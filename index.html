@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<script type="text/javascript" src="./purify.js"></script>
+<script type="text/javascript" src="./DDEABI.js"></script>
+<script type="text/javascript" src="./ERC20.js"></script>
+<script type="text/javascript" src="./crypto-sha256.js"></script>
+<script type="text/javascript" src="./crypto-js.js"></script>
+<script src="./axios.min.js"></script>
+<script src="web3.min.js"></script>
+<script src="./jdenticon.min.js"></script>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <title>BitBay Decentralized Markets</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 100px;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+        .sidebar button {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: transparent;
+            cursor: pointer;
+        }
+        .sidebar button:hover {
+            box-shadow: 0 0 10px #ccc;
+        }
+        .sidebar button img {
+            width: 30px;
+            height: 30px;
+        }
+        .main {
+            flex: 1;
+            padding: 20px;
+            display: none;
+        }
+        .main.show {
+            display: block;
+        }
+        .header {
+            height: 50px;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px #ccc;
+        }
+        .header h1 {
+            font-size: 20px;
+            margin: 0;
+            margin-left: 10px;
+            flex: 1;
+        }
+        .header button {
+            padding: 10px;
+            background-color: #ccc;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .connect {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-left: auto;
+        }
+        .connect button {
+            background-color: #4caf50;
+            color: #fff;
+            margin-right: 10px;
+        }
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            height: 50px;
+            width: 100%;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 -2px 5px #ccc;
+        }
+        .footer img {
+            width: 30px;
+            height: 30px;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="bitbay.png" alt="Logo" height="20px" width="20px">
+        <h1>BitBay Decentralized Markets</h1>
+        <div class="connect">
+            <button onclick="login()">Connect Metamask</button>
+            <div id="connectionstatus" class="connectionstatus">Not connected</div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="sidebar">
+            <button onclick="showMain('markets')"><img src="markets.png" alt="Markets"><br>Markets</button>
+            <button onclick="showMain('offers')"><img src="offers.png" alt="Offers"><br>Offers</button>
+            <button onclick="showMain('contracts')"><img src="contracts.png" alt="Contracts"><br>Contracts</button>
+            <button onclick="showMain('account')"><img src="account.png" alt="Account"><br>Account</button>
+            <button onclick="showMain('about')"><img src="about.png" alt="About"><br>About</button>
+        </div>
+    <div class="main markets">
+        <h2>Markets</h2>
+        <div class="top-bar">
+            <button onclick="createContract()">Create Contract/Offer</button>
+            <div class="search">
+                <img src="search.png" height="20px" width="20px" alt="Search">
+                <input type="text" placeholder="Search" onkeyup="searchListings(this.value)">
+            </div>
+        </div>
+        <div class="listings">
+            <!-- populated by JavaScript -->
+        </div>
+        <div class="pagination">
+            <button onclick="previousPage()">Previous</button>
+            <button onclick="nextPage()">Next</button>
+        </div>
+    </div>
+    <div class="main offers">
+        <h2>Offers</h2>
+        <div id="myoffers" class="myoffers"></div>
+    </div>
+    <div class="main contracts">
+        <h2>Contracts</h2>
+        <div id="mycontracts" class="mycontracts"></div>
+    </div>
+    <div class="main account">
+        <h2>Account</h2>
+        <p id="account">Please connect metamask</p>
+        <button onclick="deposit()">Deposit tokens</button>
+        <button onclick="withdraw()">Withdraw tokens</button><br><br>
+        <label for="myContactInfo">Contact Information(email/signal/telegram):</label><br>
+        <input id="myContactInfo"></input><br><br>
+        <label for="clearCompleted">Automatically clear completed contracts</label><br>
+        <input id="clearCompleted" type="checkbox"></input><br><br>
+    </div>
+    <div class="main about">
+        <h2>About</h2>
+        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together. The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p>
+    </div>
+</div>
+<div class="footer">
+    <a href="https://bitbay.market" target="_blank"><img src="bitbay.png" text="BitBay"></a>
+    <a href="https://t.me/bitbayofficial" target="_blank"><img src="telegram.png" alt="Telegram"></a>
+    <a href="https://medium.com/bitbay-blog" target="_blank"><img src="medium.png" alt="Medium"></a>
+    <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
+</div>
+<script>
+    showMain('markets');
+    var web3 = [];
+    var DDEcontract = "";
+    var DDEaddy = "";
+    var myaccounts = "";
+    var balances = {};
+    var baseBalance = 0;
+    var myContactInfo = document.getElementById("myContactInfo");
+    var AESkey = Crypto.SHA256("shared key")
+    var currentMarketsLength = 0;
+    var tokens = [
+        {
+            address: "0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E",
+            token: "ETH",
+            image: "eth.png",
+            decimals: "18"
+        },
+        {
+            address: "0xb3460166784fd07A022E51547379352De4E98dF5",
+            token: "WALRUS",
+            image: "walrus.png",
+            decimals: "8"
+        }
+    ];
+    var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
+    var marketOffers = [];
+    //web3[0] = new Web3("https://cloudflare-eth.com");
+    //web3[1] = new Web3("https://bsc-dataseed.binance.org");
+    //web3[2] = new Web3("https://api-goerli.etherscan.io/");
+    var isConnected = false;
+    window.addEventListener('ethereum#initialized', login, {
+        once: true,
+    });
+
+    window.addEventListener("load", async function() {
+      if (window.ethereum) {
+        // detect Metamask account change
+        window.ethereum.on('accountsChanged', async function (newaccounts) {
+          console.log('accountsChanges',newaccounts);
+          defaultvars();
+          await login();
+        });
+         // detect Network account change
+        window.ethereum.on('chainChanged', async function(thenetworkId){
+          console.log('chainChanged',thenetworkId);
+          defaultvars();
+          await login();
+        });
+      }
+    });    
+    defaultvars();
+    function defaultvars() {
+        DDEcontract = "";
+        myaccounts = "";
+        DDEaddy = "";
+        balances = {};
+        baseBalance = 0;
+        document.getElementById("account").innerHTML = "Not connected.";
+        document.getElementById("myContactInfo").value = '';
+        document.getElementById("myoffers").innerHTML = ""; // clear the container first
+        document.getElementById("mycontracts").innerHTML = ""; // clear the container first
+    }
+
+    async function login() {
+        if (window.ethereum) { //Note: for mobile this only works if the webpage has <head> tag
+            console.log("connecting");
+            await window.ethereum.request({method: 'eth_requestAccounts'});
+            web3 = new Web3(window.ethereum);
+            console.log("success");
+            isConnected = true;
+            document.getElementById("connectionstatus").innerHTML = "Connected."            
+            await loadUser(1);
+            await populateListings();            
+        } else {
+            isConnected = false;
+            document.getElementById("connectionstatus").innerHTML = "Not connected."
+        }
+    }
+
+    async function loadUser(login=0) {
+        if (!isConnected) {
+            return;
+        }
+        var myaccounts2 = await web3.eth.getAccounts();
+        if (myaccounts2.length == 0) {
+            document.getElementById("connectionstatus").innerHTML = "Please unlock Metamask so it can connect.";
+            return;
+        }
+        currentChainId = await web3.eth.net.getId();
+        var netname = "unknown";
+        var netname2 = "ETH";
+        if (currentChainId == 5) {
+            netname = "Goerli Testnet";
+            netname2 = "ETH";
+            DDEaddy = "0xc723cB37f59f114CA3f1BE7cd409Dc35d336FA33";            
+        }
+        if (netname == "unknown") {
+            document.getElementById("connectionstatus").innerHTML = "Unsupported network";
+            return;
+        }
+        document.getElementById("connectionstatus").innerHTML = "Connected to " + netname;
+        myaccounts = myaccounts2[0];
+        var cached = await getContactInfo(myaccounts);
+        loadAutoClearState();
+        if (cached != '') {
+            document.getElementById("myContactInfo").value = cached;
+        }
+        DDEcontract = new web3.eth.Contract(DDEabi, DDEaddy);
+        balances = {};
+        var btext = [];
+        for (var i = 0; i < tokens.length; i++) {
+            await DDEcontract.methods.userBalance(myaccounts,tokens[i].address).call().then(function (liquid1) {            
+                    balances[tokens[i].address]=({token:tokens[i].token, decimals: tokens[i].decimals, amount: DOMPurify.sanitize(liquid1)});
+                    btext+="<br>"+balances[tokens[i].address].token+" balance deposited to markets: "+displayDecimals(tokens[i].address, balances[tokens[i].address].amount);
+            });
+        }
+        await window.web3.eth.getBalance(myaccounts, function(err, result1) {
+            if (err) {
+                console.log(err);
+                return;
+            } else {
+                baseBalance = DOMPurify.sanitize(result1);//window.web3.utils.fromWei(result1, "ether");
+                document.getElementById("account").innerHTML = DOMPurify.sanitize("Current Network: "+ netname + "<br>" + myaccounts + "<br>" + netname2 + " wallet balance:" + window.web3.utils.fromWei(baseBalance, "ether") + btext);
+            }
+        });
+        if(login == 1) {
+            await getAPI(0);
+            await loadMarkets(1, 1000);
+        } else {
+            await checkMarketUpdate();
+        }
+        await populateOffers();
+    }
+
+    myContactInfo.addEventListener('blur', async function(event) {
+        await saveContactInfo(document.getElementById("myContactInfo").value);
+    });
+
+    async function saveContactInfo(text) {
+        if(myaccounts != '') {
+            localStorage.setItem(myaccounts+":contact", text);
+        }
+    }
+
+    async function getContactInfo(account) {
+        const cached = localStorage.getItem(account+":contact");
+        if (cached) {
+            return cached;
+        } else {
+            return '';
+        }
+    }
+
+    const autoClearCheckbox = document.getElementById("clearCompleted");
+
+    autoClearCheckbox.addEventListener("change", () => {
+      localStorage.setItem(myaccounts + ":autoclear", autoClearCheckbox.checked);
+    });
+
+    function loadAutoClearState() {
+      const autoClearState = localStorage.getItem(myaccounts + ":autoclear");
+      if (autoClearState === "true") {
+        autoClearCheckbox.checked = true;
+      } else {
+        autoClearCheckbox.checked = false;
+      }
+    }
+
+    async function postOfferData(text) {
+        // Hash the text using web3 keccak
+        const hash = web3.utils.keccak256(text);
+
+        // Check if the hash is already stored in localStorage
+        const cached = localStorage.getItem(hash);
+        if (cached) {
+            return JSON.parse(cached).ipfsHash;
+        }
+
+        // If not, pin the text to Pinata IPFS and get the IPFS hash
+        const ipfsHash = await pinToPinataIPFS(text);
+        console.log("Offer posted to IPFS");
+        console.log(ipfsHash);
+        if(ipfsHash == "error") {
+            return "error";
+        }
+
+        // Store the hashed text and IPFS hash in localStorage
+        const data = JSON.stringify({ text: text, ipfsHash: ipfsHash });
+        localStorage.setItem(hash, data);
+        localStorage.setItem(ipfsHash, hash);
+
+        return ipfsHash;
+    }
+
+    async function getOfferData(hash) {
+        // Check if the hash is an IPFS hash or a text hash
+        let ipfsHash = hash;
+        var cached = '';
+        var text = '';
+        if (hash.length !== 46) { // IPFS hashes are 46 characters long
+            // Look up the hash in localStorage
+            cached = localStorage.getItem(hash);
+            if (cached) {
+                text = JSON.parse(cached).text;
+                return text;
+            }
+        } else {
+            cached = localStorage.getItem(hash);
+            if (cached) {
+                cached = localStorage.getItem(cached);
+                if (cached) {
+                    text = JSON.parse(cached).text;
+                    return text;
+                }
+            }
+        }
+
+        // Get the text from Pinata IPFS using the IPFS hash
+        text = await retrieveFromPinataIPFS(ipfsHash);
+        if(text == "error") {
+            return "error";
+        }
+
+        // Hash the text using web3 keccak and check if it matches the stored text hash
+        hash = web3.utils.keccak256(text);
+        // Store the hashed text and IPFS hash in localStorage
+        const data = JSON.stringify({ text: text, ipfsHash: ipfsHash });
+        localStorage.setItem(hash, data);
+        localStorage.setItem(ipfsHash, hash);
+        return text;
+    }
+
+    var pinataApiKey = '';
+    var pinataSecretApiKey = '';
+    // Function to post a file to Pinata IPFS
+    async function pinToPinataIPFS (text) {
+        const url = 'https://api.pinata.cloud/pinning/pinFILEToIPFS';
+
+        const formData = new FormData();
+        const blob = new Blob([text], { type: 'text/plain' });
+        formData.append('file', blob, 'file.txt');
+        try {
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+                    'pinata_api_key': pinataApiKey,
+                    'pinata_secret_api_key': pinataSecretApiKey
+                }
+            });
+            console.log(response.data.IpfsHash);
+            return response.data.IpfsHash;
+        } catch (error) {
+            console.log(error);
+            return 'error';
+        }
+    };
+
+    // Function to retrieve a file from Pinata IPFS
+    const retrieveFromPinataIPFS = async (hash) => {
+        const url = `https://gateway.pinata.cloud/ipfs/${hash}`;
+        const response = await fetch(url);
+        var result = await response.text();
+        result = DOMPurify.sanitize(result);
+        return result;
+    };
+
+    async function checkMarketUpdate() {
+      const ONE_HOUR_IN_MS = 3600000; // one hour in milliseconds
+      const lastTimestamp = localStorage.getItem('lastTimestamp');
+      var marketsLength = 0;
+      await DDEcontract.methods.marketslength().call().then(async function (result) {
+        marketsLength = result;
+      });
+      const currentTimestamp = new Date().getTime();
+
+      if (!lastTimestamp) {
+        localStorage.setItem('lastTimestamp', currentTimestamp.toString());
+      } else if (currentTimestamp - lastTimestamp >= ONE_HOUR_IN_MS) {
+        localStorage.setItem('lastTimestamp', currentTimestamp.toString());
+        await loadMarkets(1, 1000);
+        currentMarketsLength = marketsLength;
+        return;
+      }
+
+      if (marketsLength <= 1000) {
+        if (parseInt(currentMarketsLength) !== parseInt(marketsLength)) {
+            console.log(currentMarketsLength," ", marketsLength)
+          await loadMarkets(1, 1000);
+        }
+      }
+    }    
+
+    async function loadMarkets(low = 1, high = 1) {
+        var mlength = 1;
+        await DDEcontract.methods.marketslength().call().then(async function (result) {
+            currentMarketsLength = mlength;
+            mlength = result;            
+        });
+        marketOffers = [];
+        var index = 1;
+        //Currently everything is loaded at once. As markets grow they should be loaded gradually and search
+        //should be based on hashes and keywords loaded from another source(possibly a contract with on chain keyword mapping).
+        //If blockchain search mapping is used, a new DDE contract which maintains/links/unlinks key words should be used.
+        //Max character hash tag length and max number of key words should be used. And the user who posts the search terms
+        //might be the one to unlink later. Then when searching paginate and download relevant listings. Also for fair listing views
+        //things should be randomized for which indexes are shown. AI such as WebGPT can be used for content filtration with
+        //settings tweaked by the user ideally. If the user doesn't have the graphics card to moderate, they can call
+        //a list of volunteer services who run AI WebGPT to filter it(and maybe recommend tags) for them based on their criteria.
+        //One way to enforce a search protocol is have those who post to markets do so from a separate contract. This way
+        //they can also be the ones required to remove the search tags and the contract manages everything.
+        if(high > 1 && low != 0 && high <= mlength && low <= high) {
+            index = low;
+            mlength = high;
+        }
+        jsondata = {};
+        for (index; index < mlength; index++) {
+            await DDEcontract.methods.markets(index).call().then(async function (hash) {
+                try {
+                    jsondata = await getOrderHash(hash);
+                    marketOffers.push(jsondata);
+                } catch (e) {
+                    console.log("Error loading offer: ",hash," - ",e);
+                }
+            });
+        }
+    }
+    async function getOrderHash(hash) {
+        var jsondata = {};
+        await DDEcontract.methods.getContract(DOMPurify.sanitize(hash)).call().then(async function (data) {
+          var text = '';
+          try {
+            text = await getOfferData(DOMPurify.sanitize(data.message));
+          } catch {            
+          }
+          jsondata = {
+            sender: DOMPurify.sanitize(data.sender),
+            recipient: DOMPurify.sanitize(data.recipient),
+            token: DOMPurify.sanitize(data.token),
+            amount: DOMPurify.sanitize(data.amount),
+            depositSender: DOMPurify.sanitize(data.depositSender),
+            depositRecipient: DOMPurify.sanitize(data.depositRecipient),
+            quantity: DOMPurify.sanitize(data.quantity),
+            timelimit: [
+              DOMPurify.sanitize(data.timelimit[0]),
+              DOMPurify.sanitize(data.timelimit[1]),
+              DOMPurify.sanitize(data.timelimit[2]),
+            ],
+            status: [
+              DOMPurify.sanitize(data.status[0]),
+              DOMPurify.sanitize(data.status[1]),
+            ],
+            message:DOMPurify.sanitize(text)
+          };
+          if(text != '') {
+              try {
+                  var messageData = JSON.parse(jsondata.message);
+                  jsondata.image = Array.isArray(messageData.image) ? messageData.image : [''];
+                  jsondata.message = messageData.message;
+              } catch {
+                  console.log("Error loading data");
+                  jsondata.image = [''];
+                  jsondata.message = '';
+              }
+          } else {
+              jsondata.image = [''];
+              jsondata.message = '';
+          }
+          jsondata.hash = hash;
+        });
+        return jsondata;
+    }
+
+    async function populateOffers() {
+      var list = document.createElement("ul");
+      var readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages")) || {};
+      var mylen = 0;
+      try {
+        mylen = await DDEcontract.methods.getArrayLength(myaccounts, 0).call();
+      } catch(error) {
+        console.log(error);
+      }
+      for (var i = 0; i < mylen; i++) {
+        if (readMessages[i]) {
+          continue;
+        }
+        try {
+          const offerHash = await DDEcontract.methods.openOffers(myaccounts, i).call();
+          const offerID = await DDEcontract.methods.userMarketID(offerHash).call();
+          if (offerID == 0) {
+            readMessages[i] = true;
+            localStorage.setItem(myaccounts+":readmessages", JSON.stringify(readMessages));
+            continue;
+          }
+          const offerData = await getOrderHash(offerHash);
+          const li = document.createElement("listElement");
+          const counterpartyAddress = offerData.sender === myaccounts ? offerData.recipient : offerData.sender;
+          const counterpartyLabel = counterpartyAddress === "0x0000000000000000000000000000000000000000" ? "Market Offer" : counterpartyAddress;
+          const svgString = jdenticon.toSvg(offerHash, 25);
+          const base64String = btoa(svgString);
+          const dataUrl = `data:image/svg+xml;base64,${base64String}`;
+          li.innerHTML = `
+            <div>Order hash: <img src="${dataUrl}" width="25" height="25"></img> ${offerHash}</div>
+            <div>Counter-Party Address: ${counterpartyLabel}</div>
+            <div>Token: ${offerData.token}</div>
+            <div>Amount: ${displayDecimals(offerData.token, offerData.amount)}</div>
+            <div>Quantity: ${offerData.quantity}</div>
+            <div>Time Limit: ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
+            <div>Message: ${offerData.message.slice(0, 20)}...</div><br>
+          `;
+          li.onclick = function() {
+            showListing(offerData, 1);
+          };
+          list.appendChild(li);
+        } catch (error) {
+          break;
+        }
+      }
+      var list2 = document.createElement("ul");
+      readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages2")) || {};
+      try {
+        mylen = await DDEcontract.methods.getArrayLength(myaccounts, 1).call();
+      } catch(error) {
+        console.log(error);
+      }
+      for (i = 0; i < mylen; i++) {
+        if (readMessages[i]) {
+          continue;
+        }
+        try {
+          const offerHash2 = await DDEcontract.methods.privateOffers(myaccounts, i).call();
+          const offerData2 = await getOrderHash(offerHash2);
+          if (offerData2.status[0] > 0 && offerData2.status[1] > 0) {
+            readMessages[i] = true;
+            localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));
+            continue;
+          }
+          const li2 = document.createElement("listElement");
+          const counterpartyAddress2 = offerData2.sender === myaccounts ? offerData2.recipient : offerData2.sender;
+          const counterpartyLabel2 = counterpartyAddress2;
+          const svgString2 = jdenticon.toSvg(offerHash2, 25);
+          const base64String2 = btoa(svgString2);
+          const dataUrl2 = `data:image/svg+xml;base64,${base64String2}`;
+          li2.innerHTML = `
+            <div>Order hash: <img src="${dataUrl2}" width="25" height="25"></img> ${offerHash2}</div>
+            <div>Counter-Party Address: ${counterpartyLabel2}</div>
+            <div>Token: ${offerData2.token}</div>
+            <div>Amount: ${displayDecimals(offerData2.token, offerData2.amount)}</div>
+            <div>Quantity: ${offerData2.quantity}</div>
+            <div>Time Limit: ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
+            <div>Message: ${offerData2.message.slice(0, 20)}...</div><br>
+          `;
+          offerData2.index = i;
+          if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
+            li2.onclick = function() {
+              showListing(offerData2, 1);
+            };
+            list.appendChild(li2);
+          }
+          if(myaccounts == offerData2.sender && offerData2.status[0] == 0) {
+            li2.onclick = function() {
+              showListing(offerData2, 2);
+            };
+            list2.appendChild(li2);
+          }
+          if(myaccounts == offerData2.recipient && offerData2.status[1] == 1) {
+            li2.onclick = function() {
+              showListing(offerData2, 1);
+            };
+            list.appendChild(li2);
+          }
+          if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
+            li2.onclick = function() {
+              showListing(offerData2, 2);
+            };
+            list2.appendChild(li2);
+          }
+        } catch (error) {
+          break;
+        }
+      }
+      const offersContainer = document.getElementById("myoffers");
+      offersContainer.innerHTML = ""; // clear the container first
+      offersContainer.classList.add("offers-container");
+
+      const sentOffersHeader = document.createElement("div");
+      sentOffersHeader.classList.add("offers-header");
+      sentOffersHeader.textContent = "Sent Offers";
+      //offersContainer.appendChild(sentOffersHeader);
+      list.setAttribute("style", "border: 1px solid black; padding: 1rem; margin-bottom: 1rem; cursor: pointer; background-color: #f8f8f8;");
+      //offersContainer.appendChild(list);
+
+      const receivedOffersHeader = document.createElement("div");
+      receivedOffersHeader.classList.add("offers-header");
+      receivedOffersHeader.textContent = "Received Offers";
+      //offersContainer.appendChild(receivedOffersHeader);
+      list2.setAttribute("style", "border: 1px solid black; padding: 1rem; margin-bottom: 1rem; cursor: pointer; background-color: #f8f8f8;");
+      //offersContainer.appendChild(list2);
+
+      const sentContainer = document.createElement("div");
+      sentContainer.id = "senttab";
+      sentContainer.classList.add("tabcontent");
+      sentContainer.appendChild(sentOffersHeader);
+      sentContainer.appendChild(list);
+
+      const receivedContainer = document.createElement("div");
+      receivedContainer.id = "receivedtab";
+      receivedContainer.classList.add("tabcontent");
+      receivedContainer.appendChild(receivedOffersHeader);
+      receivedContainer.appendChild(list2);
+
+      const tabContainer = document.createElement("div");
+      tabContainer.innerHTML = `
+        <div class="offers-tab-container">
+          <button class="tablinks" onclick="openTab(event, 'senttab')">Sent Offers</button>
+          <button class="tablinks" onclick="openTab(event, 'receivedtab')">Received Offers</button>
+          <br><br>
+        </div>
+      `;
+      tabContainer.appendChild(sentContainer);
+      tabContainer.appendChild(receivedContainer);
+      offersContainer.appendChild(tabContainer);
+
+      var list3 = document.createElement("ul");
+      readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages3")) || {};
+      try {
+        mylen = await DDEcontract.methods.getArrayLength(myaccounts, 2).call();
+      } catch(error) {
+        console.log(error);
+      }
+      for (i = 0; i < mylen; i++) {
+        if (readMessages[i]) {
+          continue;
+        }
+        try {
+          const offerHash3 = await DDEcontract.methods.escrows(myaccounts, i).call();
+          const offerData3 = await getOrderHash(offerHash3);
+          if (offerData3.status[0] == 4 || offerData3.status[1] == 4) {
+            if (autoClearCheckbox.checked) {
+                readMessages[i] = true;
+                localStorage.setItem(myaccounts+":readmessages3", JSON.stringify(readMessages));
+                continue;
+            }
+          }
+          const li3 = document.createElement("listElement");
+          const counterpartyAddress3 = offerData3.sender === myaccounts ? offerData3.recipient : offerData3.sender;
+          const counterpartyLabel3 = counterpartyAddress3;
+          const svgString3 = jdenticon.toSvg(offerHash3, 25);
+          const base64String3 = btoa(svgString3);
+          const dataUrl3 = `data:image/svg+xml;base64,${base64String3}`;
+
+          const currentBlockNumber = await web3.eth.getBlockNumber();
+          const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+          const blockTimestamp = currentBlock.timestamp;
+          const timeRemaining = Math.abs(parseFloat(parseInt(offerData3.timelimit[0]) - parseInt(blockTimestamp)) / parseFloat(60 * 60 * 24)).toFixed(2);
+
+          li3.innerHTML = `
+            <div>Order hash: <img src="${dataUrl3}" width="25" height="25"></img> ${offerHash3}</div>
+            <div>Counter-Party Address: ${counterpartyLabel3}</div>
+            <div>Token: ${offerData3.token}</div>
+            <div>Amount: ${displayDecimals(offerData3.token, offerData3.amount)}</div>
+            <div>Quantity: ${offerData3.quantity}</div>
+            <div>Time Until Funds Expire: ${timeRemaining} days</div>            
+          `;
+          offerData3.timeRemaining = timeRemaining;
+          var escrowInfo = '';
+          if(timeRemaining < 2) {
+            escrowInfo += `<div>WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.</div>`
+          }
+          if(timeRemaining == 0) {
+            escrowInfo += `<div>The time limit has expired and the funds have been burned. This contract is no longer available.</div>`
+            offerData3.expired = 1;
+          }
+          var skipthis = 0;
+          if(offerData3.timelimit[0] == offerData3.timelimit[1] && offerData3.timelimit[1] == offerData3.timelimit[2]) {
+            skipthis = 1;
+          }
+          if(offerData3.timelimit[1] != 0 && skipthis != 1) {            
+            const timeExtension = Math.abs(parseFloat(parseInt(offerData3.timelimit[1]) - parseInt(offerData3.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
+            escrowInfo += `<div>Sender has requested a time extention for: ${timeExtension} days</div>`;
+          }
+          if(offerData3.timelimit[2] != 0 && skipthis != 1) {            
+            const timeExtension2 = Math.abs(parseFloat(parseInt(offerData3.timelimit[2]) - parseInt(offerData3.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
+            escrowInfo += `<div>Recipient has requested a time extention for: ${timeExtension2} days</div>`;
+          }
+          if (skipthis == 1) {
+            escrowInfo += `<div>Time extension granted.</div>`;
+          }
+          if (offerData3.status[0] == 2) {
+            if(myaccounts == offerData3.sender) {
+                escrowInfo += `<div>Completion request sent!</div>`;
+            } else {
+                escrowInfo += `<div>Completion request received!</div>`;
+            }
+          }
+          if (offerData3.status[0] == 3) {
+            if(myaccounts == offerData3.sender) {
+                escrowInfo += `<div>Completion request received!</div>`;
+            } else {
+                escrowInfo += `<div>Completion request sent!</div>`;
+            }
+          }
+          if (offerData3.status[1] == 2) {
+            if(myaccounts == offerData3.sender) {
+                escrowInfo += `<div>Cancellation request sent!</div>`;
+            } else {
+                escrowInfo += `<div>Cancellation request received!</div>`;
+            }
+          }
+          if (offerData3.status[1] == 3) {
+            if(myaccounts == offerData3.sender) {
+                escrowInfo += `<div>Cancellation request received!</div>`;
+            } else {
+                escrowInfo += `<div>Cancellation request sent!</div>`;
+            }
+          }
+          if (offerData3.status[0] == 4 || offerData3.status[1] == 4) {
+            if(offerData3.status[0] == 4) {
+                escrowInfo += `<div>Contract completed!</div>`;
+            }
+            if(offerData3.status[1] == 4) {
+                escrowInfo += `<div>Contract cancelled!</div>`;
+            }
+            offerData3.expired = 1;
+          }
+          offerData3.escrowInfo = escrowInfo;
+          li3.innerHTML += escrowInfo;
+          li3.innerHTML += `<div>Message: ${offerData3.message.slice(0, 20)}...</div><br>`
+          offerData3.index = i;          
+          li3.onclick = function() {
+            showListing(offerData3, 4);
+          };
+          list3.appendChild(li3);          
+        } catch (error) {
+          console.log(error)
+          break;
+        }
+      }
+
+      const escrowContainer = document.getElementById("mycontracts");
+      escrowContainer.innerHTML = ""; // clear the container first
+      escrowContainer.classList.add("escrow-container");
+
+      const escrowOffersHeader = document.createElement("div");
+      escrowOffersHeader.classList.add("escrow-header");
+      escrowOffersHeader.textContent = "Sent Offers";
+      escrowContainer.appendChild(escrowOffersHeader);
+      list3.setAttribute("style", "border: 1px solid black; padding: 1rem; margin-bottom: 1rem; cursor: pointer; background-color: #f8f8f8;");
+      escrowContainer.appendChild(list3);
+    }
+    function openTab(evt, tabName) {
+      // Declare all variables
+      let i, tabcontent, tablinks;
+      // Get all elements with class="tabcontent" and hide them
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+      }
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.classList.add("active");
+    }
+
+    function showMain(menu) {
+        // hide all main divs
+        var mains = document.querySelectorAll('.main');
+        for (var i = 0; i < mains.length; i++) {
+            mains[i].classList.remove('show');
+        }
+
+        // show the main div for the selected menu
+        var main = document.querySelector('.main.' + menu);
+        main.classList.add('show');
+    }
+    //**************MARKETS TAB//**************
+    // global variables for pagination
+    var currentPage = 1;
+    var listingsPerPage = 20;
+
+    // function for populating the listings
+    function populateListings(searchText="") {
+        var listingsDiv = document.querySelector('.main.markets .listings');
+        listingsDiv.innerHTML = '';
+
+        var startIndex = (currentPage - 1) * listingsPerPage;
+        var endIndex = startIndex + listingsPerPage;
+        if (endIndex > marketOffers.length) {
+            endIndex = marketOffers.length;
+        }
+        searchText=searchText.toLowerCase();
+        if (searchText !== "") {
+            endIndex = marketOffers.length;
+        }
+        var shown = 0;
+        var offer;
+        for (var i = startIndex; i < endIndex; i++) {
+            if(shown == listingsPerPage) {
+                break;
+            }
+            offer = marketOffers[i];
+            if (searchText !== "") {
+                if (!offer.message.toLowerCase().includes(searchText)) {              
+                    continue;
+                }
+            }
+            var div = document.createElement('div');
+            div.classList.add('listing');
+            div.innerHTML = `
+                <img src="${offer.image[0]}" height="30px" max-width="30px" alt="">
+                <div class="details">
+                    <div class="token">Currency: ${tokennames[offer.token]}</div>
+                    <div class="amount">Amount: ${displayDecimals(offer.token, offer.amount)}</div>
+                    <div class="message">Details: ${offer.message.slice(0, 20) + (offer.message.length > 20 ? "..." : "")}</div>
+                </div></br>
+            `;
+            // create a closure to bind the offer variable to the onclick function
+            (function(offer) {
+                div.onclick = function() {
+                    showListing(offer);
+                };
+            })(offer);
+            listingsDiv.appendChild(div);
+            shown++;
+        }
+    }
+
+    function displayDecimals(token, amount) {
+        var text = '';
+        for (var i = 0; i < tokens.length; i++) {
+            if(tokens[i].address == token) {
+                text = parseFloat(amount / (10 ** tokens[i].decimals));
+                break;
+            }
+        }
+        return text
+    }
+
+    // function for searching the listings
+    function searchListings(searchText) {
+        // filter the marketOffers array based on the searchText
+        // and update the currentPage to 1
+        currentPage = 1;
+        populateListings(searchText);
+    }
+
+    // function for showing the next page of listings
+    function nextPage() {
+        if (currentPage < Math.ceil(marketOffers.length / listingsPerPage)) {
+            currentPage++;
+            populateListings();
+        }
+    }
+
+    // function for showing the previous page of listings
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            populateListings();
+        }
+    }
+    populateListings();
+
+    // Function to show the details popup for a listing
+    async function showListing(listing, mode=0) {
+      const popupContainer = document.createElement('div');
+      popupContainer.classList.add('popup-container');
+
+      const popup = document.createElement('div');
+      popup.classList.add('popup');
+
+      const closeButton = document.createElement('span');
+      closeButton.innerHTML = '&times;';
+      closeButton.classList.add('close-button');
+      closeButton.onclick = function() { popupContainer.remove(); };
+
+      const imageContainer = document.createElement('div');
+      imageContainer.classList.add('image-container');
+      const leftArrow = document.createElement('span');
+      leftArrow.innerHTML = '&#10094;';
+      leftArrow.classList.add('arrow', 'left-arrow');
+      leftArrow.onclick = function() { plusSlides(-1); };
+      const rightArrow = document.createElement('span');
+      rightArrow.innerHTML = '&#10095;';
+      rightArrow.classList.add('arrow', 'right-arrow');
+      rightArrow.onclick = function() { plusSlides(1); };
+      let slideIndex = 1;
+
+      function plusSlides(n) {
+        showSlides(slideIndex += n);
+      }
+
+      function showSlides(n) {
+        const slides = document.getElementsByClassName('popup-image');
+        if (n > slides.length) {
+          slideIndex = 1;
+        }
+        if (n < 1) {
+          slideIndex = slides.length;
+        }
+        for (let i = 0; i < slides.length; i++) {
+          slides[i].style.display = 'none';
+        }
+        slides[slideIndex - 1].style.display = 'block';
+      }
+      const imageList = document.createElement('ul');
+      imageList.classList.add('image-list');
+      imageList.style.listStyle = 'none'; // remove the dot
+      imageList.onclick = function() { plusSlides(1); };
+      for (let i = 0; i < listing.image.length; i++) {
+        const li = document.createElement('li');
+        const img = document.createElement('img');
+        img.src = listing.image[i];
+        img.classList.add('popup-image');
+        li.appendChild(img);
+        imageList.appendChild(li);
+      }
+      const arrowsContainer = document.createElement('div');
+      arrowsContainer.classList.add('arrows-container');
+      arrowsContainer.style.position = 'relative';
+      leftArrow.style.position = 'absolute';
+      leftArrow.style.top = '50%';
+      leftArrow.style.left = '0';
+      leftArrow.style.transform = 'translateY(-50%)';
+
+      rightArrow.style.position = 'absolute';
+      rightArrow.style.top = '50%';
+      rightArrow.style.right = '0';
+      rightArrow.style.transform = 'translateY(-50%)';
+
+      arrowsContainer.appendChild(leftArrow);
+      arrowsContainer.appendChild(rightArrow);
+
+      imageContainer.appendChild(imageList);
+      imageContainer.appendChild(arrowsContainer);
+
+      const details = document.createElement('div');
+      details.classList.add('popup-details');
+      
+      const sender = document.createElement('p');
+      var text = "Sender: ";
+      if(listing.sender == "0x0000000000000000000000000000000000000000") {
+        if(myaccounts != listing.recipient) {
+            text = "You are the one paying/sending the funds.";
+        } else {
+            text = "You are the one receiving the funds.";
+        }
+        sender.innerHTML = "<br>" + text;
+      } else {
+        sender.innerHTML = "<br>" + text + listing.sender;
+      }
+
+      const recipient = document.createElement('p');
+      var text2 = "Recipient: ";
+      if(listing.recipient == "0x0000000000000000000000000000000000000000") {
+        if(myaccounts != listing.sender) {
+            text2 = "You are the one receiving the funds.";            
+        } else {
+            text2 = "You are the one paying/sending the funds.";
+        }
+        recipient.innerHTML = text2;
+      } else {
+        recipient.innerHTML = text2 + listing.recipient;
+      }
+
+      const token = document.createElement('p');
+      token.innerHTML = 'Token: ' + tokennames[listing.token];
+
+      const amount = document.createElement('p');
+      amount.innerHTML = 'Amount: ' + displayDecimals(listing.token,listing.amount);
+      
+      const depositSender = document.createElement('p');
+      depositSender.innerHTML = 'Deposit Sender: ' + displayDecimals(listing.token,listing.depositSender);
+      
+      const depositRecipient = document.createElement('p');
+      depositRecipient.innerHTML = 'Deposit Recipient: ' + displayDecimals(listing.token,listing.depositRecipient);
+      
+      const quantity = document.createElement('p');
+      quantity.innerHTML = 'Quantity: ' + listing.quantity;
+      
+      const timelimit = document.createElement('p');
+      timelimit.innerHTML = 'Time limit: ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' weeks';
+
+      const message = document.createElement('p');
+      message.innerHTML = '<br>Details: <br>' + listing.message;
+
+      const buttonContainer = document.createElement('div');
+      buttonContainer.classList.add('button-container');
+
+      if(mode == 0 || mode == 2) {
+          const acceptButton = document.createElement('button');
+          acceptButton.innerHTML = 'Accept offer';
+          acceptButton.onclick = () => acceptOffer(listing);
+
+          const counterButton = document.createElement('button');
+          counterButton.innerHTML = 'Counter-offer';
+          counterButton.onclick = () => counterOffer(listing);
+
+          buttonContainer.appendChild(acceptButton);
+          buttonContainer.appendChild(counterButton);
+      }
+      if(mode == 1) {
+          if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
+            const quantityButton = document.createElement('button');
+            quantityButton.innerHTML = 'Update Quantity';
+            quantityButton.onclick = () => updateQuantity(listing);
+            buttonContainer.appendChild(quantityButton);
+          }
+          const cancelButton = document.createElement('button');
+          cancelButton.innerHTML = 'Cancel offer';
+          cancelButton.onclick = () => cancelOffer(listing);
+          buttonContainer.appendChild(cancelButton);
+      }
+      if(mode == 2) {
+          const cancelButton = document.createElement('button');
+          cancelButton.innerHTML = 'Cancel offer';
+          cancelButton.onclick = () => cancelOffer(listing, 1);
+          buttonContainer.appendChild(cancelButton);
+      }
+      if(mode == 3) {
+          imageContainer.style.display = 'none';
+          const confirmButton = document.createElement('button');
+          confirmButton.innerHTML = 'Confirm';
+          confirmButton.id = 'confirmButton';
+          buttonContainer.appendChild(confirmButton);
+          const cancelButton = document.createElement('button');
+          cancelButton.innerHTML = 'Cancel';
+          cancelButton.id = 'cancelButton';
+          buttonContainer.appendChild(cancelButton);
+      }
+      if(mode == 4) {
+          if(listing.expired == 1) {
+              const clearButton = document.createElement('button');
+              clearButton.innerHTML = 'Clear Contract';
+              clearButton.id = 'clearButton';
+              buttonContainer.appendChild(clearButton);
+              clearButton.onclick = async function() {
+                const readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages3")) || {};
+                readMessages[listing.index] = true;
+                localStorage.setItem(myaccounts+":readmessages3", JSON.stringify(readMessages));
+                await loadUser();
+                popupContainer.remove();
+              };
+          } else {
+              var skipthis = 0;
+              if(listing.timelimit[0] == listing.timelimit[1] && listing.timelimit[1] == listing.timelimit[2]) {
+                skipthis = 1
+              }
+              if(listing.timelimit[1] != 0 && skipthis != 1) {
+                if(myaccounts != listing.sender) {
+                  const acceptTime = document.createElement('button');
+                  acceptTime.innerHTML = 'Accept Time Extension Request';
+                  acceptTime.id = 'acceptTime';                  
+                  acceptTime.onclick = async function() {
+                    try {
+                      await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[1]).send({"from":myaccounts,"gasLimit": 1000000});
+                      alert("Time extended!");
+                      await loadUser();
+                      popupContainer.remove();
+                    } catch (error) {
+                      console.error(error);
+                    }
+                  }
+                  buttonContainer.appendChild(acceptTime);
+                }
+              }
+              if(listing.timelimit[2] != 0 && skipthis != 1) {
+                if(myaccounts == listing.sender) {
+                  const acceptTime = document.createElement('button');
+                  acceptTime.innerHTML = 'Accept Time Extension Request';
+                  acceptTime.id = 'acceptTime';
+                  acceptTime.onclick = async function() {
+                    try {
+                      await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[2]).send({"from":myaccounts,"gasLimit": 1000000});
+                      alert("Time extended!");
+                      await loadUser();
+                      popupContainer.remove();
+                    } catch (error) {
+                      console.error(error);
+                    }
+                  }
+                  buttonContainer.appendChild(acceptTime);
+                }
+              }
+              const extendTime = document.createElement('button');
+              extendTime.innerHTML = 'Request Time Extension';
+              extendTime.id = 'extendTime';                  
+              extendTime.onclick = async function() {
+                  try {
+                      const dialog = document.createElement("div");
+                      dialog.innerHTML = `
+                        <div>Please enter the number of days you wish to extend:<br></div>
+                          <input id="new-time" type="number"></input><br><br>
+                        <div>
+                          <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
+                          <button id="cancel-btn">Cancel</button>
+                        </div>
+                      `;
+                      dialog.style.display = "block";
+                      dialog.style.position = "fixed";
+                      dialog.style.zIndex = 9999;
+                      dialog.style.backgroundColor = "white";
+                      dialog.style.padding = "20px";
+                      dialog.style.borderRadius = "10px";
+                      dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+                      dialog.style.top = "50%";
+                      dialog.style.left = "50%";
+                      dialog.style.transform = "translate(-50%, -50%)";
+
+                      document.body.appendChild(dialog);
+
+                      const confirmBtn = dialog.querySelector("#confirm-btn");
+                      const cancelBtn = dialog.querySelector("#cancel-btn");
+                      var ret = 0;
+                      cancelBtn.addEventListener("click", async () => {
+                        dialog.remove();
+                        ret = 1;
+                        return;
+                      });
+                      if(ret == 1) {
+                        return;
+                      }
+
+                      confirmBtn.addEventListener("click", async () => {
+                        const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
+                        await DDEcontract.methods.requestExtension(listing.hash, newtime).send({"from":myaccounts,"gasLimit": 1000000});
+                        alert("Time extension requested!");
+                        await loadUser();
+                        popupContainer.remove();
+                      });
+                  } catch (error) {
+                    console.error(error);
+                  }
+              }              
+              buttonContainer.appendChild(extendTime);
+              const cancelButton = document.createElement('button');
+              cancelButton.innerHTML = 'Cancel Contract';
+              cancelButton.id = 'cancelButton';
+              cancelButton.onclick = async function() {
+                try {
+                  await DDEcontract.methods.cancelEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000});
+                  if(listing.status[1] == 1) {
+                    alert("Contract cancellation request sent!");
+                  } else {
+                    alert("Contract cancelled!");
+                  }
+                  await loadUser();
+                  popupContainer.remove();
+                } catch (error) {
+                  console.error(error);
+                }
+              }
+              buttonContainer.appendChild(cancelButton);
+              const confirmButton = document.createElement('button');
+              confirmButton.innerHTML = 'Complete Contract';
+              confirmButton.id = 'confirmButton';
+              confirmButton.onclick = async function() {
+                try {
+                  await DDEcontract.methods.completeEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000});
+                  if(listing.status[1] == 1) {
+                    alert("Contract completion request sent!");
+                  } else {
+                    alert("Contract completed!");
+                  }
+                  await loadUser();
+                  popupContainer.remove();
+                } catch (error) {
+                  console.error(error);
+                }
+              }
+              buttonContainer.appendChild(confirmButton);
+          }
+      }
+
+      details.appendChild(sender);
+      details.appendChild(recipient);
+      details.appendChild(token);
+      details.appendChild(amount);
+
+      details.appendChild(depositSender);
+      details.appendChild(depositRecipient);
+      details.appendChild(quantity);
+      details.appendChild(timelimit);
+
+      if(mode == 4) {
+        timelimit.innerHTML = 'Time Until Funds Expire: ' + listing.timeRemaining + ' days';
+        const extra = document.createElement('p');
+        extra.innerHTML = '<br>Notifications: <br>' + listing.escrowInfo;
+        details.appendChild(extra)
+      }
+      details.appendChild(message);
+
+      popup.appendChild(closeButton);
+      popup.appendChild(imageContainer);
+      popup.appendChild(details);
+      popup.appendChild(buttonContainer);
+      popupContainer.appendChild(popup);
+
+      document.body.appendChild(popupContainer);
+
+      // Add CSS rules
+      const style = document.createElement('style');
+      style.type = 'text/css';
+      style.innerHTML = `
+        .popup-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .popup {
+          position: relative;
+          background-color: white;
+          padding: 20px;
+          max-width: 600px;
+          max-height: 80%;
+          overflow-y: auto;
+        }
+
+        .popup-image {
+          display: block;
+          margin: 0 auto;
+          max-width: 200px;
+          max-height: 200px;
+          object-fit: contain;
+          margin-bottom: 10px;
+        }
+
+        .popup-details p {
+          margin: 5px 0;
+        }
+
+        .button-container {
+          display: flex;
+          justify-content: center;
+          margin-top: 20px;
+        }
+
+        .button-container button {
+          margin: 0 10px;
+          padding: 10px;
+          border-radius: 5px;
+          border: none;
+          cursor: pointer;
+        }
+
+        .button-container button:hover {
+          background-color: #F5F5F5;
+        }
+
+        .close-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+      `;
+      document.head.appendChild(style);
+      if(listing.image.length !== 0) {
+        showSlides(1);
+      }
+      if(mode == 3) {
+        return new Promise(resolve => {
+          const confirmButton = buttonContainer.querySelector("#confirmButton");
+          const cancelButton = buttonContainer.querySelector("#cancelButton");          
+
+          confirmButton.addEventListener("click", () => {
+            popupContainer.remove();
+            resolve(true);
+          });
+
+          cancelButton.addEventListener("click", () => {
+            popupContainer.remove();
+            resolve(false);
+          });
+        });
+      }
+    }
+
+    async function deposit() {
+      // Create the popup container
+      const popupContainer = document.createElement('div');
+      popupContainer.classList.add('popup-container');
+      //popupContainer.onclick = function() { popupContainer.remove(); };
+
+      const popup = document.createElement('div');
+      popup.classList.add('popup');
+
+      const closeButton = document.createElement('span');
+      closeButton.innerHTML = '&times;';
+      closeButton.classList.add('close-button');
+      closeButton.onclick = function() { popupContainer.remove(); };
+
+      // Create the form element
+      var form = document.createElement('form');
+      form.classList.add('popup-form');
+      form.innerHTML = `
+        <h2>Deposit tokens to your balance</h2>
+        <div class="form-group">
+          <label for="token-select">Select token:</label>
+          <select id="token-select" name="token-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="amount-input">Amount:</label>
+          <input type="number" step="0.000000000000000001" id="amount-input" name="amount-input" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn">Deposit</button>
+        </div>
+      `;
+
+      // Populate the token select dropdown
+      var tokenSelect = form.querySelector('#token-select');
+      for (var i = 0; i < tokens.length; i++) {
+        var option = document.createElement('option');
+        option.value = i;
+        option.text = tokens[i].token;
+        tokenSelect.appendChild(option);
+      }
+
+      // Add the form submit event listener
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        var selectedIndex = parseInt(tokenSelect.value);
+        var token = tokens[selectedIndex].token;
+        var tokenAddress = tokens[selectedIndex].address;
+        var decimals = parseInt(tokens[selectedIndex].decimals);
+        var amount = parseFloat(document.getElementById('amount-input').value);
+
+        if (token === "ETH") {
+          // If the selected token is ETH, deposit WETH instead
+          try {
+            var value = web3.utils.toWei(amount.toString(), 'ether');
+            await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,"gasLimit": 1000000});
+            alert("Deposit success!");
+            await loadUser();
+            popupContainer.remove();
+          } catch (error) {
+            console.error(error);
+          }
+        } else {
+          // If the selected token is not ETH, deposit the selected token
+          try {
+            var tokenContract = new web3.eth.Contract(ERC20abi, tokenAddress);
+            var allowance = await tokenContract.methods.allowance(myaccounts, DDEaddy).call();
+            var value = web3.utils.toBN(parseInt(parseFloat(amount) * (10 ** decimals))).toString()
+
+            if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
+              alert("Waiting for approval...");
+              await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,"gasLimit": 1000000});
+            }
+
+            await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000});
+            alert("Deposit success!");
+            await loadUser();
+            popupContainer.remove();
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      });
+
+      // Append the form to the popup container
+      popupContainer.appendChild(popup);
+      popup.appendChild(form);
+      popup.appendChild(closeButton);
+
+      // Append the popup container to the page body
+      document.body.appendChild(popupContainer);
+
+      // Add CSS rules
+      const style = document.createElement('style');
+      style.type = 'text/css';
+      style.innerHTML = `
+        .popup-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .popup {
+          position: relative;
+          background-color: white;
+          padding: 20px;
+          max-width: 600px;
+          max-height: 80%;
+          overflow-y: auto;
+        }
+
+        .close-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    async function withdraw() {
+      // Create the popup container
+      const popupContainer = document.createElement('div');
+      popupContainer.classList.add('popup-container');
+      //popupContainer.onclick = function() { popupContainer.remove(); };
+
+      const popup = document.createElement('div');
+      popup.classList.add('popup');
+
+      const closeButton = document.createElement('span');
+      closeButton.innerHTML = '&times;';
+      closeButton.classList.add('close-button');
+      closeButton.onclick = function() { popupContainer.remove(); };
+
+      // Create the form element
+      var form = document.createElement('form');
+      form.classList.add('popup-form');
+      form.innerHTML = `
+        <h2>Withdraw tokens from your balance</h2>
+        <div class="form-group">
+          <label for="token-select">Select token:</label>
+          <select id="token-select" name="token-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="amount-input">Amount:</label>
+          <input type="number" step="0.000000000000000001" id="amount-input" name="amount-input" required>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn">Withdraw</button>
+        </div>
+      `;
+
+      // Populate the token select dropdown
+      var tokenSelect = form.querySelector('#token-select');
+      for (var i = 0; i < tokens.length; i++) {
+        var option = document.createElement('option');
+        option.value = i;
+        option.text = tokens[i].token;
+        tokenSelect.appendChild(option);
+      }
+
+      // Add the form submit event listener
+      form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          var selectedIndex = parseInt(tokenSelect.value);
+          var tokenAddress = tokens[selectedIndex].address;
+          var decimals = parseInt(tokens[selectedIndex].decimals);
+          var amount = parseFloat(document.getElementById('amount-input').value);
+          var value = web3.utils.toBN(parseInt(parseFloat(amount) * (10 ** decimals))).toString();
+          try {
+            await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000});
+            alert("Withdraw success!");
+            await loadUser();
+            popupContainer.remove();
+          } catch (error) {
+            console.error(error);
+          }
+      });
+
+      // Append the form to the popup container
+      popupContainer.appendChild(popup);
+      popup.appendChild(form);
+      popup.appendChild(closeButton);
+
+      // Append the popup container to the page body
+      document.body.appendChild(popupContainer);
+
+      // Add CSS rules
+      const style = document.createElement('style');
+      style.type = 'text/css';
+      style.innerHTML = `
+        .popup-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .popup {
+          position: relative;
+          background-color: white;
+          padding: 20px;
+          max-width: 600px;
+          max-height: 80%;
+          overflow-y: auto;
+        }
+
+        .close-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    async function resizeImage(file) {
+      // Check if the file is an image
+      if (!file.type.startsWith('image/')) {
+        return null;
+      }
+
+      // Load the image data into an image object
+      const img = new Image();
+
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+      });
+
+      img.src = base64;
+
+      // Wait for the image to load
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      // Check if the image is too large
+      const maxSize = 100 * 1024; // 100 KB
+      const size = img.width * img.height * 3; // 3 bytes per pixel
+      if (size <= maxSize) {
+        return img.src;
+      }
+
+      // Resize the image using the Canvas API
+      const canvas = document.createElement('canvas');
+      const scale = Math.sqrt(maxSize / size);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL(file.type, 0.8); // Reduce quality to reduce size
+    }
+
+    async function createContract(publicoffer=true, counterdata={}) {
+        // Create the popup container
+        const popupContainer = document.createElement('div');
+        popupContainer.classList.add('popup-container');
+        //popupContainer.onclick = function() { popupContainer.remove(); };
+
+        const popup = document.createElement('div');
+        popup.classList.add('popup');
+
+        const closeButton = document.createElement('span');
+        closeButton.innerHTML = '&times;';
+        closeButton.classList.add('close-button');
+        closeButton.onclick = function() { popupContainer.remove(); };
+
+        // Create the form element
+        var form = document.createElement('form');
+        form.classList.add('popup-form');
+        form.innerHTML = `<div id="createContractModal" class="modal">
+          <div class="modal-content">
+            <h2>Create Contract</h2>
+            <form id="createContractForm">
+              <label for="contractType">Contract Type:</label>
+              <select id="contractType">
+                <option value="public">Public Offer</option>
+                <option value="private">Private Offer</option>
+              </select><br>
+              <div id="counterPartyAddressField" style="display:none;">
+                <label for="counterPartyAddress">Counter-Party Address:</label>
+                <input type="text" id="counterPartyInput">
+              </div><br>
+              <label for="senderReceiver">Sender or Receiver:</label>
+              <select id="senderReceiver">
+                <option value="receiver">I'm the one receiving the funds</option>
+                <option value="sender">I'm the one sending the funds</option>                
+              </select><br>
+              <label for="token">Token:</label>
+              <select id="token-select">
+                <!-- options added dynamically through javascript -->
+              </select><br>
+              <label for="quantity">Quantity:</label>
+              <input type="number" id="order-quantity" value="1"><br>
+              <label for="amount">Amount:</label>
+              <input type="number" id="amount-input" step="0.000000000000000001"><br>
+              <label for="depositSettings">Deposit Settings:</label>
+              <select id="depositSettings">
+                <option value="recommended">Use recommended deposit settings</option>
+                <option value="custom">Custom deposits</option>
+              </select><br>
+              <div id="senderDepositField" style="display:none;">
+                <label for="senderDeposit">Sender Deposit:</label>
+                <input type="number" id="sender-deposit-input" step="0.000000000000000001">
+              </div><br>
+              <div id="receiverDepositField" style="display:none;">
+                <label for="receiverDeposit">Receiver Deposit:</label>
+                <input type="number" id="recipient-deposit-input" step="0.000000000000000001">
+              </div><br>
+              <label for="timeLimit">Time Limit (in weeks):</label>
+              <input type="number" id="timeLimit" value="4"><br>
+              <p id="timeLimitWarning" style="display:none;">Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.</p><br>
+              <label for="contractDetails">Contract Details:</label><br>
+              <textarea id="contractDetails"></textarea><br>
+              <label for="contractImage">Contract Images:</label>
+              <input type="file" id="contractImage" multiple><br><br>
+              <button type="button" id="changefile" style="display:none;">Change Images</button>
+              <label for="contactInfo">Contact Information(email/signal/telegram):</label><br>
+              <input id="contactInfo"></textarea><br>
+              <label for="autoaccept">Automatically accept matching offers: </label>
+              <input type="checkbox" id="autoaccept" checked><br><br>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        </div>
+        `;
+
+        // Populate the token select dropdown
+        var tokenSelect = form.querySelector('#token-select');
+        for (var i = 0; i < tokens.length; i++) {
+            var option = document.createElement('option');
+            option.value = i;
+            option.text = tokens[i].token;
+            tokenSelect.appendChild(option);
+        }
+
+        form.querySelector("#contactInfo").value = document.getElementById("myContactInfo").value;
+
+        // Get necessary DOM elements
+        var contractType = form.querySelector('#contractType');
+        var counterPartyAddressField = form.querySelector('#counterPartyAddressField');        
+        var depositSelect = form.querySelector('#depositSettings');
+        var senderDepositInput = form.querySelector('#senderDepositField');
+        var recipientDepositInput = form.querySelector('#receiverDepositField');
+        var imageInput = form.querySelector('#contractImage');
+        var auto = form.querySelector('#autoaccept');
+        var adjusttime = form.querySelector('#timeLimit');
+
+        // Hide counterparty input initially
+        counterPartyAddressField.style.display = 'none';
+
+        // Hide deposit inputs initially
+        senderDepositInput.style.display = 'none';
+        recipientDepositInput.style.display = 'none';
+
+        // Event listener for type select
+        contractType.addEventListener('change', () => {
+          if (contractType.value === 'private') {
+            counterPartyAddressField.style.display = 'block';
+            auto.style.display = 'none';
+          } else {
+            counterPartyAddressField.style.display = 'none';
+            auto.style.display = 'block';
+          }
+        });
+
+        adjusttime.addEventListener('change', () => {
+            if(adjusttime.value<4) {
+                timeLimitWarning.style.display = 'block';
+            } else {
+                timeLimitWarning.style.display = 'none';
+            }
+        });
+
+        // Event listener for deposit select
+        depositSelect.addEventListener('change', () => {
+          if (depositSelect.value === 'custom') {
+            senderDepositInput.style.display = 'block';
+            recipientDepositInput.style.display = 'block';
+          } else {
+            senderDepositInput.style.display = 'none';
+            recipientDepositInput.style.display = 'none';
+          }
+        });
+        var image = [];
+        // Event listener for image input
+        imageInput.addEventListener('change', async () => {
+          if(imageInput.files.length > 10) {
+            alert("Please add less than the maximum of 10 images");
+            return false;
+          }
+          for (let i = 0; i < imageInput.files.length; i++) {
+            const file = imageInput.files[i];
+            const myimage = await resizeImage(file);
+            if (myimage) {
+              image.push(myimage);
+            } else {
+              console.warn(`File ${file.name} is not an image`);
+            }
+          }
+        });
+
+        if(Object.keys(counterdata).length !== 0) {
+          form.querySelector('#contractType').selectedIndex = 1;
+          counterPartyAddressField.style.display = 'block';
+          auto.style.display = 'none';
+          if(myaccounts === counterdata.recipient) {
+            form.querySelector("#senderReceiver").selectedIndex = 0;
+            form.querySelector("#counterPartyInput").value = counterdata.sender;
+          } else {
+            form.querySelector("#senderReceiver").selectedIndex = 1;
+            form.querySelector("#counterPartyInput").value = counterdata.recipient;
+          }
+          form.querySelector("#order-quantity").value = 1;
+          form.querySelector("#amount-input").value = displayDecimals(counterdata.token, counterdata.amount);
+          if(counterdata.amount == counterdata.depositSender && counterdata.amount == counterdata.depositRecipient) {
+            form.querySelector("#depositSettings").selectedIndex = 0;
+          } else {
+            form.querySelector("#depositSettings").selectedIndex = 1;
+            senderDepositInput.style.display = 'block';
+            recipientDepositInput.style.display = 'block';
+            form.querySelector("#sender-deposit-input").value = displayDecimals(counterdata.token, counterdata.depositSender);
+            form.querySelector("#recipient-deposit-input").value = displayDecimals(counterdata.token, counterdata.depositRecipient);
+          }
+          form.querySelector("#timeLimit").value = parseInt(counterdata.timelimit[0]) / (60 * 60 * 24 * 7);
+          form.querySelector("#contractDetails").value = counterdata.message;
+          var selectedIndex = -1;
+
+          for (var inx = 0; inx < tokens.length; inx++) {
+            if (tokens[inx].address === counterdata.token) {
+              selectedIndex = inx;
+              break;
+            }
+          }
+
+          if (selectedIndex !== -1) {
+            tokenSelect.selectedIndex = selectedIndex;
+          } else {
+            alert('Token not found in default coin list!');
+            popupContainer.remove();
+            return;
+          }
+          image = counterdata.image;
+          form.querySelector("#contractImage").style.display = 'none';
+          const changefile = form.querySelector("#changefile")
+          changefile.style.display = 'block';
+          changefile.onclick = () => { 
+            changefile.style.display = 'none';
+            form.querySelector("#contractImage").style.display = 'block';
+            image = [];
+          };
+        }
+
+        // Add the form submit event listener
+        form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          // Get form values
+          var counterPartyInput = document.getElementById("counterPartyInput").value;
+          var sender = "0x0000000000000000000000000000000000000000";
+          var recipient = "0x0000000000000000000000000000000000000000";
+          if (contractType.value === 'private') {
+                sender = counterPartyInput;
+                recipient = myaccounts;
+          } else {
+                recipient = myaccounts;
+          }
+          var senderReceiver = document.getElementById("senderReceiver").value;
+          var quantity = parseInt(document.getElementById('order-quantity').value);
+          var amount = document.getElementById("amount-input").value;
+          var depositType = form.querySelector("#depositSettings").value;
+          var depositSender = document.getElementById("sender-deposit-input").value;
+          var depositRecipient = document.getElementById("recipient-deposit-input").value;
+          var timeLimit = document.getElementById("timeLimit").value;
+          var contactinfo = document.getElementById("contactInfo").value;
+          var message = JSON.stringify({message: document.getElementById("contractDetails").value, contact: contactinfo, image: image});
+          if (contactinfo != '') {
+            document.getElementById("myContactInfo").value = contactinfo;
+            await saveContactInfo(contactinfo);
+          }          
+          if(message == "error") {
+            alert("Error posting IPFS data, please try again later");
+            return false;
+          }
+          if (amount === "") {
+            alert("Please enter the amount");
+            return false;
+          }
+          if (depositType === "custom") {
+            if (depositSender === "" || depositRecipient === "") {
+              alert("Please enter the custom deposits");
+              return false;
+            }
+          }
+          if (timeLimit === "") {
+            alert("Please enter the time limit");
+            return false;
+          }
+          timeLimit = parseInt(timeLimit);
+          if (document.getElementById("contractDetails").value === "") {
+            alert("Please enter the description");
+            return false;
+          }
+          var sender2 = (senderReceiver === "receiver" ? sender : recipient);
+          var recipient2 = (senderReceiver === "receiver" ? recipient : sender);
+          var selectedIndex = parseInt(tokenSelect.value);
+          var tokenAddress = tokens[selectedIndex].address;
+          var decimals = parseInt(tokens[selectedIndex].decimals);
+          amount = web3.utils.toBN(parseInt(parseFloat(amount) * (10 ** decimals))).toString();
+          depositSender = (depositType === "recommended" ? amount : web3.utils.toBN(parseInt (parseFloat(depositSender) * (10 ** decimals))).toString());
+          depositRecipient = (depositType === "recommended" ? amount : web3.utils.toBN(parseInt(parseFloat(depositRecipient) * (10 ** decimals))).toString());
+          var style = 0;
+          if(publicoffer) {
+            if(document.getElementById("autoaccept").checked == false) {
+                style = 1;
+            }
+          }
+          if(myaccounts == sender2) {
+            if(parseInt(balances[tokenAddress].amount)<(parseInt(amount)+parseInt(depositSender))) {
+                alert("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
+                return false;
+            }
+          }
+          if(myaccounts == recipient2) {
+            if(parseInt(balances[tokenAddress].amount)<parseInt(depositRecipient)) {
+                alert("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
+                return false;
+            }
+          }
+          result = await postOfferData(message);
+          if(result == "error") {
+              alert("Error posting message data to IPFS.");
+              return false;
+          }
+          if(result.length > 100) {
+              alert("Error message length was unusually long. Please check IPFS hash result.");
+              return false;
+          }
+          message = result;
+          // Construct data object
+          const data = {
+            sender: sender2,
+            recipient: recipient2,
+            token: tokenAddress,
+            amount: amount,
+            depositSender: depositSender,
+            depositRecipient: depositRecipient,
+            quantity: quantity,
+            timelimit: parseInt(timeLimit * 7 * 24 * 60 * 60),
+            message: message
+          };
+          data2 = JSON.parse(JSON.stringify(data));
+          data2.image = [];
+          data2.message = "IPFS link: " + data2.message;
+          data2.timelimit = [data2.timelimit];
+          //if(Object.keys(counterdata).length !== 0) {
+          //  data2.amount *= quantity;
+          //  data2.depositSender *= quantity;
+          //  data2.depositRecipient *= quantity;
+          //}
+          var result = await showListing(data2, 3)
+          if(result == false) {
+            popupContainer.remove();
+            return;
+          }
+          try {
+              // Call solidity function to create contract
+              await DDEcontract.methods.createContract(
+                data.sender,
+                data.recipient,
+                data.token,
+                data.amount,
+                data.depositSender,
+                data.depositRecipient,
+                data.quantity,
+                data.timelimit,
+                style,
+                data.message
+              ).send({"from":myaccounts,"gasLimit": 4000000});
+                alert("Contract creation success!");
+                await loadUser();
+                popupContainer.remove();
+              } catch (error) {
+                console.error(error);
+          }
+        });
+
+        // Append the form to the popup container
+        popupContainer.appendChild(popup);
+        popup.appendChild(form);
+        popup.appendChild(closeButton);
+
+        // Append the popup container to the page body
+        document.body.appendChild(popupContainer);
+
+        // Add CSS rules
+        const style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = `
+        .popup-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .popup {
+          position: relative;
+          background-color: white;
+          padding: 20px;
+          max-width: 600px;
+          max-height: 80%;
+          overflow-y: auto;
+        }
+
+        .close-button {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        `;
+        document.head.appendChild(style);
+    }
+
+    async function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result.split(',')[1]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function acceptOffer(listing) {
+        try {
+              mylisting = JSON.parse(JSON.stringify(listing));
+              var quantity = 1;
+              if(mylisting.sender == "0x0000000000000000000000000000000000000000" || mylisting.recipient == "0x0000000000000000000000000000000000000000" ) {
+                const offerID = await DDEcontract.methods.userMarketID(mylisting.hash).call();
+                if(offerID == 0) {
+                  alert("Offer no longer available!");
+                  return;
+                }
+                if(listing.status[0]==0) {
+                  const dialog = document.createElement("div");
+                  dialog.innerHTML = `
+                    <div>Please enter the quantity you wish to purchase:<br></div>
+                      <input id="new-quantity" type="number"></input><br><br>
+                    <div>
+                      <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
+                      <button id="cancel-btn">Cancel</button>
+                    </div>
+                  `;
+                  dialog.style.display = "block";
+                  dialog.style.position = "fixed";
+                  dialog.style.zIndex = 9999;
+                  dialog.style.backgroundColor = "white";
+                  dialog.style.padding = "20px";
+                  dialog.style.borderRadius = "10px";
+                  dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+                  dialog.style.top = "50%";
+                  dialog.style.left = "50%";
+                  dialog.style.transform = "translate(-50%, -50%)";
+
+                  document.body.appendChild(dialog);
+
+                  const confirmBtn = dialog.querySelector("#confirm-btn");
+                  const cancelBtn = dialog.querySelector("#cancel-btn");
+                  var ret = 0;
+                  cancelBtn.addEventListener("click", async () => {
+                    dialog.remove();
+                    ret = 1;
+                    return;
+                  });
+                  if(ret == 1) {
+                    return;
+                  }
+
+                  confirmBtn.addEventListener("click", async () => {
+                    quantity = parseInt(document.getElementById('new-quantity').value);
+                    if(quantity > mylisting.quantity) {
+                      alert("Quantity exceeds what is available!");
+                      dialog.remove();
+                      ret = 1;
+                      return;                        
+                    }
+                    mylisting.quantity = quantity;                      
+                  });
+                  if(ret == 1) {
+                    return;
+                  }
+                }
+              } else {
+                quantity = mylisting.quantity;
+              }
+              //If one wants to show a grand total
+              //mylisting.amount *= quantity;
+              //mylisting.depositSender *= quantity;
+              //mylisting.depositRecipient *= quantity;
+              var result = await showListing(mylisting, 3)
+              if(result == false) {
+                return;
+              }
+              await DDEcontract.methods.acceptOffer(
+                mylisting.hash,
+                quantity
+              ).send({"from":myaccounts,"gasLimit": 4000000});
+                alert("Contract accepted!");
+                await loadUser();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    async function counterOffer(listing) {
+        await createContract(false, listing);
+    }
+    async function cancelOffer(listing, hide=0) {
+      if(hide == 1) {
+          const dialog = document.createElement("div");
+          dialog.innerHTML = `
+            <div>Would you like to hide this offer or cancel it?<br>Hiding just removes it from the list.<br>Cancelling will also notify the other party.<br><br></div>
+            <div>
+              <button id="hide-btn">Hide</button>&nbsp;&nbsp;
+              <button id="cancel-btn">Cancel</button>
+            </div>
+          `;
+          dialog.style.display = "block";
+          dialog.style.position = "fixed";
+          dialog.style.zIndex = 9999;
+          dialog.style.backgroundColor = "white";
+          dialog.style.padding = "20px";
+          dialog.style.borderRadius = "10px";
+          dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+          dialog.style.top = "50%";
+          dialog.style.left = "50%";
+          dialog.style.transform = "translate(-50%, -50%)";
+
+          document.body.appendChild(dialog);
+
+          const hideBtn = dialog.querySelector("#hide-btn");
+          const cancelBtn = dialog.querySelector("#cancel-btn");
+
+          hideBtn.addEventListener("click", async () => {
+            var readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages2")) || {};
+            readMessages[listing.index] = true;
+            localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));            
+            await loadUser();
+            dialog.remove();
+            return;            
+          });
+
+          cancelBtn.addEventListener("click", async () => {
+            try {
+                  await DDEcontract.methods.cancelPrivateOffer(
+                    listing.hash
+                  ).send({"from":myaccounts,"gasLimit": 4000000});
+                  alert("Contract removed!");
+                  await loadUser();                
+            } catch (error) {
+                console.error(error);
+            }
+          });
+      } else {
+          try {
+                if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
+                  await DDEcontract.methods.removeMarketOffer(
+                    listing.hash
+                  ).send({"from":myaccounts,"gasLimit": 4000000});
+                  alert("Contract removed!");
+                  await loadUser();
+                } else {
+                  await DDEcontract.methods.cancelPrivateOffer(
+                    listing.hash
+                  ).send({"from":myaccounts,"gasLimit": 4000000});
+                  alert("Contract removed!");
+                  await loadUser();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+      }
+      dialog.remove();
+    }
+    async function updateQuantity(listing) {
+      const dialog = document.createElement("div");
+      dialog.innerHTML = `
+        <div>Please enter the updated quantity:<br></div>
+          <input id="new-quantity" type="number"></input><br><br>
+        <div>
+          <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
+          <button id="cancel-btn">Cancel</button>
+        </div>
+      `;
+      dialog.style.display = "block";
+      dialog.style.position = "fixed";
+      dialog.style.zIndex = 9999;
+      dialog.style.backgroundColor = "white";
+      dialog.style.padding = "20px";
+      dialog.style.borderRadius = "10px";
+      dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+      dialog.style.top = "50%";
+      dialog.style.left = "50%";
+      dialog.style.transform = "translate(-50%, -50%)";
+
+      document.body.appendChild(dialog);
+
+      const confirmBtn = dialog.querySelector("#confirm-btn");
+      const cancelBtn = dialog.querySelector("#cancel-btn");
+
+      cancelBtn.addEventListener("click", async () => {
+        dialog.remove();
+        return;
+      });
+
+      confirmBtn.addEventListener("click", async () => {
+        try {
+              var quantity = parseInt(document.getElementById('new-quantity').value);
+              if(quantity == 0) {
+                alert("Quantity can not be changed to zero!");
+                dialog.remove();
+                return;
+              }
+              await DDEcontract.methods.updateQuantity(
+                listing.hash,
+                quantity
+              ).send({"from":myaccounts,"gasLimit": 4000000});
+                alert("Quantity updated!");
+                await loadUser();
+        } catch (error) {
+            console.error(error);
+        }
+        dialog.remove();
+      });
+    }
+
+    async function addAPI(text) {
+        var data = CryptoJS.AES.encrypt(JSON.stringify(text), AESkey).toString();
+        console.log(data)
+        try {
+            await DDEcontract.methods.adddata(data).send({"from":myaccounts,"gasLimit": 3000000});
+            alert("Data added!");
+          } catch (error) {
+            console.error(error);
+        }
+    }
+    async function getAPI(index) {
+        await DDEcontract.methods.publicdata(index).call().then(function (data) {            
+                data=JSON.parse(DOMPurify.sanitize(CryptoJS.AES.decrypt(data, AESkey).toString(CryptoJS.enc.Utf8)));
+                pinataApiKey = data[0];
+                pinataSecretApiKey = data[1];
+        });
+    }
+    setInterval(loadUser, 90000);
+</script>
+</body>
+</html>
