@@ -160,12 +160,12 @@
         <button onclick="withdraw()">Withdraw tokens</button><br><br>
         <label for="myContactInfo">Contact Information(email/signal/telegram):</label><br>
         <input id="myContactInfo"></input><br><br>
-        <label for="clearCompleted">Automatically clear completed contracts</label><br>
+        <label for="clearCompleted">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
     </div>
     <div class="main about">
         <h2>About</h2>
-        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together. The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p>
+        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together. The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.<br><br>For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. There is no arbiters to prevent a contract from defaulting. Users are forced to work with each other to achieve a desirable outcome. For more information on how all of this works you may visit <a href="https://bitbay.market" target="_blank">https://bitbay.market</a></p>
     </div>
 </div>
 <div class="footer">
@@ -200,6 +200,9 @@
         }
     ];
     var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
+    web3 = new Web3("https://rpc.ankr.com/eth_goerli");
+    DDEaddy = "0xc723cB37f59f114CA3f1BE7cd409Dc35d336FA33"; //Goerli testnet is default market view
+    var DDEcontract2 = new web3.eth.Contract(DDEabi, DDEaddy);
     var marketOffers = [];
     //web3[0] = new Web3("https://cloudflare-eth.com");
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
@@ -461,7 +464,6 @@
 
       if (marketsLength <= 1000) {
         if (parseInt(currentMarketsLength) !== parseInt(marketsLength)) {
-            console.log(currentMarketsLength," ", marketsLength)
           await loadMarkets(1, 1000);
         }
       }
@@ -469,9 +471,13 @@
 
     async function loadMarkets(low = 1, high = 1) {
         var mlength = 1;
-        await DDEcontract.methods.marketslength().call().then(async function (result) {
+        var DDEcontract3 = DDEcontract;
+        if(DDEcontract == '') {
+            DDEcontract3 = DDEcontract2;
+        }
+        await DDEcontract3.methods.marketslength().call().then(async function (result) {
             currentMarketsLength = mlength;
-            mlength = result;            
+            mlength = result;
         });
         marketOffers = [];
         var index = 1;
@@ -491,23 +497,31 @@
         }
         jsondata = {};
         for (index; index < mlength; index++) {
-            await DDEcontract.methods.markets(index).call().then(async function (hash) {
-                try {
+            try {
+                await DDEcontract3.methods.markets(index).call().then(async function (hash) {
                     jsondata = await getOrderHash(hash);
                     marketOffers.push(jsondata);
-                } catch (e) {
-                    console.log("Error loading offer: ",hash," - ",e);
-                }
-            });
+                });
+            } catch (e) {
+                console.log("Error loading offer: ",e);
+            }
+        }
+        if(DDEcontract == '') {
+            populateListings();
         }
     }
     async function getOrderHash(hash) {
         var jsondata = {};
-        await DDEcontract.methods.getContract(DOMPurify.sanitize(hash)).call().then(async function (data) {
+        var DDEcontract3 = DDEcontract;
+        if(DDEcontract == '') {
+            DDEcontract3 = DDEcontract2;
+        }
+        await DDEcontract3.methods.getContract(DOMPurify.sanitize(hash)).call().then(async function (data) {
           var text = '';
           try {
             text = await getOfferData(DOMPurify.sanitize(data.message));
-          } catch {            
+          } catch (e) {
+            console.log(e);
           }
           jsondata = {
             sender: DOMPurify.sanitize(data.sender),
@@ -533,10 +547,12 @@
                   var messageData = JSON.parse(jsondata.message);
                   jsondata.image = Array.isArray(messageData.image) ? messageData.image : [''];
                   jsondata.message = messageData.message;
+                  jsondata.contact = messageData.contact;
               } catch {
                   console.log("Error loading data");
                   jsondata.image = [''];
                   jsondata.message = '';
+                  jsondata.contact = '';
               }
           } else {
               jsondata.image = [''];
@@ -1062,7 +1078,7 @@
       timelimit.innerHTML = 'Time limit: ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' weeks';
 
       const message = document.createElement('p');
-      message.innerHTML = '<br>Details: <br>' + listing.message;
+      message.innerHTML = '<br>Details: <br>' + listing.message + '<br><br>Contact Information: <br>' + listing.contact;
 
       const buttonContainer = document.createElement('div');
       buttonContainer.classList.add('button-container');
@@ -2034,7 +2050,7 @@
                   alert("Offer no longer available!");
                   return;
                 }
-                if(listing.status[0]==0) {
+                if(listing.status[0]==0 || listing.status[1]==0) {
                   const dialog = document.createElement("div");
                   dialog.innerHTML = `
                     <div>Please enter the quantity you wish to purchase:<br></div>
@@ -2059,47 +2075,52 @@
 
                   const confirmBtn = dialog.querySelector("#confirm-btn");
                   const cancelBtn = dialog.querySelector("#cancel-btn");
-                  var ret = 0;
                   cancelBtn.addEventListener("click", async () => {
                     dialog.remove();
-                    ret = 1;
                     return;
                   });
-                  if(ret == 1) {
-                    return;
-                  }
 
                   confirmBtn.addEventListener("click", async () => {
                     quantity = parseInt(document.getElementById('new-quantity').value);
                     if(quantity > mylisting.quantity) {
                       alert("Quantity exceeds what is available!");
-                      dialog.remove();
-                      ret = 1;
                       return;                        
                     }
-                    mylisting.quantity = quantity;                      
-                  });
-                  if(ret == 1) {
-                    return;
-                  }
+                    dialog.remove();
+                    mylisting.quantity = quantity;
+                    //If one wants to show a grand total
+                    //mylisting.amount *= quantity;
+                    //mylisting.depositSender *= quantity;
+                    //mylisting.depositRecipient *= quantity;
+                    var result = await showListing(mylisting, 3)
+                    if(result == false) {
+                      return;
+                    }
+                    await DDEcontract.methods.acceptOffer(
+                      mylisting.hash,
+                      quantity
+                    ).send({"from":myaccounts,"gasLimit": 4000000});
+                      alert("Contract accepted!");
+                      await loadUser();                      
+                    });
                 }
               } else {
                 quantity = mylisting.quantity;
+                //If one wants to show a grand total
+                //mylisting.amount *= quantity;
+                //mylisting.depositSender *= quantity;
+                //mylisting.depositRecipient *= quantity;
+                var result = await showListing(mylisting, 3)
+                if(result == false) {
+                  return;
+                }
+                await DDEcontract.methods.acceptOffer(
+                  mylisting.hash,
+                  quantity
+                ).send({"from":myaccounts,"gasLimit": 4000000});
+                  alert("Contract accepted!");
+                  await loadUser();
               }
-              //If one wants to show a grand total
-              //mylisting.amount *= quantity;
-              //mylisting.depositSender *= quantity;
-              //mylisting.depositRecipient *= quantity;
-              var result = await showListing(mylisting, 3)
-              if(result == false) {
-                return;
-              }
-              await DDEcontract.methods.acceptOffer(
-                mylisting.hash,
-                quantity
-              ).send({"from":myaccounts,"gasLimit": 4000000});
-                alert("Contract accepted!");
-                await loadUser();
         } catch (error) {
             console.error(error);
         }
@@ -2144,6 +2165,7 @@
 
           cancelBtn.addEventListener("click", async () => {
             try {
+                  dialog.remove();
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash
                   ).send({"from":myaccounts,"gasLimit": 4000000});
@@ -2171,8 +2193,7 @@
             } catch (error) {
                 console.error(error);
             }
-      }
-      dialog.remove();
+      }      
     }
     async function updateQuantity(listing) {
       const dialog = document.createElement("div");
@@ -2244,6 +2265,7 @@
         });
     }
     setInterval(loadUser, 90000);
+    loadMarkets(1, 1000);    
 </script>
 </body>
 </html>
