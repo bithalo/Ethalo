@@ -162,10 +162,12 @@
         <input id="myContactInfo"></input><br><br>
         <label for="clearCompleted">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
+        <button onclick="backupLocalStorage()">Backup cached site/user data</button>
+        <button onclick="loadLocalStorage()">Load site/user data from file</button><br><br>
     </div>
     <div class="main about">
         <h2>About</h2>
-        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together. The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.<br><br>For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. There is no arbiters to prevent a contract from defaulting. Users are forced to work with each other to achieve a desirable outcome. For more information on how all of this works you may visit <a href="https://bitbay.market" target="_blank">https://bitbay.market</a></p>
+        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together. The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.<br><br>For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. There is no arbiters to prevent a contract from defaulting. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. For more information on how all of this works you may visit <a href="https://bitbay.market" target="_blank">https://bitbay.market</a></p>
     </div>
 </div>
 <div class="footer">
@@ -315,6 +317,45 @@
     myContactInfo.addEventListener('blur', async function(event) {
         await saveContactInfo(document.getElementById("myContactInfo").value);
     });
+
+    function backupLocalStorage() {
+      const localStorageData = JSON.stringify(localStorage);
+      const blob = new Blob([localStorageData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = window.prompt('Choose a file name for the backup:', 'localStorageBackup.json');
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadLocalStorage() {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const fileData = JSON.parse(event.target.result);
+          Object.keys(fileData).forEach(function(key) {
+            localStorage.setItem(key, fileData[key]);
+          });
+          console.log('Local storage data overwritten with data from file.');
+        } catch (error) {
+          console.error('Error parsing file data:', error);
+        }
+      };
+      reader.onerror = function(event) {
+        console.error('Error loading file:', event.target.error);
+      };
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+
+      input.onchange = function(event) {
+        const file = event.target.files[0];
+        reader.readAsText(file);
+      };
+      // Trigger a click event on the input element to prompt the user to select a file
+      input.click();
+    }
 
     async function saveContactInfo(text) {
         if(myaccounts != '') {
@@ -1207,18 +1248,13 @@
 
                       const confirmBtn = dialog.querySelector("#confirm-btn");
                       const cancelBtn = dialog.querySelector("#cancel-btn");
-                      var ret = 0;
                       cancelBtn.addEventListener("click", async () => {
                         dialog.remove();
-                        ret = 1;
-                        return;
                       });
-                      if(ret == 1) {
-                        return;
-                      }
 
-                      confirmBtn.addEventListener("click", async () => {
+                      confirmBtn.addEventListener("click", async () => {                        
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
+                        dialog.remove();
                         await DDEcontract.methods.requestExtension(listing.hash, newtime).send({"from":myaccounts,"gasLimit": 1000000});
                         alert("Time extension requested!");
                         await loadUser();
@@ -2077,7 +2113,6 @@
                   const cancelBtn = dialog.querySelector("#cancel-btn");
                   cancelBtn.addEventListener("click", async () => {
                     dialog.remove();
-                    return;
                   });
 
                   confirmBtn.addEventListener("click", async () => {
@@ -2159,8 +2194,7 @@
             readMessages[listing.index] = true;
             localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));            
             await loadUser();
-            dialog.remove();
-            return;            
+            dialog.remove();           
           });
 
           cancelBtn.addEventListener("click", async () => {
