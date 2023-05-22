@@ -39,6 +39,12 @@ contract TwoPartyEscrow {
     mapping(address => bytes32[]) public privateOffers;
     mapping(address => bytes32[]) public escrows;
     mapping(address => string[]) public userdata;
+    mapping(bytes32 => string[]) public tagdata;
+    mapping(bytes32 => uint[]) public tagposition;
+    mapping(string => bytes32[]) public hashtag; //References for searching
+    mapping(string => uint) public taglength;
+    mapping(string => uint[]) public openslot;
+    mapping(string => uint) public openslotlength;
     string[] public publicdata;
     uint lock;
     address WETH;
@@ -77,7 +83,7 @@ contract TwoPartyEscrow {
         require(lock != 1);
         lock = 1;
         require(amount > 0);
-        require(userBalance[msg.sender][token] >= amount, "Insufficient balance");
+        require(userBalance[msg.sender][token] >= amount); //Insufficient balance
         if(token != WETH) {
             require(ERC20(token).transfer(msg.sender, amount));
         } else {
@@ -96,17 +102,26 @@ contract TwoPartyEscrow {
         uint256 _depositSender,
         uint256 _depositRecipient,
         uint256 _quantity,
-        uint256 _timelimit,
+        uint256[2] memory _timelimit,
         uint256 style,
-        string memory _message
+        string memory _message,
+        string[] memory _hashtags //Only use for chains that can handle the data cost or use short common word references
     ) public returns (bytes32) {        
-        require(_quantity > 0, "Quantity must be greater than 0");
+        require(_quantity > 0);
         require(_sender == msg.sender || _recipient == msg.sender);
         require(style < 2); //0 allows instant acceptance, 1 only allows for counters
         if(_sender == msg.sender) {
-            require(userBalance[msg.sender][_token] >= (_amount + _depositSender) * _quantity, "Insufficient balance");
+            if(style == 0) {
+                require(userBalance[msg.sender][_token] >= (_amount + _depositSender) * _quantity);
+            } else {
+                require(userBalance[msg.sender][_token] >= (_amount + _depositSender));
+            }
         } else {
-            require(userBalance[msg.sender][_token] >= (_depositRecipient) * _quantity, "Insufficient balance");
+            if(style == 0) {
+                require(userBalance[msg.sender][_token] >= (_depositRecipient) * _quantity);
+            } else {
+                require(userBalance[msg.sender][_token] >= (_depositRecipient));
+            }
         }
 
         Contract memory newContract;
@@ -120,7 +135,7 @@ contract TwoPartyEscrow {
             depositSender: _depositSender,
             depositRecipient: _depositRecipient,
             quantity: _quantity,
-            timelimit: [_timelimit,0,0],
+            timelimit: [_timelimit[0],_timelimit[1],block.timestamp],
             status: [style,uint(0)],
             message: _message
         });
@@ -144,17 +159,41 @@ contract TwoPartyEscrow {
             }
             markets[marketslength] = hash;
             userMarketID[hash] = marketslength;
-            marketslength += 1;            
+            marketslength += 1;
             openOffers[msg.sender].push(hash);
+        }
+        if(_hashtags.length > 0) {
+            require(_hashtags.length < 11);
+            require(_sender == address(0) || _recipient == address(0));
+            uint x = 0;
+            string memory mytag;            
+            while(x < _hashtags.length) {
+                mytag = _hashtags[x];
+                require(bytes(mytag).length <= 32);
+                if(openslotlength[mytag] > 0) {
+                    openslotlength[mytag] -= 1;
+                    tagposition[hash].push(openslot[mytag][openslotlength[mytag]]);
+                    hashtag[mytag][openslot[mytag][openslotlength[mytag]]] = hash;                    
+                } else {
+                    tagposition[hash].push(taglength[mytag]);
+                    taglength[mytag] += 1;
+                    hashtag[mytag].push(hash);
+                }
+                x += 1;
+            }
+            tagdata[hash] = _hashtags;
         }
         contracts[hash] = newContract;
         initialized[hash] = true;
         return hash;
     }
-    function acceptOffer(bytes32 hash, uint quantity) public {
+    function acceptOffer(bytes32 hash, uint quantity, uint offerlimit) public {
         address sender = contracts[hash].sender;
         address recipient = contracts[hash].recipient;
         require(quantity > 0);
+        if(contracts[hash].timelimit[1] != 0) {
+            require(block.timestamp < contracts[hash].timelimit[1]); //Offer has expired
+        }
         if(sender != address(0) && recipient != address(0)) {
             require(sender == msg.sender || recipient == msg.sender);
             require(quantity == contracts[hash].quantity);
@@ -166,15 +205,18 @@ contract TwoPartyEscrow {
             }
             contracts[hash].status = [uint(1),uint(1)];
         }
-        Contract memory newContract = contracts[hash];
+        Contract memory newContract = contracts[hash];        
         uint style = 0;
         if(sender == address(0) || recipient == address(0)) {
-            require(userMarketID[hash] != 0,"This offer is no longer available.");
+            require(userMarketID[hash] != 0); //Offer is no longer available
             require(quantity <= contracts[hash].quantity);
             style = newContract.status[0];
             if(style == 0) {
                 contracts[hash].quantity -= quantity;
                 if(contracts[hash].quantity == 0) {
+                    if(tagdata[hash].length > 0) {
+                        removeTags(hash);
+                    }
                     uint marketId = userMarketID[hash];
                     require(markets[marketId] == hash);
                     marketslength -= 1;
@@ -208,13 +250,15 @@ contract TwoPartyEscrow {
         newContract.depositRecipient *= quantity;
         if(style == 0) {
             newContract.timelimit[0] += block.timestamp;
-            require(userBalance[recipient][newContract.token] >= (newContract.depositRecipient), "Insufficient recipient balance");
+            require(userBalance[recipient][newContract.token] >= (newContract.depositRecipient)); //Insufficient recipient balance
             userBalance[recipient][newContract.token] -= (newContract.depositRecipient);
-            require(userBalance[sender][newContract.token] >= (newContract.amount + newContract.depositSender), "Insufficient sender balance");
+            require(userBalance[sender][newContract.token] >= (newContract.amount + newContract.depositSender)); //Insufficient sender balance
             userBalance[sender][newContract.token] -= (newContract.amount + newContract.depositSender);
             bytes32 acceptedhash = keccak256(abi.encodePacked(sender, recipient, newContract.token, newContract.amount, newContract.depositSender, newContract.depositRecipient, newContract.timelimit[0], newContract.message, uint(1)));
             require(initialized[acceptedhash] == false);
             initialized[acceptedhash] = true;
+            newContract.timelimit[1] = 0;
+            newContract.timelimit[2] = 0;
             contracts[acceptedhash] = newContract;
             escrows[sender].push(acceptedhash);
             escrows[recipient].push(acceptedhash);
@@ -222,14 +266,48 @@ contract TwoPartyEscrow {
             bytes32 counterhash = keccak256(abi.encodePacked(sender, recipient, newContract.token, newContract.amount, newContract.depositSender, newContract.depositRecipient, newContract.timelimit[0], newContract.message, block.timestamp));
             require(initialized[counterhash] == false);
             initialized[counterhash] = true;
+            newContract.timelimit[1] = offerlimit;
+            newContract.timelimit[2] = 0;
             contracts[counterhash] = newContract;
             privateOffers[sender].push(counterhash);
             privateOffers[recipient].push(counterhash);
         }
     }
+    function compareStrings(string memory a, string memory b) internal pure returns (bool) {
+        return keccak256(bytes(a)) == keccak256(bytes(b));
+    }
+    function removeTags(bytes32 hash) internal {
+        uint x = 0;
+        uint hashpos = 0;
+        string memory mytag;
+        mytag = tagdata[hash][tagdata[hash].length - 1];
+        if(compareStrings(mytag,"")) { 
+            return;
+        }
+        while(x < tagdata[hash].length) {
+            hashpos = tagposition[hash][x];
+            mytag = tagdata[hash][x];
+            hashtag[mytag][hashpos] = 0x0;
+            if(openslotlength[mytag] == openslot[mytag].length) {
+                openslot[mytag].push(0);
+            }
+            openslot[mytag][openslotlength[mytag]] = hashpos;
+            openslotlength[mytag] += 1;
+            x += 1;
+        }
+        tagdata[hash].push("");
+    }
+    function removeExpiredTags(bytes32 hash) public {
+        require(contracts[hash].sender == address(0) || contracts[hash].recipient == address(0));
+        if(block.timestamp < contracts[hash].timelimit[2] + 31556952) {
+            require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
+        }
+        removeTags(hash);
+    } 
     function requestExtension(bytes32 hash, uint timelimit) public {
-        require(block.timestamp < contracts[hash].timelimit[0], "Escrow has expired. The contracts funds have been destroyed.");
-        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4, "The deal has already completed");
+        require(block.timestamp < contracts[hash].timelimit[0]); //Escrow has expired, the funds have been destroyed        
+        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4); //The deal has already completed
+        require(contracts[hash].status[0] > 0 && contracts[hash].status[1] > 0); //Can only extend in escrow
         require(timelimit > contracts[hash].timelimit[0]);
         require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
         if(msg.sender == contracts[hash].sender) {
@@ -242,8 +320,9 @@ contract TwoPartyEscrow {
         }
     }
     function cancelEscrow(bytes32 hash) public {
-        require(block.timestamp < contracts[hash].timelimit[0], "Escrow has expired. The contracts funds have been destroyed.");
-        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4, "The deal has already completed");
+        require(block.timestamp < contracts[hash].timelimit[0]); //Escrow has expired, the funds have been destroyed
+        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4); //The deal has already completed
+        require(contracts[hash].status[0] > 0 && contracts[hash].status[1] > 0);
         address sender = contracts[hash].sender;
         address recipient = contracts[hash].recipient; 
         require(sender == msg.sender || recipient == msg.sender);
@@ -260,8 +339,9 @@ contract TwoPartyEscrow {
         }
     }
     function completeEscrow(bytes32 hash) public {
-        require(block.timestamp < contracts[hash].timelimit[0], "Escrow has expired. The contracts funds have been destroyed.");
-        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4, "The deal has already completed");
+        require(block.timestamp < contracts[hash].timelimit[0]); //Escrow has expired, the funds have been destroyed
+        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4); //The deal has already completed
+        require(contracts[hash].status[0] > 0 && contracts[hash].status[1] > 0);
         address sender = contracts[hash].sender;
         address recipient = contracts[hash].recipient; 
         require(sender == msg.sender || recipient == msg.sender);
@@ -287,12 +367,15 @@ contract TwoPartyEscrow {
             valid = true;
         }
         require(valid);
-        contracts[hash].status = [uint(1),uint(1)];
+        contracts[hash].status = [uint(4),uint(4)];
     }
     function removeMarketOffer(bytes32 hash) public {
         uint marketId = userMarketID[hash];
         require(contracts[markets[marketId]].sender == address(0) || contracts[markets[marketId]].recipient == address(0));
         require(contracts[markets[marketId]].sender == msg.sender || contracts[markets[marketId]].recipient == msg.sender);
+        if(tagdata[hash].length > 0) {
+            removeTags(hash);
+        }
         marketslength -= 1;
         userMarketID[markets[marketslength]] = marketId;
         userMarketID[markets[marketId]] = 0;

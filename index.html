@@ -4,8 +4,9 @@
 <script type="text/javascript" src="./ERC20.js"></script>
 <script type="text/javascript" src="./crypto-sha256.js"></script>
 <script type="text/javascript" src="./crypto-js.js"></script>
+<script type="text/javascript" src="./bignumber.min.js"></script>
 <script src="./axios.min.js"></script>
-<script src="web3.min.js"></script>
+<script src="./web3.min.js"></script>
 <script src="./jdenticon.min.js"></script>
 <html>
 <head>
@@ -123,8 +124,8 @@
     <div class="container">
         <div class="sidebar">
             <button onclick="showMain('markets')"><img src="markets.png" alt="Markets"><br>Markets</button>
-            <button onclick="showMain('offers')"><img src="offers.png" alt="Offers"><br>Offers</button>
-            <button onclick="showMain('contracts')"><img src="contracts.png" alt="Contracts"><br>Contracts</button>
+            <button onclick="showMain('offers')" id="offersButton"><img src="offers.png" alt="Offers"><br>Offers</button>
+            <button onclick="showMain('contracts')" id="contractsButton"><img src="contracts.png" alt="Contracts"><br>Contracts</button>
             <button onclick="showMain('account')"><img src="account.png" alt="Account"><br>Account</button>
             <button onclick="showMain('about')"><img src="about.png" alt="About"><br>About</button>
         </div>
@@ -134,7 +135,8 @@
             <button onclick="createContract()">Create Contract/Offer</button>
             <div class="search">
                 <img src="search.png" height="20px" width="20px" alt="Search">
-                <input type="text" placeholder="Search" onkeyup="searchListings(this.value)">
+                <input type="text" id="searchText" placeholder="Search" onkeyup="searchListings(this.value)">
+                <button onclick="searchListings(getElementById('searchText').value, 1)">Search</button><div id="loadingStatus"></div>
             </div>
         </div>
         <div class="listings">
@@ -160,8 +162,17 @@
         <button onclick="withdraw()">Withdraw tokens</button><br><br>
         <label for="myContactInfo">Contact Information(email/signal/telegram):</label><br>
         <input id="myContactInfo"></input><br><br>
+        <button onclick="registerEmail(document.getElementById('myContactInfo').value)">Register email to my address(optional)</button><br>
+        <div id="publicemail"></div><br><br>
         <label for="clearCompleted">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
+        <label for="offerExpiration">Private offers expire: </label>
+        <select id="offerExpiration">
+          <option value="never">Never</option>
+          <option value="two-weeks">Two weeks</option>
+          <option value="one-month">One month</option>
+        </select>
+        <br><br>
         <button onclick="backupLocalStorage()">Backup cached site/user data</button>
         <button onclick="loadLocalStorage()">Load site/user data from file</button><br><br>
     </div>
@@ -185,8 +196,11 @@
     var balances = {};
     var baseBalance = 0;
     var myContactInfo = document.getElementById("myContactInfo");
+    var offerExpiration = document.getElementById("offerExpiration");
     var AESkey = Crypto.SHA256("shared key")
     var currentMarketsLength = 0;
+    var gasPrice = "";
+    var CurrentTimeStamp = new Date().getTime();
     var tokens = [
         {
             address: "0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E",
@@ -203,9 +217,9 @@
     ];
     var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
     web3 = new Web3("https://rpc.ankr.com/eth_goerli");
-    DDEaddy = "0xc723cB37f59f114CA3f1BE7cd409Dc35d336FA33"; //Goerli testnet is default market view
+    DDEaddy = "0x08576389321C1999d1A66db093CDd8655615b4cE"; //Goerli testnet is default market view
     var DDEcontract2 = new web3.eth.Contract(DDEabi, DDEaddy);
-    var marketOffers = [];
+    var marketOffers = {'indices':[], 'results':[]};
     //web3[0] = new Web3("https://cloudflare-eth.com");
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
@@ -225,6 +239,7 @@
          // detect Network account change
         window.ethereum.on('chainChanged', async function(thenetworkId){
           console.log('chainChanged',thenetworkId);
+          marketOffers = {'indices':[], 'results':[]};
           defaultvars();
           await login();
         });
@@ -237,10 +252,14 @@
         DDEaddy = "";
         balances = {};
         baseBalance = 0;
+        gasPrice = "";
         document.getElementById("account").innerHTML = "Not connected.";
         document.getElementById("myContactInfo").value = '';
         document.getElementById("myoffers").innerHTML = ""; // clear the container first
         document.getElementById("mycontracts").innerHTML = ""; // clear the container first
+        document.getElementById('publicemail').innerHTML = "";
+        offerExpiration.selectedIndex = 0;
+        currentMarketsLength = 0;
     }
 
     async function login() {
@@ -274,19 +293,35 @@
         if (currentChainId == 5) {
             netname = "Goerli Testnet";
             netname2 = "ETH";
-            DDEaddy = "0xc723cB37f59f114CA3f1BE7cd409Dc35d336FA33";            
+            DDEaddy = "0x08576389321C1999d1A66db093CDd8655615b4cE";            
         }
         if (netname == "unknown") {
             document.getElementById("connectionstatus").innerHTML = "Unsupported network";
             return;
         }
         document.getElementById("connectionstatus").innerHTML = "Connected to " + netname;
+        web3.eth.getGasPrice().then(function (theGasPrice) {
+            gasPrice = theGasPrice;
+        });
         myaccounts = myaccounts2[0];
         var cached = await getContactInfo(myaccounts);
-        loadAutoClearState();
+        document.getElementById("myContactInfo").value = cached;
+        cached = await getExpirationInfo(myaccounts);
+        var offerExpirationSelect = document.getElementById("offerExpiration");
         if (cached != '') {
-            document.getElementById("myContactInfo").value = cached;
+            for (let i = 0; i < offerExpirationSelect.options.length; i++) {
+              if (offerExpirationSelect.options[i].value === cached) {
+                offerExpirationSelect.selectedIndex = i;
+                break;
+              }
+            }
+        } else {
+            offerExpirationSelect.selectedIndex = 0;
         }
+        loadAutoClearState();
+        const currentBlockNumber = await web3.eth.getBlockNumber();
+        const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+        CurrentTimeStamp = currentBlock.timestamp;
         DDEcontract = new web3.eth.Contract(DDEabi, DDEaddy);
         balances = {};
         var btext = [];
@@ -305,9 +340,22 @@
                 document.getElementById("account").innerHTML = DOMPurify.sanitize("Current Network: "+ netname + "<br>" + myaccounts + "<br>" + netname2 + " wallet balance:" + window.web3.utils.fromWei(baseBalance, "ether") + btext);
             }
         });
+        var contact2 = '';
+        var datalen = 0;
+        try {
+            datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 3).call());
+            if(datalen > 0) {
+                contact2 = DOMPurify.sanitize(await DDEcontract.methods.userdata(myaccounts, datalen-1).call());
+                document.getElementById('publicemail').innerHTML = "Registered contact information: " + contact2;
+            } else {
+                document.getElementById('publicemail').innerHTML = "";
+            }
+        } catch(e) {
+            console.log(e);
+        }
         if(login == 1) {
             await getAPI(0);
-            await loadMarkets(1, 1000);
+            await loadMarkets(1, 50);
         } else {
             await checkMarketUpdate();
         }
@@ -372,6 +420,25 @@
         }
     }
 
+    offerExpiration.addEventListener('change', async function(event) {
+        await saveExpirationInfo(document.getElementById("offerExpiration").value);
+    });
+
+    async function saveExpirationInfo(text) {
+        if(myaccounts != '') {
+            localStorage.setItem(myaccounts+":expiration", text);
+        }
+    }
+
+    async function getExpirationInfo(account) {
+        const cached = localStorage.getItem(account+":expiration");
+        if (cached) {
+            return cached;
+        } else {
+            return '';
+        }
+    }
+
     const autoClearCheckbox = document.getElementById("clearCompleted");
 
     autoClearCheckbox.addEventListener("change", () => {
@@ -385,6 +452,17 @@
       } else {
         autoClearCheckbox.checked = false;
       }
+    }
+
+    async function registerEmail(myemail) {
+        if (myemail && myemail !== "") {
+            try {
+                await DDEcontract.methods.adduserdata(myemail).send({"from":myaccounts,"gasLimit": 3000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
+                alert("Data added!");
+              } catch (error) {
+                console.error(error);
+            }
+        }
     }
 
     async function postOfferData(text) {
@@ -469,7 +547,7 @@
                 }
             });
             console.log(response.data.IpfsHash);
-            return response.data.IpfsHash;
+            return DOMPurify.sanitize(response.data.IpfsHash);
         } catch (error) {
             console.log(error);
             return 'error';
@@ -490,67 +568,143 @@
       const lastTimestamp = localStorage.getItem('lastTimestamp');
       var marketsLength = 0;
       await DDEcontract.methods.marketslength().call().then(async function (result) {
-        marketsLength = result;
+        marketsLength = DOMPurify.sanitize(result);
       });
-      const currentTimestamp = new Date().getTime();
+      const currentTimestamp2 = new Date().getTime();
 
       if (!lastTimestamp) {
-        localStorage.setItem('lastTimestamp', currentTimestamp.toString());
-      } else if (currentTimestamp - lastTimestamp >= ONE_HOUR_IN_MS) {
-        localStorage.setItem('lastTimestamp', currentTimestamp.toString());
-        await loadMarkets(1, 1000);
+        localStorage.setItem('lastTimestamp', currentTimestamp2.toString());
+      } else if (currentTimestamp2 - lastTimestamp >= ONE_HOUR_IN_MS) {
+        localStorage.setItem('lastTimestamp', currentTimestamp2.toString());
+        await loadMarkets(1, 50);
         currentMarketsLength = marketsLength;
         return;
       }
 
-      if (marketsLength <= 1000) {
-        if (parseInt(currentMarketsLength) !== parseInt(marketsLength)) {
-          await loadMarkets(1, 1000);
-        }
+      if (parseInt(currentMarketsLength) !== parseInt(marketsLength)) {
+        await loadMarkets(1, 50);
       }
     }    
-
-    async function loadMarkets(low = 1, high = 1) {
-        var mlength = 1;
+    //Currently everything is loaded at once with a basic search. There is the option to post key words to the chain
+    //although this could get expensive depending on the blockchain. Costs can be reduced by using a p2p search index.
+    //Searches check different key words and then they can further check each listing for it's relevant key words.
+    //When the markets get larger, searches can be randomized to vary what orders are shown.
+    //AI such as WebGPT can be used for content filtration with settings tweaked by the user ideally. If the user doesn't have
+    //the graphics card to moderate, they can call a list of volunteer services who run AI WebGPT to filter it(and maybe recommend tags)
+    //for them based on their criteria. One way to enforce a search protocol is have those who post to markets do so from a separate contract.
+    //This way they can also be the ones required to remove the search tags and the contract manages everything.
+    async function loadMarkets(low = 1, high = 1, searchText = '') {        
         var DDEcontract3 = DDEcontract;
         if(DDEcontract == '') {
             DDEcontract3 = DDEcontract2;
         }
+        var mlength = 1;
         await DDEcontract3.methods.marketslength().call().then(async function (result) {
-            currentMarketsLength = mlength;
+            currentMarketsLength = DOMPurify.sanitize(result);
             mlength = result;
         });
-        marketOffers = [];
         var index = 1;
-        //Currently everything is loaded at once. As markets grow they should be loaded gradually and search
-        //should be based on hashes and keywords loaded from another source(possibly a contract with on chain keyword mapping).
-        //If blockchain search mapping is used, a new DDE contract which maintains/links/unlinks key words should be used.
-        //Max character hash tag length and max number of key words should be used. And the user who posts the search terms
-        //might be the one to unlink later. Then when searching paginate and download relevant listings. Also for fair listing views
-        //things should be randomized for which indexes are shown. AI such as WebGPT can be used for content filtration with
-        //settings tweaked by the user ideally. If the user doesn't have the graphics card to moderate, they can call
-        //a list of volunteer services who run AI WebGPT to filter it(and maybe recommend tags) for them based on their criteria.
-        //One way to enforce a search protocol is have those who post to markets do so from a separate contract. This way
-        //they can also be the ones required to remove the search tags and the contract manages everything.
         if(high > 1 && low != 0 && high <= mlength && low <= high) {
             index = low;
             mlength = high;
         }
         jsondata = {};
-        for (index; index < mlength; index++) {
-            try {
-                await DDEcontract3.methods.markets(index).call().then(async function (hash) {
-                    jsondata = await getOrderHash(hash);
-                    marketOffers.push(jsondata);
+        if (searchText !== '') {
+            const keywords = searchText.split(/[,\s]+/); // Split by commas and one or more whitespace characters
+            marketOffers['results'] = [];
+            await Promise.all(keywords.map(async keyword => {
+                // Perform operations on each keyword
+                if (keyword.length === 0) {
+                    return; // Skip further execution for empty keyword
+                }
+                let keywordIndex = 0; // Declare a separate index for each keyword iteration
+                let keywordLength = 0;
+                await DDEcontract3.methods.taglength(keyword.toLowerCase()).call().then(async function (result) {
+                    keywordIndex = 0;
+                    keywordLength = parseInt(DOMPurify.sanitize(result));
+                    if(high > 1 && low >= 0 && high <= keywordLength && low <= high) {
+                        keywordIndex = low;
+                        keywordLength = high;
+                    }
+                    for (keywordIndex; keywordIndex < keywordLength; keywordIndex++) {
+                        try {
+                            await DDEcontract3.methods.hashtag(keyword.toLowerCase(), keywordIndex).call().then(async function (hash) {
+                                hash = DOMPurify.sanitize(hash);
+                                if(hash == "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                                    return;
+                                }
+                                if(hash in marketOffers) {
+                                    if (!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
+                                        marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
+                                    }
+                                    jsondata = marketOffers[hash];
+                                } else {
+                                    jsondata = await getOrderHash(hash);
+                                    if(parseInt(jsondata.timelimit[1]) != 0) {
+                                        if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                                            marketOffers[hash] = jsondata;
+                                        }
+                                    }
+                                }
+                                if(!marketOffers['results'].includes(hash)) {
+                                    marketOffers.results.push(hash);
+                                }
+                            });
+                        } catch (e) {
+                            console.log("Error loading offer: ",e);
+                        }
+                    }
                 });
-            } catch (e) {
-                console.log("Error loading offer: ",e);
+            }));
+            sortByHits();
+        } else {
+            var searchThis = [];
+            for (index; index < mlength; index++) {
+                searchThis = [];
+                try {
+                    await DDEcontract3.methods.markets(index).call().then(async function (hash) {
+                        hash = DOMPurify.sanitize(hash);
+                        jsondata = await getOrderHash(hash);
+                        if(!marketOffers.hasOwnProperty(index)) {
+                            marketOffers.indices.push(index);
+                        }
+                        if(parseInt(jsondata.timelimit[1]) != 0) {
+                            if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                                marketOffers[index] = hash;
+                                if(hash in marketOffers) {
+                                    searchThis = marketOffers[hash]['searchTerms'];
+                                }
+                                marketOffers[hash] = jsondata;
+                                marketOffers[hash]['searchTerms'] = searchThis;
+                            }
+                        } else {
+                            marketOffers[index] = hash;
+                            if(hash in marketOffers) {
+                                searchThis = marketOffers[hash]['searchTerms'];
+                            }
+                            marketOffers[hash] = jsondata;
+                            marketOffers[hash]['searchTerms'] = searchThis;
+                        }
+                    });
+                } catch (e) {
+                    console.log("Error loading offer: ",e);
+                }
             }
         }
         if(DDEcontract == '') {
-            populateListings();
+            await populateListings();
         }
     }
+
+    function sortByHits() {
+      marketOffers['results'].sort((hashA, hashB) => {
+        const hitsA = marketOffers[hashA]['searchTerms'].length;
+        const hitsB = marketOffers[hashB]['searchTerms'].length;
+
+        return hitsB - hitsA; // Sort in descending order based on the number of hits
+      });
+    }
+
     async function getOrderHash(hash) {
         var jsondata = {};
         var DDEcontract3 = DDEcontract;
@@ -607,9 +761,12 @@
     async function populateOffers() {
       var list = document.createElement("ul");
       var readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages")) || {};
+      var notifications = JSON.parse(localStorage.getItem(myaccounts+":notifications")) || {};
       var mylen = 0;
+      var notify = 0;
+      var myhash = '';
       try {
-        mylen = await DDEcontract.methods.getArrayLength(myaccounts, 0).call();
+        mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 0).call());
       } catch(error) {
         console.log(error);
       }
@@ -617,15 +774,24 @@
         if (readMessages[i]) {
           continue;
         }
-        try {
-          const offerHash = await DDEcontract.methods.openOffers(myaccounts, i).call();
-          const offerID = await DDEcontract.methods.userMarketID(offerHash).call();
+        try {          
+          const offerHash = DOMPurify.sanitize(await DDEcontract.methods.openOffers(myaccounts, i).call());
+          const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(offerHash).call());
           if (offerID == 0) {
             readMessages[i] = true;
             localStorage.setItem(myaccounts+":readmessages", JSON.stringify(readMessages));
             continue;
           }
           const offerData = await getOrderHash(offerHash);
+          if(parseInt(offerData.timelimit[1]) != 0) {
+            if(parseInt(offerData.timelimit[1]) <= parseInt(CurrentTimeStamp)) {
+              if(offerData.sender != "0x0000000000000000000000000000000000000000" && offerData.recipient != "0x0000000000000000000000000000000000000000") {
+                readMessages[i] = true;
+                localStorage.setItem(myaccounts+":readmessages", JSON.stringify(readMessages));
+                continue;
+              }
+            }
+          }
           const li = document.createElement("listElement");
           const counterpartyAddress = offerData.sender === myaccounts ? offerData.recipient : offerData.sender;
           const counterpartyLabel = counterpartyAddress === "0x0000000000000000000000000000000000000000" ? "Market Offer" : counterpartyAddress;
@@ -641,7 +807,18 @@
             <div>Time Limit: ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
             <div>Message: ${offerData.message.slice(0, 20)}...</div><br>
           `;
+          myhash = web3.utils.keccak256(li.innerHTML);
+          if(offerHash in notifications) {
+            if(notifications[offerHash] != myhash) {
+                notifications[offerHash] = myhash;
+                notify = 1;
+            }
+          } else {
+            notifications[offerHash] = myhash;
+            notify = 1;
+          }
           li.onclick = function() {
+            document.getElementById("offersButton").style.backgroundColor = "transparent";
             showListing(offerData, 1);
           };
           list.appendChild(li);
@@ -649,10 +826,16 @@
           break;
         }
       }
+      if(notify == 1) {
+        document.getElementById("offersButton").style.backgroundColor = "silver";
+      }
+      localStorage.setItem(myaccounts+":notifications", JSON.stringify(notifications));
+      notify = 0;
+      notifications = JSON.parse(localStorage.getItem(myaccounts+":notifications2")) || {};
       var list2 = document.createElement("ul");
       readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages2")) || {};
       try {
-        mylen = await DDEcontract.methods.getArrayLength(myaccounts, 1).call();
+        mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 1).call());
       } catch(error) {
         console.log(error);
       }
@@ -661,12 +844,19 @@
           continue;
         }
         try {
-          const offerHash2 = await DDEcontract.methods.privateOffers(myaccounts, i).call();
+          const offerHash2 = DOMPurify.sanitize(await DDEcontract.methods.privateOffers(myaccounts, i).call());
           const offerData2 = await getOrderHash(offerHash2);
           if (offerData2.status[0] > 0 && offerData2.status[1] > 0) {
             readMessages[i] = true;
             localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));
             continue;
+          }
+          if(parseInt(offerData2.timelimit[1]) != 0) {
+            if(parseInt(offerData2.timelimit[1]) <= parseInt(CurrentTimeStamp)) {
+              readMessages[i] = true;
+              localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));
+              continue;
+            }
           }
           const li2 = document.createElement("listElement");
           const counterpartyAddress2 = offerData2.sender === myaccounts ? offerData2.recipient : offerData2.sender;
@@ -682,28 +872,42 @@
             <div>Quantity: ${offerData2.quantity}</div>
             <div>Time Limit: ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
             <div>Message: ${offerData2.message.slice(0, 20)}...</div><br>
-          `;
+          `;          
+          myhash = web3.utils.keccak256(li2.innerHTML);
+          if(offerHash2 in notifications) {
+            if(notifications[offerHash2] != myhash) {
+                notifications[offerHash2] = myhash;
+                notify = 1;
+            }
+          } else {
+            notifications[offerHash2] = myhash;
+            notify = 1;
+          }
           offerData2.index = i;
           if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
             li2.onclick = function() {
+              document.getElementById("offersButton").style.backgroundColor = "transparent";
               showListing(offerData2, 1);
             };
             list.appendChild(li2);
           }
           if(myaccounts == offerData2.sender && offerData2.status[0] == 0) {
             li2.onclick = function() {
+              document.getElementById("offersButton").style.backgroundColor = "transparent";
               showListing(offerData2, 2);
             };
             list2.appendChild(li2);
           }
           if(myaccounts == offerData2.recipient && offerData2.status[1] == 1) {
             li2.onclick = function() {
+              document.getElementById("offersButton").style.backgroundColor = "transparent";
               showListing(offerData2, 1);
             };
             list.appendChild(li2);
           }
           if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
             li2.onclick = function() {
+              document.getElementById("offersButton").style.backgroundColor = "transparent";
               showListing(offerData2, 2);
             };
             list2.appendChild(li2);
@@ -712,6 +916,12 @@
           break;
         }
       }
+      if(notify == 1) {
+        document.getElementById("offersButton").style.backgroundColor = "silver";
+      }
+      localStorage.setItem(myaccounts+":notifications2", JSON.stringify(notifications));
+      notify = 0;
+      notifications = JSON.parse(localStorage.getItem(myaccounts+":notifications3")) || {};
       const offersContainer = document.getElementById("myoffers");
       offersContainer.innerHTML = ""; // clear the container first
       offersContainer.classList.add("offers-container");
@@ -757,7 +967,7 @@
       var list3 = document.createElement("ul");
       readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages3")) || {};
       try {
-        mylen = await DDEcontract.methods.getArrayLength(myaccounts, 2).call();
+        mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 2).call());
       } catch(error) {
         console.log(error);
       }
@@ -766,7 +976,7 @@
           continue;
         }
         try {
-          const offerHash3 = await DDEcontract.methods.escrows(myaccounts, i).call();
+          const offerHash3 = DOMPurify.sanitize(await DDEcontract.methods.escrows(myaccounts, i).call());
           const offerData3 = await getOrderHash(offerHash3);
           if (offerData3.status[0] == 4 || offerData3.status[1] == 4) {
             if (autoClearCheckbox.checked) {
@@ -797,12 +1007,14 @@
           `;
           offerData3.timeRemaining = timeRemaining;
           var escrowInfo = '';
-          if(timeRemaining < 2) {
-            escrowInfo += `<div>WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.</div>`
-          }
-          if(timeRemaining == 0) {
-            escrowInfo += `<div>The time limit has expired and the funds have been burned. This contract is no longer available.</div>`
-            offerData3.expired = 1;
+          if (offerData3.status[0] != 4 && offerData3.status[1] != 4) {
+              if(timeRemaining < 2) {
+                escrowInfo += `<div>WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.</div>`
+              }
+              if(timeRemaining == 0) {
+                escrowInfo += `<div>The time limit has expired and the funds have been burned. This contract is no longer available.</div>`
+                offerData3.expired = 1;
+              }
           }
           var skipthis = 0;
           if(offerData3.timelimit[0] == offerData3.timelimit[1] && offerData3.timelimit[1] == offerData3.timelimit[2]) {
@@ -859,8 +1071,19 @@
           offerData3.escrowInfo = escrowInfo;
           li3.innerHTML += escrowInfo;
           li3.innerHTML += `<div>Message: ${offerData3.message.slice(0, 20)}...</div><br>`
+          myhash = web3.utils.keccak256(li3.innerHTML);
+          if(offerHash3 in notifications) {
+            if(notifications[offerHash3] != myhash) {
+                notifications[offerHash3] = myhash;
+                notify = 1;
+            }
+          } else {
+            notifications[offerHash3] = myhash;
+            notify = 1;
+          }
           offerData3.index = i;          
           li3.onclick = function() {
+            document.getElementById("contractsButton").style.backgroundColor = "transparent";
             showListing(offerData3, 4);
           };
           list3.appendChild(li3);          
@@ -869,7 +1092,10 @@
           break;
         }
       }
-
+      if(notify == 1) {
+        document.getElementById("contractsButton").style.backgroundColor = "silver";
+      }
+      localStorage.setItem(myaccounts+":notifications3", JSON.stringify(notifications));
       const escrowContainer = document.getElementById("mycontracts");
       escrowContainer.innerHTML = ""; // clear the container first
       escrowContainer.classList.add("escrow-container");
@@ -913,7 +1139,7 @@
     //**************MARKETS TAB//**************
     // global variables for pagination
     var currentPage = 1;
-    var listingsPerPage = 20;
+    var listingsPerPage = 25;
 
     // function for populating the listings
     function populateListings(searchText="") {
@@ -922,12 +1148,12 @@
 
         var startIndex = (currentPage - 1) * listingsPerPage;
         var endIndex = startIndex + listingsPerPage;
-        if (endIndex > marketOffers.length) {
-            endIndex = marketOffers.length;
+        if (endIndex > marketOffers.indices.length) {
+            endIndex = marketOffers.indices.length;
         }
         searchText=searchText.toLowerCase();
         if (searchText !== "") {
-            endIndex = marketOffers.length;
+            endIndex = marketOffers.indices.length;
         }
         var shown = 0;
         var offer;
@@ -935,16 +1161,49 @@
             if(shown == listingsPerPage) {
                 break;
             }
-            offer = marketOffers[i];
+            if (!marketOffers.hasOwnProperty(marketOffers.indices[i])) {
+                continue
+            }            
             if (searchText !== "") {
-                if (!offer.message.toLowerCase().includes(searchText)) {              
+                if(i < marketOffers.results.length) {
+                    offer = marketOffers[marketOffers.results[i]];
+                }
+                else {
+                    offer = marketOffers[marketOffers[marketOffers.indices[i]]];
+                }
+                const keywords = searchText.split(/[,\s]+/);
+                let foundKeyword = false;
+
+                for (const keyword of keywords) {
+                    if (keyword.length === 0) {
+                        continue;
+                    }
+                    if (offer.message.toLowerCase().includes(keyword.toLowerCase())) {
+                        foundKeyword = true;
+                        break;
+                    }
+                    if (offer['searchTerms'].includes(keyword.toLowerCase())) {
+                        foundKeyword = true;
+                        break;
+                    }
+                }
+                if (!foundKeyword) {
+                    continue; // Skip to the next iteration of the loop
+                }
+            } else {
+                if(parseInt(marketOffers.indices[i]) > parseInt(currentMarketsLength)) {
                     continue;
                 }
+                offer = marketOffers[marketOffers[marketOffers.indices[i]]];
             }
             var div = document.createElement('div');
             div.classList.add('listing');
+            var tempimg = '';
+            if(offer.image.length > 0) {
+                tempimg = '<img src="'+offer.image[0]+'" height="30px" max-width="30px" alt="">';
+            }
             div.innerHTML = `
-                <img src="${offer.image[0]}" height="30px" max-width="30px" alt="">
+                ${tempimg}
                 <div class="details">
                     <div class="token">Currency: ${tokennames[offer.token]}</div>
                     <div class="amount">Amount: ${displayDecimals(offer.token, offer.amount)}</div>
@@ -974,26 +1233,37 @@
     }
 
     // function for searching the listings
-    function searchListings(searchText) {
+    async function searchListings(searchText, deep=0) {
         // filter the marketOffers array based on the searchText
         // and update the currentPage to 1
         currentPage = 1;
-        populateListings(searchText);
+        if(deep == 1) {
+            document.getElementById("loadingStatus").innerHTML = "Loading..."
+            await loadMarkets(0, 50, searchText);
+            document.getElementById("loadingStatus").innerHTML = ""
+        }
+        await populateListings(searchText);
     }
 
     // function for showing the next page of listings
-    function nextPage() {
-        if (currentPage < Math.ceil(marketOffers.length / listingsPerPage)) {
+    async function nextPage() {
+        if (currentPage < Math.ceil(marketOffers.indices.length / listingsPerPage)) {
             currentPage++;
-            populateListings();
+            await populateListings();
+        } else {
+            document.getElementById("loadingStatus").innerHTML = "Loading..."
+            await loadMarkets(marketOffers.indices.length, marketOffers.indices.length + 50);
+            document.getElementById("loadingStatus").innerHTML = ""
+            currentPage++;
+            await populateListings();
         }
     }
 
     // function for showing the previous page of listings
-    function previousPage() {
+    async function previousPage() {
         if (currentPage > 1) {
             currentPage--;
-            populateListings();
+            await populateListings();
         }
     }
     populateListings();
@@ -1041,36 +1311,38 @@
         slides[slideIndex - 1].style.display = 'block';
       }
       const imageList = document.createElement('ul');
-      imageList.classList.add('image-list');
-      imageList.style.listStyle = 'none'; // remove the dot
-      imageList.onclick = function() { plusSlides(1); };
-      for (let i = 0; i < listing.image.length; i++) {
-        const li = document.createElement('li');
-        const img = document.createElement('img');
-        img.src = listing.image[i];
-        img.classList.add('popup-image');
-        li.appendChild(img);
-        imageList.appendChild(li);
-      }
       const arrowsContainer = document.createElement('div');
-      arrowsContainer.classList.add('arrows-container');
-      arrowsContainer.style.position = 'relative';
-      leftArrow.style.position = 'absolute';
-      leftArrow.style.top = '50%';
-      leftArrow.style.left = '0';
-      leftArrow.style.transform = 'translateY(-50%)';
+      if(listing.image.length > 0) {          
+          imageList.classList.add('image-list');
+          imageList.style.listStyle = 'none'; // remove the dot
+          imageList.onclick = function() { plusSlides(1); };
+          for (let i = 0; i < listing.image.length; i++) {
+            const li = document.createElement('li');
+            const img = document.createElement('img');
+            img.src = listing.image[i];
+            img.classList.add('popup-image');
+            li.appendChild(img);
+            imageList.appendChild(li);
+          }
+          
+          arrowsContainer.classList.add('arrows-container');
+          arrowsContainer.style.position = 'relative';
+          leftArrow.style.position = 'absolute';
+          leftArrow.style.top = '50%';
+          leftArrow.style.left = '0';
+          leftArrow.style.transform = 'translateY(-50%)';
 
-      rightArrow.style.position = 'absolute';
-      rightArrow.style.top = '50%';
-      rightArrow.style.right = '0';
-      rightArrow.style.transform = 'translateY(-50%)';
+          rightArrow.style.position = 'absolute';
+          rightArrow.style.top = '50%';
+          rightArrow.style.right = '0';
+          rightArrow.style.transform = 'translateY(-50%)';
 
-      arrowsContainer.appendChild(leftArrow);
-      arrowsContainer.appendChild(rightArrow);
+          arrowsContainer.appendChild(leftArrow);
+          arrowsContainer.appendChild(rightArrow);
 
-      imageContainer.appendChild(imageList);
-      imageContainer.appendChild(arrowsContainer);
-
+          imageContainer.appendChild(imageList);
+          imageContainer.appendChild(arrowsContainer);
+      }
       const details = document.createElement('div');
       details.classList.add('popup-details');
       
@@ -1119,7 +1391,38 @@
       timelimit.innerHTML = 'Time limit: ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' weeks';
 
       const message = document.createElement('p');
-      message.innerHTML = '<br>Details: <br>' + listing.message + '<br><br>Contact Information: <br>' + listing.contact;
+      message.innerHTML = '<br>Details: <br>' + listing.message;
+      if (typeof listing.contact !== 'undefined') {
+          message.innerHTML += '<br><br>Contact information: <br>' + listing.contact;
+      }
+      var contact2 = '';
+      var datalen = 0;
+      if(myaccounts != listing.recipient && listing.recipient != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
+          try {
+              datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.recipient, 3).call());
+              if(datalen > 0) {
+                  contact2 = DOMPurify.sanitize(await DDEcontract.methods.userdata(listing.recipient, datalen-1).call());
+                  if(listing.contact != contact2) {
+                      message.innerHTML += '<br><br>Recipients contact information: <br>' + contact2;
+                  }
+              }
+          } catch(e) {
+              console.log(e);
+          }
+      }
+      if(myaccounts != listing.sender && listing.sender != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
+          try {
+              datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.sender, 3).call());
+              if(datalen > 0) {
+                  contact2 = DOMPurify.sanitize(await DDEcontract.methods.userdata(listing.sender, datalen-1).call());
+                  if(listing.contact != contact2) {
+                      message.innerHTML += '<br><br>Senders contact information: <br>' + contact2;
+                  }
+              }
+          } catch(e) {
+              console.log(e);
+          }
+      }
 
       const buttonContainer = document.createElement('div');
       buttonContainer.classList.add('button-container');
@@ -1156,6 +1459,7 @@
       }
       if(mode == 3) {
           imageContainer.style.display = 'none';
+          arrowsContainer.style.display = 'none';
           const confirmButton = document.createElement('button');
           confirmButton.innerHTML = 'Confirm';
           confirmButton.id = 'confirmButton';
@@ -1190,7 +1494,7 @@
                   acceptTime.id = 'acceptTime';                  
                   acceptTime.onclick = async function() {
                     try {
-                      await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[1]).send({"from":myaccounts,"gasLimit": 1000000});
+                      await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[1]).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                       alert("Time extended!");
                       await loadUser();
                       popupContainer.remove();
@@ -1208,7 +1512,7 @@
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
-                      await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[2]).send({"from":myaccounts,"gasLimit": 1000000});
+                      await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[2]).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                       alert("Time extended!");
                       await loadUser();
                       popupContainer.remove();
@@ -1255,7 +1559,7 @@
                       confirmBtn.addEventListener("click", async () => {                        
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                         dialog.remove();
-                        await DDEcontract.methods.requestExtension(listing.hash, newtime).send({"from":myaccounts,"gasLimit": 1000000});
+                        await DDEcontract.methods.requestExtension(listing.hash, newtime).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                         alert("Time extension requested!");
                         await loadUser();
                         popupContainer.remove();
@@ -1270,7 +1574,18 @@
               cancelButton.id = 'cancelButton';
               cancelButton.onclick = async function() {
                 try {
-                  await DDEcontract.methods.cancelEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000});
+                  if(myaccounts == listing.sender) {
+                    if(listing.status[1] == 2) {
+                      alert("Contract cancellation request was already sent!");
+                      return;
+                    }
+                  } else {
+                    if(listing.status[1] == 3) {
+                      alert("Contract cancellation request was already sent!");
+                      return;
+                    }
+                  }
+                  await DDEcontract.methods.cancelEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   if(listing.status[1] == 1) {
                     alert("Contract cancellation request sent!");
                   } else {
@@ -1288,7 +1603,18 @@
               confirmButton.id = 'confirmButton';
               confirmButton.onclick = async function() {
                 try {
-                  await DDEcontract.methods.completeEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000});
+                  if(myaccounts == listing.sender) {
+                    if(listing.status[0] == 2) {
+                      alert("Contract completion request was already sent!");
+                      return;
+                    }
+                  } else {
+                    if(listing.status[0] == 3) {
+                      alert("Contract completion request was already sent!");
+                      return;
+                    }
+                  }
+                  await DDEcontract.methods.completeEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   if(listing.status[1] == 1) {
                     alert("Contract completion request sent!");
                   } else {
@@ -1472,7 +1798,7 @@
           // If the selected token is ETH, deposit WETH instead
           try {
             var value = web3.utils.toWei(amount.toString(), 'ether');
-            await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,"gasLimit": 1000000});
+            await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
             alert("Deposit success!");
             await loadUser();
             popupContainer.remove();
@@ -1483,15 +1809,15 @@
           // If the selected token is not ETH, deposit the selected token
           try {
             var tokenContract = new web3.eth.Contract(ERC20abi, tokenAddress);
-            var allowance = await tokenContract.methods.allowance(myaccounts, DDEaddy).call();
-            var value = web3.utils.toBN(parseInt(parseFloat(amount) * (10 ** decimals))).toString()
+            var allowance = DOMPurify.sanitize(await tokenContract.methods.allowance(myaccounts, DDEaddy).call());
+            var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toString()
 
             if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
               alert("Waiting for approval...");
-              await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,"gasLimit": 1000000});
+              await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
             }
 
-            await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000});
+            await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
             alert("Deposit success!");
             await loadUser();
             popupContainer.remove();
@@ -1593,10 +1919,10 @@
           var selectedIndex = parseInt(tokenSelect.value);
           var tokenAddress = tokens[selectedIndex].address;
           var decimals = parseInt(tokens[selectedIndex].decimals);
-          var amount = parseFloat(document.getElementById('amount-input').value);
-          var value = web3.utils.toBN(parseInt(parseFloat(amount) * (10 ** decimals))).toString();
+          var amount = parseFloat(document.getElementById('amount-input').value);          
+          var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
           try {
-            await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000});
+            await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
             alert("Withdraw success!");
             await loadUser();
             popupContainer.remove();
@@ -1702,6 +2028,9 @@
         closeButton.classList.add('close-button');
         closeButton.onclick = function() { popupContainer.remove(); };
 
+        var myterms = [];
+        var expiration = 0;
+
         // Create the form element
         var form = document.createElement('form');
         form.classList.add('popup-form');
@@ -1754,7 +2083,9 @@
               <button type="button" id="changefile" style="display:none;">Change Images</button>
               <label for="contactInfo">Contact Information(email/signal/telegram):</label><br>
               <input id="contactInfo"></textarea><br>
-              <label for="autoaccept">Automatically accept matching offers: </label>
+              <label for="key-words" id="key-label">Search key words(optional):</label>
+              <button type="button" id="key-words">Add search terms</button><br>
+              <label for="autoaccept">Automatically accept matching offers  </label>
               <input type="checkbox" id="autoaccept" checked><br><br>
               <button type="submit">Submit</button>
             </form>
@@ -1782,6 +2113,8 @@
         var imageInput = form.querySelector('#contractImage');
         var auto = form.querySelector('#autoaccept');
         var adjusttime = form.querySelector('#timeLimit');
+        var addWord = form.querySelector("#key-words");
+        var addWordLabel = form.querySelector("#key-label");
 
         // Hide counterparty input initially
         counterPartyAddressField.style.display = 'none';
@@ -1795,9 +2128,14 @@
           if (contractType.value === 'private') {
             counterPartyAddressField.style.display = 'block';
             auto.style.display = 'none';
+            myterms = [];
+            addWord.style.display = 'none';
+            addWordLabel.style.display = 'none';
           } else {
             counterPartyAddressField.style.display = 'none';
             auto.style.display = 'block';
+            addWord.style.display = 'block';
+            addWordLabel.style.display = 'block';
           }
         });
 
@@ -1885,7 +2223,11 @@
             changefile.style.display = 'none';
             form.querySelector("#contractImage").style.display = 'block';
             image = [];
-          };
+          }
+        }
+
+        addWord.onclick = async function() {
+            myterms = await addWords();
         }
 
         // Add the form submit event listener
@@ -1898,7 +2240,20 @@
           if (contractType.value === 'private') {
                 sender = counterPartyInput;
                 recipient = myaccounts;
+                var offerExpirationSelect = document.getElementById("offerExpiration");
+                var selectedValue = offerExpirationSelect.value;
+                const currentBlockNumber = await web3.eth.getBlockNumber();
+                const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+                const blockTimestamp = currentBlock.timestamp;
+                if (selectedValue === "never") {
+                  expiration = 0; // Set the time limit to 0 seconds for "Never" option
+                } else if (selectedValue === "two-weeks") {
+                  expiration = parseInt(blockTimestamp + (2 * 7 * 24 * 60 * 60)); // Set the time limit to 2 weeks in seconds
+                } else if (selectedValue === "one-month") {
+                  expiration = parseInt(blockTimestamp + (30 * 24 * 60 * 60)); // Set the time limit to 1 month in seconds
+                }
           } else {
+                expiration = 0;
                 recipient = myaccounts;
           }
           var senderReceiver = document.getElementById("senderReceiver").value;
@@ -1942,23 +2297,28 @@
           var selectedIndex = parseInt(tokenSelect.value);
           var tokenAddress = tokens[selectedIndex].address;
           var decimals = parseInt(tokens[selectedIndex].decimals);
-          amount = web3.utils.toBN(parseInt(parseFloat(amount) * (10 ** decimals))).toString();
-          depositSender = (depositType === "recommended" ? amount : web3.utils.toBN(parseInt (parseFloat(depositSender) * (10 ** decimals))).toString());
-          depositRecipient = (depositType === "recommended" ? amount : web3.utils.toBN(parseInt(parseFloat(depositRecipient) * (10 ** decimals))).toString());
+
+          amount = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
+          depositSender = (depositType === "recommended" ? amount : (new BigNumber(depositSender.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0));
+          depositRecipient = (depositType === "recommended" ? amount : (new BigNumber(depositRecipient.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0));
           var style = 0;
           if(publicoffer) {
             if(document.getElementById("autoaccept").checked == false) {
                 style = 1;
             }
           }
+          var multiplier = 1;
+          if(style == 0) {
+            multiplier = quantity;
+          }
           if(myaccounts == sender2) {
-            if(parseInt(balances[tokenAddress].amount)<(parseInt(amount)+parseInt(depositSender))) {
+            if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(amount).add(web3.utils.toBN(depositSender)).mul(web3.utils.toBN(multiplier)))) {
                 alert("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
                 return false;
             }
           }
           if(myaccounts == recipient2) {
-            if(parseInt(balances[tokenAddress].amount)<parseInt(depositRecipient)) {
+            if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(depositRecipient).mul(web3.utils.toBN(multiplier)))) {
                 alert("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
                 return false;
             }
@@ -1994,6 +2354,7 @@
           //  data2.depositSender *= quantity;
           //  data2.depositRecipient *= quantity;
           //}
+          console.log(data2);
           var result = await showListing(data2, 3)
           if(result == false) {
             popupContainer.remove();
@@ -2009,10 +2370,11 @@
                 data.depositSender,
                 data.depositRecipient,
                 data.quantity,
-                data.timelimit,
+                [data.timelimit, expiration],
                 style,
-                data.message
-              ).send({"from":myaccounts,"gasLimit": 4000000});
+                data.message,
+                myterms
+              ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                 alert("Contract creation success!");
                 await loadUser();
                 popupContainer.remove();
@@ -2066,6 +2428,93 @@
         document.head.appendChild(style);
     }
 
+    async function addWords() {
+      return new Promise((resolve) => {
+        const dialog = document.createElement("div");
+        const addedTerms = [];
+
+        // Predefined list of popular key words
+        const popularKeywords = ["goods", "services", "barter", "crypto", "real estate", "electronics", "metals"];
+
+        dialog.innerHTML = `
+          <div>Please enter some key words so users can find your order easier:<br></div>
+            <input id="hashtag" type="text"></input><button id="add-btn">Add</button><br><br>
+          <div id="term-list"></div>
+          <div>
+            <div>Popular key words:</div>
+            <div id="popular-keywords"></div>
+            <br>
+            <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
+            <button id="cancel-btn">Cancel</button>
+          </div>
+        `;
+        dialog.style.display = "block";
+        dialog.style.position = "fixed";
+        dialog.style.zIndex = 9999;
+        dialog.style.backgroundColor = "white";
+        dialog.style.padding = "20px";
+        dialog.style.borderRadius = "10px";
+        dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+        dialog.style.top = "50%";
+        dialog.style.left = "50%";
+        dialog.style.transform = "translate(-50%, -50%)";
+
+        document.body.appendChild(dialog);
+
+        const termList = dialog.querySelector("#term-list");
+        const confirmBtn = dialog.querySelector("#confirm-btn");
+        const cancelBtn = dialog.querySelector("#cancel-btn");
+        const addBtn = dialog.querySelector("#add-btn");
+        const popularKeywordsContainer = dialog.querySelector("#popular-keywords");
+
+        // Display the added terms list
+        function displayAddedTerms() {
+          termList.innerHTML = "";
+          addedTerms.forEach(term => {
+            const termElement = document.createElement("div");
+            termElement.textContent = term;
+            termList.appendChild(termElement);
+          });
+        }
+
+        // Add a term to the list when Add button is clicked
+        addBtn.addEventListener("click", async () => {
+          const hashtagInput = dialog.querySelector("#hashtag");
+          const term = hashtagInput.value.trim();
+          if (term !== "") {
+            addedTerms.push(term);
+            displayAddedTerms();
+            hashtagInput.value = "";
+          }
+        });
+
+        // Add a popular keyword to the list when a bubble button is clicked
+        popularKeywords.forEach(keyword => {
+          const keywordButton = document.createElement("button");
+          keywordButton.textContent = keyword;
+          keywordButton.addEventListener("click", () => {
+            if (addedTerms.length < 11) {
+              addedTerms.push(keyword.toLowerCase());
+              displayAddedTerms();
+            } else {
+              alert('The maximum number of keywords is 10');
+            }
+          });
+          popularKeywordsContainer.appendChild(keywordButton);
+        });
+
+        // Remove the dialog when Cancel button is clicked
+        cancelBtn.addEventListener("click", async () => {
+          dialog.remove();
+        });
+
+        // Resolve the promise with the added terms when Confirm button is clicked
+        confirmBtn.addEventListener("click", async () => {
+          dialog.remove();
+          resolve(addedTerms);
+        });
+      });
+    }
     async function readFileAsDataURL(file) {
       return new Promise((resolve, reject) => {
         let reader = new FileReader();
@@ -2080,8 +2529,21 @@
         try {
               mylisting = JSON.parse(JSON.stringify(listing));
               var quantity = 1;
+              var accepttimelimit = 0;
+              var offerExpirationSelect = document.getElementById("offerExpiration");
+              var selectedValue = offerExpirationSelect.value;
+              const currentBlockNumber = await web3.eth.getBlockNumber();
+              const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+              const blockTimestamp = currentBlock.timestamp;
+              if (selectedValue === "never") {
+                accepttimelimit = 0; // Set the time limit to 0 seconds for "Never" option
+              } else if (selectedValue === "two-weeks") {
+                accepttimelimit = parseInt(blockTimestamp + (2 * 7 * 24 * 60 * 60)); // Set the time limit to 2 weeks in seconds
+              } else if (selectedValue === "one-month") {
+                accepttimelimit = parseInt(blockTimestamp + (30 * 24 * 60 * 60)); // Set the time limit to 1 month in seconds
+              }
               if(mylisting.sender == "0x0000000000000000000000000000000000000000" || mylisting.recipient == "0x0000000000000000000000000000000000000000" ) {
-                const offerID = await DDEcontract.methods.userMarketID(mylisting.hash).call();
+                const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(mylisting.hash).call());
                 if(offerID == 0) {
                   alert("Offer no longer available!");
                   return;
@@ -2123,6 +2585,34 @@
                     }
                     dialog.remove();
                     mylisting.quantity = quantity;
+                    var counterparty = mylisting.sender;
+                    if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
+                        counterparty = mylisting.recipient;
+                    }
+                    var counterbalance = "";
+                    await DDEcontract.methods.userBalance(counterparty,mylisting.token).call().then(function (bal) {            
+                            counterbalance = DOMPurify.sanitize(bal);
+                    });
+                    if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
+                      if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
+                          alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                          return false;
+                      }
+                      if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
+                          alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                          return false;
+                      }
+                    }
+                    if(mylisting.recipient == "0x0000000000000000000000000000000000000000") {
+                      if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
+                          alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                          return false;
+                      }
+                      if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
+                          alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                          return false;
+                      }
+                    }
                     //If one wants to show a grand total
                     //mylisting.amount *= quantity;
                     //mylisting.depositSender *= quantity;
@@ -2133,14 +2623,43 @@
                     }
                     await DDEcontract.methods.acceptOffer(
                       mylisting.hash,
-                      quantity
-                    ).send({"from":myaccounts,"gasLimit": 4000000});
+                      quantity,
+                      accepttimelimit
+                    ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                       alert("Contract accepted!");
                       await loadUser();                      
                     });
                 }
               } else {
                 quantity = mylisting.quantity;
+                var counterparty = mylisting.sender;
+                if(mylisting.sender == myaccounts) {
+                    counterparty = mylisting.recipient;
+                }
+                var counterbalance = "";
+                await DDEcontract.methods.userBalance(counterparty,mylisting.token).call().then(function (bal) {            
+                        counterbalance = DOMPurify.sanitize(bal);
+                });
+                if(mylisting.sender == myaccounts) {
+                  if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
+                      alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                      return false;
+                  }
+                  if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
+                      alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                      return false;
+                  }
+                }
+                if(mylisting.recipient == myaccounts) {
+                  if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
+                      alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                      return false;
+                  }
+                  if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
+                      alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                      return false;
+                  }
+                }
                 //If one wants to show a grand total
                 //mylisting.amount *= quantity;
                 //mylisting.depositSender *= quantity;
@@ -2151,8 +2670,9 @@
                 }
                 await DDEcontract.methods.acceptOffer(
                   mylisting.hash,
-                  quantity
-                ).send({"from":myaccounts,"gasLimit": 4000000});
+                  quantity,
+                  accepttimelimit
+                ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   alert("Contract accepted!");
                   await loadUser();
               }
@@ -2202,7 +2722,7 @@
                   dialog.remove();
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash
-                  ).send({"from":myaccounts,"gasLimit": 4000000});
+                  ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   alert("Contract removed!");
                   await loadUser();                
             } catch (error) {
@@ -2214,13 +2734,13 @@
                 if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
                   await DDEcontract.methods.removeMarketOffer(
                     listing.hash
-                  ).send({"from":myaccounts,"gasLimit": 4000000});
+                  ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   alert("Contract removed!");
                   await loadUser();
                 } else {
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash
-                  ).send({"from":myaccounts,"gasLimit": 4000000});
+                  ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   alert("Contract removed!");
                   await loadUser();
                 }
@@ -2271,7 +2791,7 @@
               await DDEcontract.methods.updateQuantity(
                 listing.hash,
                 quantity
-              ).send({"from":myaccounts,"gasLimit": 4000000});
+              ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                 alert("Quantity updated!");
                 await loadUser();
         } catch (error) {
@@ -2285,7 +2805,7 @@
         var data = CryptoJS.AES.encrypt(JSON.stringify(text), AESkey).toString();
         console.log(data)
         try {
-            await DDEcontract.methods.adddata(data).send({"from":myaccounts,"gasLimit": 3000000});
+            await DDEcontract.methods.adddata(data).send({"from":myaccounts,"gasLimit": 3000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
             alert("Data added!");
           } catch (error) {
             console.error(error);
@@ -2299,7 +2819,7 @@
         });
     }
     setInterval(loadUser, 90000);
-    loadMarkets(1, 1000);    
+    loadMarkets(1, 50);    
 </script>
 </body>
 </html>
