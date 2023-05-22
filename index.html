@@ -2481,6 +2481,17 @@
         addBtn.addEventListener("click", async () => {
           const hashtagInput = dialog.querySelector("#hashtag");
           const term = hashtagInput.value.trim();
+          if (term.includes(" ") || term.includes(",")) {
+            alert("Key words should not contain spaces or commas");
+            return;
+          }
+          const encoder = new TextEncoder();
+          const utf8Bytes = encoder.encode(term);
+          const byteLength = utf8Bytes.length;
+          if (byteLength > 32) {
+            alert("String exceeds limit of 32 bytes");
+            return;
+          }
           if (term !== "") {
             addedTerms.push(term);
             displayAddedTerms();
