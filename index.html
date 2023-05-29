@@ -111,7 +111,28 @@
             cursor: pointer;
         }
         .main.markets {
-            min-height: calc(100% - 50px); /* Subtract footer height */
+            min-height: calc(100% - 100px); /* Subtract footer height */
+            max-height: calc(100% - 100px); /* Subtract footer height */
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
+        }
+        .main.offers {
+            min-height: calc(100% - 100px); /* Subtract footer height */
+            max-height: calc(100% - 100px); /* Subtract footer height */
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
+        }
+        .main.contracts {
+            min-height: calc(100% - 100px); /* Subtract footer height */
+            max-height: calc(100% - 100px); /* Subtract footer height */
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
+        }
+        .main.account {
+            min-height: calc(100% - 100px); /* Subtract footer height */
+            max-height: calc(100% - 100px); /* Subtract footer height */
+            overflow-y: auto; /* Enable vertical scrolling if content overflows */
+        }
+        .main.about {
+            min-height: calc(100% - 100px); /* Subtract footer height */
+            max-height: calc(100% - 100px); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
         }
     </style>
@@ -166,10 +187,11 @@
         <button onclick="withdraw()">Withdraw tokens</button><br><br>
         <label for="myContactInfo">Contact Information(email/signal/telegram):</label><br>
         <input id="myContactInfo"></input><br><br>
-        <button onclick="registerEmail(document.getElementById('myContactInfo').value)">Register email to my address(optional)</button><br>
+        <button onclick="registerEmail(document.getElementById('myContactInfo').value)">Register contact information to my address(optional)</button><br>
         <div id="publicemail"></div><br><br>
         <label for="clearCompleted">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
+        <button onclick="RefreshContracts()">Refresh/restore previously cleared contracts</button><br><br>
         <label for="offerExpiration">Private offers expire: </label>
         <select id="offerExpiration">
           <option value="never">Never</option>
@@ -186,7 +208,7 @@
     </div>
     <div class="main about">
         <h2>About</h2>
-        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together. The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.<br><br>For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. There is no arbiters to prevent a contract from defaulting. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. For more information on how all of this works you may visit <a href="https://bitbay.market" target="_blank">https://bitbay.market</a></p>
+        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.<br><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 700px;"></a><p>The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.<br><br>For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. There is no arbiters to prevent a contract from defaulting. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. BitBay does not take any fees for the escrows. This system is entirely free to use. For more information on how all of this works you may visit <a href="https://bitbay.market" target="_blank">https://bitbay.market</a></p>
     </div>
 </div>
 <div class="footer">
@@ -413,6 +435,13 @@
       input.click();
     }
 
+    async function RefreshContracts() {
+        if(myaccounts != '') {
+            localStorage.setItem(myaccounts+":readmessages3", JSON.stringify({}));
+            await populateOffers();
+        }
+    }
+
     async function saveContactInfo(text) {
         if(myaccounts != '') {
             localStorage.setItem(myaccounts+":contact", text);
@@ -629,7 +658,7 @@
     };
 
     async function checkMarketUpdate() {
-      const ONE_HOUR_IN_MS = 3600000; // one hour in milliseconds
+      const ONE_HOUR_IN_MS = 900000; // 15 minutes in milliseconds
       const lastTimestamp = localStorage.getItem('lastTimestamp');
       var marketsLength = 0;
       await DDEcontract.methods.marketslength().call().then(async function (result) {
@@ -1060,7 +1089,7 @@
           const currentBlockNumber = await web3.eth.getBlockNumber();
           const currentBlock = await web3.eth.getBlock(currentBlockNumber);
           const blockTimestamp = DOMPurify.sanitize(currentBlock.timestamp);
-          const timeRemaining = Math.abs(parseFloat(parseInt(offerData3.timelimit[0]) - parseInt(blockTimestamp)) / parseFloat(60 * 60 * 24)).toFixed(2);
+          const timeRemaining = (parseFloat(parseInt(offerData3.timelimit[0]) - parseInt(blockTimestamp)) / parseFloat(60 * 60 * 24)).toFixed(2);
 
           li3.innerHTML = `
             <div>Order hash: <img src="${dataUrl3}" width="25" height="25"></img> ${offerHash3}</div>
@@ -1073,10 +1102,10 @@
           offerData3.timeRemaining = timeRemaining;
           var escrowInfo = '';
           if (offerData3.status[0] != 4 && offerData3.status[1] != 4) {
-              if(timeRemaining < 2) {
+              if(parseFloat(timeRemaining) < parseFloat(2)) {
                 escrowInfo += `<div>WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.</div>`
               }
-              if(timeRemaining == 0) {
+              if(parseFloat(timeRemaining) <= parseFloat(0)) {
                 escrowInfo += `<div>The time limit has expired and the funds have been burned. This contract is no longer available.</div>`
                 offerData3.expired = 1;
               }
@@ -1206,7 +1235,7 @@
     //**************MARKETS TAB//**************
     // global variables for pagination
     var currentPage = 1;
-    var listingsPerPage = 25;
+    var listingsPerPage = 5;
 
     // function for populating the listings
     function populateListings(searchText="") {
@@ -1231,7 +1260,10 @@
             }
             if (!marketOffers.hasOwnProperty(marketOffers.indices[i])) {
                 continue
-            }            
+            }
+            if(parseInt(marketOffers.indices[i]) >= parseInt(currentMarketsLength)) {
+                continue;
+            }
             if (searchText !== "") {
                 if(i < marketOffers.results.length) {
                     offer = marketOffers[marketOffers.results[i]];
@@ -1259,9 +1291,6 @@
                     continue; // Skip to the next iteration of the loop
                 }
             } else {
-                if(parseInt(marketOffers.indices[i]) > parseInt(currentMarketsLength)) {
-                    continue;
-                }
                 offer = marketOffers[marketOffers[marketOffers.indices[i]]];
             }
             if(offer.hash in myhashes) {
@@ -2361,6 +2390,9 @@
             return false;
           }
           timeLimit = parseInt(timeLimit);
+          if (timeLimit === 0) {
+            alert("Time limit must be greater than zero")
+          }
           if (document.getElementById("contractDetails").value === "") {
             alert("Please enter the description");
             return false;
