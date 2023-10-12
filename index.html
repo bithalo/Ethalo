@@ -487,14 +487,14 @@
           mySelectElement.add(option);
         }
 
-        var selectedAPI = "4";
+        var selectedAPI = "5";
         const cached = localStorage.getItem(myaccounts+mychainid+":api");        
         if (cached) {
             const index = Array.from(mySelectElement.options).findIndex(option => option.value === cached.toString());
             mySelectElement.selectedIndex = index;
             selectedAPI = cached.toString();
             if (selectedAPI == 'a') {
-                selectedAPI = "4";
+                selectedAPI = "5";
             }
         }
         await getAPI(selectedAPI);
@@ -616,8 +616,8 @@
 
     var pinataApiKey = '';    
     var pinataSecretApiKey = '';
-    var pinataGateway = 'https://lime-worthwhile-jellyfish-477.mypinata.cloud/ipfs/';
-    var pinataToken = 'uANTmKNZtS9B9YLihOWYurPww5yCDdvL7MuhDzxLCHXVvuP5T8NWGVhsLAmlcmcl';
+    var pinataGateway = 'https://azure-faithful-anteater-219.mypinata.cloud/ipfs/';
+    var pinataToken = 'vgbqHzLAN_A5OI0suZED_RyzKacw5SfNjq25y45oB_CMVoOa1T4IfNrDJOkGysCP';
     // Function to post a file to Pinata IPFS
     async function pinToPinataIPFS (text) {
         const url = 'https://api.pinata.cloud/pinning/pinFILEToIPFS';
@@ -2460,6 +2460,7 @@
           //  data2.depositRecipient *= quantity;
           //}
           console.log(data2);
+          //May eventually want to check for duplicate contract hash submission
           var result = await showListing(data2, 3)
           if(result == false) {
             popupContainer.remove();
