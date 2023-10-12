@@ -487,14 +487,14 @@
           mySelectElement.add(option);
         }
 
-        var selectedAPI = "5";
+        var selectedAPI = "6";
         const cached = localStorage.getItem(myaccounts+mychainid+":api");        
         if (cached) {
             const index = Array.from(mySelectElement.options).findIndex(option => option.value === cached.toString());
             mySelectElement.selectedIndex = index;
             selectedAPI = cached.toString();
             if (selectedAPI == 'a') {
-                selectedAPI = "5";
+                selectedAPI = "6";
             }
         }
         await getAPI(selectedAPI);
@@ -2929,7 +2929,7 @@
         }
     }
     async function getAPI(index) {
-        await DDEcontract.methods.publicdata(index).call().then(function (data) {            
+        await DDEcontract.methods.publicdata(index).call().then(function (data) {
                 data=JSON.parse(DOMPurify.sanitize(CryptoJS.AES.decrypt(data, AESkey).toString(CryptoJS.enc.Utf8)));
                 if (data.length === 2) { //using public gateway
                     pinataApiKey = data[0];
