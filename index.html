@@ -5,20 +5,32 @@
 <script type="text/javascript" src="./crypto-sha256.js"></script>
 <script type="text/javascript" src="./crypto-js.js"></script>
 <script type="text/javascript" src="./bignumber.min.js"></script>
+<script type="text/javascript" src="./sweetalert211.js"></script>
 <script src="./axios.min.js"></script>
 <script src="./web3.min.js"></script>
 <script src="./jdenticon.min.js"></script>
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./translate.js"></script>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
-    <title>BitBay Decentralized Markets</title>
+    <title t-id="1">BitBay Decentralized Markets</title>
     <style>
         body {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
             font-size: 14px;
+        }
+        #languageSelect {
+          padding: 10px;
+          font-size: 16px;
+        }
+        #selectedFlag {
+          width: 30px;
+          height: 30px;
+          margin-right: 5px;
         }
         .container {
             display: flex;
@@ -31,23 +43,32 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-top: 50px;
+            padding-top: 10px;
+            padding-bottom: 30px;
         }
         .sidebar button {
             width: 80px;
             height: 80px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             border: none;
             border-radius: 5px;
             background-color: transparent;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
         .sidebar button:hover {
-            box-shadow: 0 0 10px #ccc;
+            box-shadow: 0 0 10px #7c7c7c;
         }
         .sidebar button img {
+            margin-top: 10px;
             width: 30px;
             height: 30px;
+        }
+        .sidebar button span {
+            line-height: 1; /* Set line-height to 1 to avoid vertical shifting */
         }
         .main {
             flex: 1;
@@ -66,11 +87,45 @@
             padding: 0 20px;
             box-shadow: 0 2px 5px #ccc;
         }
+        .header2 {
+            height: 50px;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px #ccc;
+        }
+        .header2 a {
+            text-decoration: none; /* Remove underlining */
+            color: #333; /* Change link color */
+            margin-right: 10px; /* Add some spacing between links */
+            font-size: 8.5px;
+        }
+        /* Change link color on hover */
+        .header2 a:hover {
+            color: #007bff; /* Change link color on hover */            
+        }
         .header h1 {
-            font-size: 20px;
+            font-size: 12px;
             margin: 0;
             margin-left: 10px;
             flex: 1;
+        }
+        @media screen and (min-width: 600px) {
+          .header2 a {
+            font-size: 11px;
+            margin-right: 20px;
+          }
+        }
+        @media screen and (min-width: 800px) {
+          .header h1 {
+            font-size: 20px; /* Adjust the font size for larger screens */
+          }
+          .header2 a {
+            font-size: 14px;
+            margin-right: 30px;
+          }
         }
         .header button {
             padding: 10px;
@@ -114,6 +169,7 @@
             min-height: calc(100% - 100px); /* Subtract footer height */
             max-height: calc(100% - 100px); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
+            margin-bottom: 50px;
         }
         .main.offers {
             min-height: calc(100% - 100px); /* Subtract footer height */
@@ -140,75 +196,92 @@
 <body>
     <div class="header">
         <img src="bitbay.png" alt="Logo" height="20px" width="20px">
-        <h1>BitBay Decentralized Markets</h1>
+        <h1 t-id="2">BitBay Decentralized Markets</h1>
+        <img id="selectedFlag" src="english.png" alt="Selected Flag">
+        <select id="languageSelect" style="margin-right: 20px; font-size: 10px; width: 75px;">
+          <option value="default" disabled selected>Default</option>
+        </select>
         <div class="connect">
-            <button onclick="login()">Connect Metamask</button>
-            <div id="connectionstatus" class="connectionstatus">Not connected</div>
+            <button t-id="3" onclick="login()">Connect Metamask</button>
+            <div id="connectionstatus" class="connectionstatus" t-id="4">Not connected</div>
         </div>
     </div>
     <div class="container">
         <div class="sidebar">
-            <button onclick="showMain('markets')"><img src="markets.png" alt="Markets"><br>Markets</button>
-            <button onclick="showMain('offers')" id="offersButton"><img src="offers.png" alt="Offers"><br>Offers</button>
-            <button onclick="showMain('contracts')" id="contractsButton"><img src="contracts.png" alt="Contracts"><br>Contracts</button>
-            <button onclick="showMain('account')"><img src="account.png" alt="Account"><br>Account</button>
-            <button onclick="showMain('about')"><img src="about.png" alt="About"><br>About</button>
+            <button onclick="showMain('markets')" id="marketsButton"><img src="markets.png" alt="Markets" style="display: block;"><span class="text" t-id="5">Markets</span></button>
+            <button onclick="showMain('offers')" id="offersButton"><img src="ethalo.png" alt="Offers" style="display: block;"><span class="text" t-id="6">Offers</span></button>
+            <button onclick="showMain('contracts')" id="contractsButton"><img src="contracts.png" alt="Contracts" style="display: block;"><span class="text" t-id="7">Contracts</span></button>
+            <button onclick="showMain('account')" id="accountButton"><img src="account.png" alt="Account" style="display: block;"><span class="text" t-id="8">Account</span></button>
+            <button onclick="showMain('about')" id="aboutButton"><img src="about.png" alt="About" style="display: block;"><span class="text" t-id="9">About</span></button>
         </div>
     <div class="main markets">
-        <h2>Markets</h2>
+        <div class="header2">
+            <a href="#" t-id="10" onclick="changeSearchText('goods')">Goods</a>
+            <a href="#" t-id="11" onclick="changeSearchText('services')">Services</a>
+            <a href="#" t-id="12" onclick="changeSearchText('barter')">Barter</a>
+            <a href="#" t-id="13" onclick="changeSearchText('p2p-trading')">P2P Trading</a>
+            <a href="#" t-id="14" onclick="changeSearchText('commodities')">Commodities</a>
+        </div>
+        <h2 t-id="15">Markets</h2>
         <div class="top-bar">
-            <button onclick="createContract()">Create Contract/Offer</button>
+            <button onclick="createContract()" t-id="16">Create Contract/Offer</button>
             <div class="search">
                 <img src="search.png" height="20px" width="20px" alt="Search">
                 <input type="text" id="searchText" placeholder="Search" onkeyup="searchListings(this.value)">
-                <button onclick="searchListings(getElementById('searchText').value, 1)">Search</button><div id="loadingStatus"></div>
+                <button onclick="searchListings(getElementById('searchText').value, 1)" t-id="17">Search</button><div id="loadingStatus"></div>
+                <div class="pagination">
+                    <br>
+                    <button onclick="previousPage()" t-id="18">Previous</button>
+                    <button onclick="nextPage()" t-id="19">Next</button>
+                    <select id="SortBy">
+                      <option value="default" t-id="20">Sort: Default</option>
+                      <option value="price-low" t-id="21">Sort: Best price</option>
+                      <option value="price-high" t-id="22">Sort: High price</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div class="listings">
             <!-- populated by JavaScript -->
         </div>
-        <div class="pagination">
-            <button onclick="previousPage()">Previous</button>
-            <button onclick="nextPage()">Next</button>
-        </div>
     </div>
     <div class="main offers">
-        <h2>Offers</h2>
+        <h2 t-id="23">Offers</h2>
         <div id="myoffers" class="myoffers"></div>
     </div>
     <div class="main contracts">
-        <h2>Contracts</h2>
+        <h2 t-id="24">Contracts</h2>
         <div id="mycontracts" class="mycontracts"></div>
     </div>
     <div class="main account">
-        <h2>Account</h2>
-        <p id="account">Please connect metamask</p>
-        <button onclick="deposit()">Deposit tokens</button>
-        <button onclick="withdraw()">Withdraw tokens</button><br><br>
-        <label for="myContactInfo">Contact Information(email/signal/telegram):</label><br>
+        <h2 t-id="25">Account</h2>
+        <p id="account" t-id="26">Please connect metamask</p>
+        <button onclick="deposit()" t-id="27">Deposit tokens</button>
+        <button onclick="withdraw()" t-id="28">Withdraw tokens</button><br><br>
+        <label for="myContactInfo" t-id="29">Contact Information(email/signal/telegram):</label><br>
         <input id="myContactInfo"></input><br><br>
-        <button onclick="registerEmail(document.getElementById('myContactInfo').value)">Register contact information to my address(optional)</button><br>
+        <button onclick="registerEmail(document.getElementById('myContactInfo').value)" t-id="30">Register contact information to my address(optional)</button><br>
         <div id="publicemail"></div><br><br>
-        <label for="clearCompleted">Automatically clear completed contracts</label>
+        <label for="clearCompleted" t-id="31">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
-        <button onclick="RefreshContracts()">Refresh/restore previously cleared contracts</button><br><br>
-        <label for="offerExpiration">Private offers expire: </label>
+        <button onclick="RefreshContracts()" t-id="32">Refresh/restore previously cleared contracts</button><br><br>
+        <label for="offerExpiration" t-id="33">Private offers expire: </label>
         <select id="offerExpiration">
-          <option value="never">Never</option>
-          <option value="two-weeks">Two weeks</option>
-          <option value="one-month">One month</option>
+          <option value="never" t-id="34">Never</option>
+          <option value="two-weeks" t-id="35">Two weeks</option>
+          <option value="one-month" t-id="36">One month</option>
         </select>
         <br><br>
-        <button onclick="backupLocalStorage()">Backup cached site/user data</button>
-        <button onclick="loadLocalStorage()">Load site/user data from file</button><br><br>
+        <button onclick="backupLocalStorage()" t-id="37">Backup cached site/user data</button>
+        <button onclick="loadLocalStorage()" t-id="38">Load site/user data from file</button><br><br>
         <select id="connectMethod">
-          <option value="0">Use default IPFS Pinata Gateway</option>
+          <option value="0" t-id="39">Use default IPFS Pinata Gateway</option>
         </select>
         <br><br>
     </div>
     <div class="main about">
-        <h2>About</h2>
-        <p>Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.<br><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 700px;"></a><p>The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.<br><br>For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. There is no arbiters to prevent a contract from defaulting. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. BitBay does not take any fees for the escrows. This system is entirely free to use. For more information on how all of this works you may visit <a href="https://bitbay.market" target="_blank">https://bitbay.market</a></p>
+        <h2 t-id="40">About</h2>
+        <p t-id="41">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 700px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><br><p t-id="43">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own "know your customer" if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. BitBay does not take any fees for the escrows. This system is entirely free to use. For more information on how all of this works you may visit: </p><a href="https://bitbay.market" target="_blank">https://bitbay.market</a>
     </div>
 </div>
 <div class="footer">
@@ -218,6 +291,202 @@
     <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
 </div>
 <script>
+    function populateLanguageSelect() {
+      const languageSelect = document.getElementById("languageSelect");
+
+      langOptions.forEach((lang) => {
+        const option = document.createElement("option");
+        option.value = lang.substring(0, 2).toLowerCase();
+        option.textContent = lang;
+        
+        // Create and append flag image
+        const flagImg = document.createElement("img");
+        flagImg.src = `${lang.toLowerCase()}.png`;
+        flagImg.alt = lang;
+        option.appendChild(flagImg);
+
+        languageSelect.appendChild(option);
+      });
+      languageSelect.selectedIndex = 0;
+    }
+
+    document.getElementById("languageSelect").addEventListener('change', function() {
+        const languageSelect = document.getElementById("languageSelect");
+        const selectedFlagImg = document.getElementById("selectedFlag");
+        selectedFlagImg.src = languageSelect.options[languageSelect.selectedIndex].getElementsByTagName('img')[0].src;
+        translateDocument(languageSelect.options[languageSelect.selectedIndex].value);
+    });
+
+    function translateThis() {
+      const selectedLanguageCode = document.getElementById("languageSelect").value;
+      console.log("Selected Language Code:", selectedLanguageCode);
+      translateDocument(selectedLanguageCode);
+    }
+    window.onload = populateLanguageSelect;
+
+    function translate(text, lang, x) {
+        if(lang in languages && x in languages[lang]) {
+            return languages[lang][x]["#"+lang];
+        } else {
+            return text;
+        }
+    }
+
+    function translateDocument(lang) {
+        document.querySelectorAll('[t-id]').forEach(element => {
+            const tId = element.getAttribute('t-id');
+            const nonTextContent = Array.from(element.childNodes).filter(node => node.nodeType !== 3);
+            const textContent = element.textContent;
+            languages[tId] = { "#e": textContent };
+
+            // Translate the text content
+            const translatedText = translate(textContent, lang, tId);
+
+            // Update the text content
+            element.textContent = translatedText;
+
+            // Reinsert the non-text content
+            nonTextContent.forEach(node => element.appendChild(node));
+        });
+    }
+
+    var loadedFiles = {};
+    // Open or create the IndexedDB database
+    var request = indexedDB.open('fileDatabase', 1);
+
+    // Setup the database structure if it doesn't exist
+    request.onupgradeneeded = async function(event) {
+      db = event.target.result;
+      var objectStore = db.createObjectStore('files', { keyPath: 'hash' });
+      objectStore.createIndex('hash', 'hash', { unique: true });
+    };
+
+    // Assign the database reference once it's successfully opened
+    request.onsuccess = function (event) {
+      return new Promise(async function (resolve) {
+        db = event.target.result;
+
+        // Initialize loadedFiles from IndexedDB
+        var transaction = db.transaction(['files'], 'readonly');
+        var objectStore = transaction.objectStore('files');
+
+        objectStore.getAll().onsuccess = function (event) {
+          loadedFiles = event.target.result.reduce(function(obj, file) {
+            obj[file.hash] = file.data;
+            return obj;
+          }, {});
+
+          resolve(); // Resolve the promise once the asynchronous operation is done
+        };
+      });
+    };
+
+    // Function to open the IndexedDB database
+    async function openDatabase() {
+      return new Promise(function(resolve, reject) {
+        var request = indexedDB.open('fileDatabase', 1);
+
+        request.onupgradeneeded = function(event) {
+          db = event.target.result;
+          var objectStore = db.createObjectStore('files', { keyPath: 'hash' });
+          objectStore.createIndex('hash', 'hash', { unique: true });
+        };
+
+        request.onsuccess = function(event) {
+          db = event.target.result;
+          resolve();
+        };
+
+        request.onerror = function(event) {
+          reject(event.target.error);
+        };
+      });
+    }
+
+    // Function to initialize loadedFiles from IndexedDB
+    async function initializeLoadedFiles() {
+      return new Promise(function(resolve, reject) {
+        var transaction = db.transaction(['files'], 'readonly');
+        var objectStore = transaction.objectStore('files');
+
+        objectStore.getAll().onsuccess = function(event) {
+          loadedFiles = event.target.result.reduce(function(obj, file) {
+            obj[file.hash] = file.data;
+            return obj;
+          }, {});
+          resolve();
+        };
+
+        transaction.onerror = function(event) {
+          reject(event.target.error);
+        };
+      });
+    }
+
+    // Function to get file from IndexedDB
+    async function getFile(hash) {
+      return new Promise(function (resolve, reject) {
+        if(hash=='') {
+          resolve(['']);
+        }
+        // Check if the file hash is in loadedFiles
+        if (!(hash in loadedFiles)) {
+          // If not, fetch it from IndexedDB
+          var transaction = db.transaction(['files'], 'readonly');
+          var objectStore = transaction.objectStore('files');
+
+          var request = objectStore.get(hash);
+
+          request.onsuccess = async function (event) {
+            var file = event.target.result;
+            if (file) {
+              loadedFiles[hash] = file.data;
+              resolve(loadedFiles[hash]); // Resolve the promise with the file data
+            } else {
+              resolve(['']); //Image not found in IndexedDB
+            }
+          };
+
+          request.onerror = async function (event) {
+            resolve(['']); //event.target.error
+          };
+        } else {
+          resolve(loadedFiles[hash]); // Resolve the promise with the cached file data
+        }
+      });
+    }
+
+
+    // Function to store image/file in IndexedDB
+    async function storeFile(hash, data) {
+      // Open a read-write transaction
+      var transaction = db.transaction(['files'], 'readwrite');
+      var objectStore = transaction.objectStore('files');
+      // Put the file data into the object store
+      objectStore.put({ hash: hash, data: data });
+      loadedFiles[hash] = data;
+    }
+
+    async function storeFiles(files) {
+      // Open a read-write transaction
+      var transaction = db.transaction(['files'], 'readwrite');
+      var objectStore = transaction.objectStore('files');
+
+      for (var hash in files) {
+        objectStore.put({ hash: hash, data: files[hash] });
+      }
+      loadedFiles = files;
+    }
+
+    function changeSearchText(newText) {
+        document.getElementById('searchText').value = newText;
+        searchListings(newText, 1);
+    }
+
+    document.getElementById('SortBy').addEventListener('change', function () {
+        populateListings();
+    });
+
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
@@ -538,7 +807,7 @@
         if (myemail && myemail !== "") {
             try {
                 await DDEcontract.methods.adduserdata(myemail).send({"from":myaccounts,"gasLimit": 3000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                alert("Data added!");
+                await Swal.fire("Data added!");
               } catch (error) {
                 console.error(error);
             }
@@ -550,8 +819,8 @@
         const hash = web3.utils.keccak256(text);
 
         // Check if the hash is already stored in localStorage
-        const cached = localStorage.getItem(hash);
-        if (cached) {
+        const cached = await getFile(hash);
+        if (!Array.isArray(cached)) {
             return JSON.parse(cached).ipfsHash;
         }
 
@@ -565,8 +834,8 @@
 
         // Store the hashed text and IPFS hash in localStorage
         const data = JSON.stringify({ text: text, ipfsHash: ipfsHash });
-        localStorage.setItem(hash, data);
-        localStorage.setItem(ipfsHash, hash);
+        await storeFile(hash, data);
+        await storeFile(ipfsHash, hash);
 
         return ipfsHash;
     }
@@ -578,16 +847,16 @@
         var text = '';
         if (hash.length !== 46) { // IPFS hashes are 46 characters long
             // Look up the hash in localStorage
-            cached = localStorage.getItem(hash);
-            if (cached) {
+            cached = await getFile(hash);
+            if (!Array.isArray(cached)) {
                 text = JSON.parse(cached).text;
                 return text;
             }
         } else {
-            cached = localStorage.getItem(hash);
-            if (cached) {
-                cached = localStorage.getItem(cached);
-                if (cached) {                    
+            cached = await getFile(hash);
+            if (!Array.isArray(cached)) {
+                cached = await getFile(cached);
+                if (!Array.isArray(cached)) {
                     text = JSON.parse(cached).text;
                     try {
                         const mytest = JSON.parse(text);
@@ -598,7 +867,6 @@
                 }
             }
         }
-
         // Get the text from Pinata IPFS using the IPFS hash
         text = await retrieveFromPinataIPFS(ipfsHash);
         if(text == "error") {
@@ -609,8 +877,8 @@
         hash = web3.utils.keccak256(text);
         // Store the hashed text and IPFS hash in localStorage
         const data = JSON.stringify({ text: text, ipfsHash: ipfsHash });
-        localStorage.setItem(hash, data);
-        localStorage.setItem(ipfsHash, hash);
+        await storeFile(hash, data);
+        await storeFile(ipfsHash, hash);
         return text;
     }
 
@@ -702,10 +970,12 @@
             index = low;
             mlength = high;
         }
-        jsondata = {};
+        var jsondata = {};
+        var sortHits = 0;
+        marketOffers['results'] = [];
         if (searchText !== '') {
-            const keywords = searchText.split(/[,\s]+/); // Split by commas and one or more whitespace characters
-            marketOffers['results'] = [];
+            sortHits = 1;
+            const keywords = searchText.split(/[,\s]+/); // Split by commas and one or more whitespace characters            
             await Promise.all(keywords.map(async keyword => {
                 // Perform operations on each keyword
                 if (keyword.length === 0) {
@@ -743,14 +1013,14 @@
                                 if(!marketOffers['results'].includes(hash)) {
                                     marketOffers.results.push(hash);
                                 }
-                            });
+                            });                            
+                            await populateListings("", 1);
                         } catch (e) {
                             console.log("Error loading offer: ",e);
                         }
                     }
                 });
-            }));
-            sortByHits();
+            }));            
         } else {
             var searchThis = [];
             for (index; index < mlength; index++) {
@@ -779,14 +1049,18 @@
                             marketOffers[hash] = jsondata;
                             marketOffers[hash]['searchTerms'] = searchThis;
                         }
+                        if(!marketOffers['results'].includes(hash)) {
+                            marketOffers.results.push(hash);
+                        }
                     });
+                    await populateListings();
                 } catch (e) {
                     console.log("Error loading offer: ",e);
                 }
             }
         }
         if(DDEcontract == '') {
-            await populateListings();
+            await populateListings("", sortHits);
         }
     }
 
@@ -794,8 +1068,21 @@
       marketOffers['results'].sort((hashA, hashB) => {
         const hitsA = marketOffers[hashA]['searchTerms'].length;
         const hitsB = marketOffers[hashB]['searchTerms'].length;
-
         return hitsB - hitsA; // Sort in descending order based on the number of hits
+      });
+    }
+    function sortByAmountHigh() {
+      marketOffers['results'].sort((hashA, hashB) => {
+        const amountA = marketOffers[hashA]['amount'];
+        const amountB = marketOffers[hashB]['amount'];
+        return amountB - amountA; // Sort in descending order based on the 'amount' key
+      });
+    }
+    function sortByAmountLow() {
+      marketOffers['results'].sort((hashA, hashB) => {
+        const amountA = marketOffers[hashA]['amount'];
+        const amountB = marketOffers[hashB]['amount'];
+        return amountA - amountB; // Sort in ascending order based on the 'amount' key
       });
     }
 
@@ -834,7 +1121,9 @@
           if(text != '') {
               try {
                   var messageData = JSON.parse(jsondata.message);
-                  jsondata.image = Array.isArray(messageData.image) ? messageData.image : [''];
+                  var myimg = Array.isArray(messageData.image) ? messageData.image : [''];
+                  storeFile(Crypto.SHA256(JSON.stringify(myimg)), myimg);
+                  jsondata.image = Crypto.SHA256(JSON.stringify(myimg));
                   jsondata.message = messageData.message;
                   jsondata.contact = messageData.contact;
               } catch (e) {
@@ -1235,10 +1524,20 @@
     //**************MARKETS TAB//**************
     // global variables for pagination
     var currentPage = 1;
-    var listingsPerPage = 5;
+    var listingsPerPage = 10;
 
-    // function for populating the listings
-    function populateListings(searchText="") {
+    async function populateListings(searchText = "", sortHits = 0) {
+        if(sortHits == 1) {
+            sortByHits();
+        } else {
+            var sortBy = document.getElementById("SortBy").value;
+            if(sortBy == "price-low") {
+                sortByAmountLow();
+            }
+            if(sortBy == "price-high") {
+                sortByAmountHigh();
+            } 
+        }
         var listingsDiv = document.querySelector('.main.markets .listings');
         listingsDiv.innerHTML = '';
 
@@ -1247,28 +1546,31 @@
         if (endIndex > marketOffers.indices.length) {
             endIndex = marketOffers.indices.length;
         }
-        searchText=searchText.toLowerCase();
+        searchText = searchText.toLowerCase();
         if (searchText !== "") {
             endIndex = marketOffers.indices.length;
         }
         var shown = 0;
         var offer;
         var myhashes = {};
+
+        var gridContainer = document.createElement('div');
+        gridContainer.classList.add('listings-grid');
+
         for (var i = startIndex; i < endIndex; i++) {
-            if(shown == listingsPerPage) {
+            if (shown == listingsPerPage) {
                 break;
             }
             if (!marketOffers.hasOwnProperty(marketOffers.indices[i])) {
-                continue
+                continue;
             }
-            if(parseInt(marketOffers.indices[i]) >= parseInt(currentMarketsLength)) {
+            if (parseInt(marketOffers.indices[i]) >= parseInt(currentMarketsLength)) {
                 continue;
             }
             if (searchText !== "") {
-                if(i < marketOffers.results.length) {
+                if (i < marketOffers.results.length) {
                     offer = marketOffers[marketOffers.results[i]];
-                }
-                else {
+                } else {
                     offer = marketOffers[marketOffers[marketOffers.indices[i]]];
                 }
                 const keywords = searchText.split(/[,\s]+/);
@@ -1288,39 +1590,77 @@
                     }
                 }
                 if (!foundKeyword) {
-                    continue; // Skip to the next iteration of the loop
+                    continue;
                 }
             } else {
-                offer = marketOffers[marketOffers[marketOffers.indices[i]]];
+                if(marketOffers.results.length > 0) {
+                    if (i < marketOffers.results.length) {
+                        offer = marketOffers[marketOffers.results[i]];
+                    } else {
+                        offer = marketOffers[marketOffers[marketOffers.indices[i]]];
+                    }
+                } else {
+                    offer = marketOffers[marketOffers[marketOffers.indices[i]]];
+                }
             }
-            if(offer.hash in myhashes) {
+            if (offer.hash in myhashes) {
                 continue;
             } else {
                 myhashes[offer.hash] = 1;
             }
-            var div = document.createElement('div');
-            div.classList.add('listing');
+
+            var gridItem = document.createElement('div');
+            gridItem.classList.add('listing-grid-item');
             var tempimg = '';
-            if(offer.image.length > 0) {
-                tempimg = '<img src="'+offer.image[0]+'" height="30px" max-width="30px" alt="">';
+            var myimg = await getFile(offer.image);
+            if (myimg.length > 0 && myimg != '' && myimg[0] != '') {
+                tempimg = '<img src="' + myimg[0] + '" alt="./blank-image.jpg">';
+            } else {
+                tempimg = '<img src="./blank-image.jpg" alt="">';
             }
-            div.innerHTML = `
-                ${tempimg}
-                <div class="details">
+            gridItem.innerHTML = `
+                <div class="listing-image">${tempimg}</div>
+                <div class="listing-details">
                     <div class="token">Currency: ${tokennames[offer.token]}</div>
                     <div class="amount">Amount: ${displayDecimals(offer.token, offer.amount)}</div>
                     <div class="message">Details: ${offer.message.slice(0, 20) + (offer.message.length > 20 ? "..." : "")}</div>
-                </div></br>
+                </div>
             `;
+
             // create a closure to bind the offer variable to the onclick function
-            (function(offer) {
-                div.onclick = function() {
+            (function (offer) {
+                gridItem.onclick = function () {
                     showListing(offer);
                 };
             })(offer);
-            listingsDiv.appendChild(div);
+
+            gridContainer.appendChild(gridItem);
             shown++;
         }
+
+        listingsDiv.appendChild(gridContainer);
+
+        // Inject CSS styles into a style tag
+        var style = document.createElement('style');
+        style.textContent = `
+            .listings-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+                grid-gap: 20px;
+            }
+
+            .listing-grid-item {
+                border: 1px solid #ccc;
+                padding: 10px;
+                text-align: center;
+            }
+
+            .listing-image img {
+                max-width: 200px;
+                height: auto;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     function displayDecimals(token, amount) {
@@ -1414,14 +1754,15 @@
       }
       const imageList = document.createElement('ul');
       const arrowsContainer = document.createElement('div');
-      if(listing.image.length > 0) {          
+      var myimgs = await getFile(listing.image);
+      if(myimgs.length > 0) {          
           imageList.classList.add('image-list');
           imageList.style.listStyle = 'none'; // remove the dot
           imageList.onclick = function() { plusSlides(1); };
-          for (let i = 0; i < listing.image.length; i++) {
+          for (let i = 0; i < myimgs.length; i++) {
             const li = document.createElement('li');
             const img = document.createElement('img');
-            img.src = listing.image[i];
+            img.src = myimgs[i];
             img.classList.add('popup-image');
             li.appendChild(img);
             imageList.appendChild(li);
@@ -1597,7 +1938,7 @@
                   acceptTime.onclick = async function() {
                     try {
                       await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[1]).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                      alert("Time extended!");
+                      await Swal.fire("Time extended!");
                       await loadUser();
                       popupContainer.remove();
                     } catch (error) {
@@ -1615,7 +1956,7 @@
                   acceptTime.onclick = async function() {
                     try {
                       await DDEcontract.methods.requestExtension(listing.hash, listing.timelimit[2]).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                      alert("Time extended!");
+                      await Swal.fire("Time extended!");
                       await loadUser();
                       popupContainer.remove();
                     } catch (error) {
@@ -1662,7 +2003,7 @@
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                         dialog.remove();
                         await DDEcontract.methods.requestExtension(listing.hash, newtime).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                        alert("Time extension requested!");
+                        await Swal.fire("Time extension requested!");
                         await loadUser();
                         popupContainer.remove();
                       });
@@ -1678,20 +2019,20 @@
                 try {
                   if(myaccounts == listing.sender) {
                     if(listing.status[1] == 2) {
-                      alert("Contract cancellation request was already sent!");
+                      await Swal.fire("Contract cancellation request was already sent!");
                       return;
                     }
                   } else {
                     if(listing.status[1] == 3) {
-                      alert("Contract cancellation request was already sent!");
+                      await Swal.fire("Contract cancellation request was already sent!");
                       return;
                     }
                   }
                   await DDEcontract.methods.cancelEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   if(listing.status[1] == 1) {
-                    alert("Contract cancellation request sent!");
+                    await Swal.fire("Contract cancellation request sent!");
                   } else {
-                    alert("Contract cancelled!");
+                    await Swal.fire("Contract cancelled!");
                   }
                   await loadUser();
                   popupContainer.remove();
@@ -1707,20 +2048,20 @@
                 try {
                   if(myaccounts == listing.sender) {
                     if(listing.status[0] == 2) {
-                      alert("Contract completion request was already sent!");
+                      await Swal.fire("Contract completion request was already sent!");
                       return;
                     }
                   } else {
                     if(listing.status[0] == 3) {
-                      alert("Contract completion request was already sent!");
+                      await Swal.fire("Contract completion request was already sent!");
                       return;
                     }
                   }
                   await DDEcontract.methods.completeEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                   if(listing.status[1] == 1) {
-                    alert("Contract completion request sent!");
+                    await Swal.fire("Contract completion request sent!");
                   } else {
-                    alert("Contract completed!");
+                    await Swal.fire("Contract completed!");
                   }
                   await loadUser();
                   popupContainer.remove();
@@ -1824,7 +2165,7 @@
         }
       `;
       document.head.appendChild(style);
-      if(listing.image.length !== 0) {
+      if(myimgs.length !== 0) {
         showSlides(1);
       }
       if(mode == 3) {
@@ -1901,7 +2242,7 @@
           try {
             var value = web3.utils.toWei(amount.toString(), 'ether');
             await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-            alert("Deposit success!");
+            await Swal.fire("Deposit success!");
             await loadUser();
             popupContainer.remove();
           } catch (error) {
@@ -1915,12 +2256,12 @@
             var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toString()
 
             if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
-              alert("Waiting for approval...");
+              await Swal.fire("Waiting for approval...");
               await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
             }
 
             await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-            alert("Deposit success!");
+            await Swal.fire("Deposit success!");
             await loadUser();
             popupContainer.remove();
           } catch (error) {
@@ -2025,7 +2366,7 @@
           var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
           try {
             await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-            alert("Withdraw success!");
+            await Swal.fire("Withdraw success!");
             await loadUser();
             popupContainer.remove();
           } catch (error) {
@@ -2263,7 +2604,7 @@
         // Event listener for image input
         imageInput.addEventListener('change', async () => {
           if(imageInput.files.length > 10) {
-            alert("Please add less than the maximum of 10 images");
+            await Swal.fire("Please add less than the maximum of 10 images");
             return false;
           }
           for (let i = 0; i < imageInput.files.length; i++) {
@@ -2313,11 +2654,11 @@
           if (selectedIndex !== -1) {
             tokenSelect.selectedIndex = selectedIndex;
           } else {
-            alert('Token not found in default coin list!');
+            await Swal.fire('Token not found in default coin list!');
             popupContainer.remove();
             return;
           }
-          image = counterdata.image;
+          image = await(getFile(counterdata.image));
           form.querySelector("#contractImage").style.display = 'none';
           const changefile = form.querySelector("#changefile")
           changefile.style.display = 'block';
@@ -2372,29 +2713,29 @@
             await saveContactInfo(contactinfo);
           }          
           if(message == "error") {
-            alert("Error posting IPFS data, please try again later");
+            await Swal.fire("Error posting IPFS data, please try again later");
             return false;
           }
           if (amount === "") {
-            alert("Please enter the amount");
+            await Swal.fire("Please enter the amount");
             return false;
           }
           if (depositType === "custom") {
             if (depositSender === "" || depositRecipient === "") {
-              alert("Please enter the custom deposits");
+              await Swal.fire("Please enter the custom deposits");
               return false;
             }
           }
           if (timeLimit === "") {
-            alert("Please enter the time limit");
+            await Swal.fire("Please enter the time limit");
             return false;
           }
           timeLimit = parseInt(timeLimit);
           if (timeLimit === 0) {
-            alert("Time limit must be greater than zero")
+            await Swal.fire("Time limit must be greater than zero")
           }
           if (document.getElementById("contractDetails").value === "") {
-            alert("Please enter the description");
+            await Swal.fire("Please enter the description");
             return false;
           }
           var sender2 = (senderReceiver === "receiver" ? sender : recipient);
@@ -2418,23 +2759,23 @@
           }
           if(myaccounts == sender2) {
             if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(amount).add(web3.utils.toBN(depositSender)).mul(web3.utils.toBN(multiplier)))) {
-                alert("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
+                await Swal.fire("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
                 return false;
             }
           }
           if(myaccounts == recipient2) {
             if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(depositRecipient).mul(web3.utils.toBN(multiplier)))) {
-                alert("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
+                await Swal.fire("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
                 return false;
             }
           }
           result = await postOfferData(message);
           if(result == "error") {
-              alert("Error posting message data to IPFS.");
+              await Swal.fire("Error posting message data to IPFS.");
               return false;
           }
           if(result.length > 100) {
-              alert("Error message length was unusually long. Please check IPFS hash result.");
+              await Swal.fire("Error message length was unusually long. Please check IPFS hash result.");
               return false;
           }
           message = result;
@@ -2481,7 +2822,7 @@
                 data.message,
                 myterms
               ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                alert("Contract creation success!");
+                await Swal.fire("Contract creation success!");
                 await loadUser();
                 popupContainer.remove();
               } catch (error) {
@@ -2588,14 +2929,14 @@
           const hashtagInput = dialog.querySelector("#hashtag");
           const term = hashtagInput.value.trim();
           if (term.includes(" ") || term.includes(",")) {
-            alert("Key words should not contain spaces or commas");
+            await Swal.fire("Key words should not contain spaces or commas");
             return;
           }
           const encoder = new TextEncoder();
           const utf8Bytes = encoder.encode(term);
           const byteLength = utf8Bytes.length;
           if (byteLength > 32) {
-            alert("String exceeds limit of 32 bytes");
+            await Swal.fire("String exceeds limit of 32 bytes");
             return;
           }
           if (term !== "") {
@@ -2609,12 +2950,12 @@
         popularKeywords.forEach(keyword => {
           const keywordButton = document.createElement("button");
           keywordButton.textContent = keyword;
-          keywordButton.addEventListener("click", () => {
+          keywordButton.addEventListener("click", async () => {
             if (addedTerms.length < 11) {
               addedTerms.push(keyword.toLowerCase());
               displayAddedTerms();
             } else {
-              alert('The maximum number of keywords is 10');
+              await Swal.fire('The maximum number of keywords is 10');
             }
           });
           popularKeywordsContainer.appendChild(keywordButton);
@@ -2662,7 +3003,7 @@
               if(mylisting.sender == "0x0000000000000000000000000000000000000000" || mylisting.recipient == "0x0000000000000000000000000000000000000000" ) {
                 const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(mylisting.hash).call());
                 if(offerID == 0) {
-                  alert("Offer no longer available!");
+                  await Swal.fire("Offer no longer available!");
                   return;
                 }
                 if(listing.status[0]==0 || listing.status[1]==0) {
@@ -2697,7 +3038,7 @@
                   confirmBtn.addEventListener("click", async () => {
                     quantity = parseInt(document.getElementById('new-quantity').value);
                     if(quantity > mylisting.quantity) {
-                      alert("Quantity exceeds what is available!");
+                      await Swal.fire("Quantity exceeds what is available!");
                       return;                        
                     }
                     dialog.remove();
@@ -2712,21 +3053,21 @@
                     });
                     if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
                       if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                          alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                          await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
                           return false;
                       }
                       if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                          alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                          await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
                           return false;
                       }
                     }
                     if(mylisting.recipient == "0x0000000000000000000000000000000000000000") {
                       if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                          alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                          await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
                           return false;
                       }
                       if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                          alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                          await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
                           return false;
                       }
                     }
@@ -2743,7 +3084,7 @@
                       quantity,
                       accepttimelimit
                     ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                      alert("Contract accepted!");
+                      await Swal.fire("Contract accepted!");
                       await loadUser();                      
                     });
                 }
@@ -2759,21 +3100,21 @@
                 });
                 if(mylisting.sender == myaccounts) {
                   if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                      alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                      await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
                       return false;
                   }
                   if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                      alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                      await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
                       return false;
                   }
                 }
                 if(mylisting.recipient == myaccounts) {
                   if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                      alert("You don't have enough funds. Please deposit funds first before proceeding.");
+                      await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
                       return false;
                   }
                   if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                      alert("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                      await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
                       return false;
                   }
                 }
@@ -2790,7 +3131,7 @@
                   quantity,
                   accepttimelimit
                 ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                  alert("Contract accepted!");
+                  await Swal.fire("Contract accepted!");
                   await loadUser();
               }
         } catch (error) {
@@ -2840,7 +3181,7 @@
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash
                   ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                  alert("Contract removed!");
+                  await Swal.fire("Contract removed!");
                   await loadUser();                
             } catch (error) {
                 console.error(error);
@@ -2852,13 +3193,13 @@
                   await DDEcontract.methods.removeMarketOffer(
                     listing.hash
                   ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                  alert("Contract removed!");
+                  await Swal.fire("Contract removed!");
                   await loadUser();
                 } else {
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash
                   ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                  alert("Contract removed!");
+                  await Swal.fire("Contract removed!");
                   await loadUser();
                 }
             } catch (error) {
@@ -2901,7 +3242,7 @@
         try {
               var quantity = parseInt(document.getElementById('new-quantity').value);
               if(quantity == 0) {
-                alert("Quantity can not be changed to zero!");
+                await Swal.fire("Quantity can not be changed to zero!");
                 dialog.remove();
                 return;
               }
@@ -2909,7 +3250,7 @@
                 listing.hash,
                 quantity
               ).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                alert("Quantity updated!");
+                await Swal.fire("Quantity updated!");
                 await loadUser();
         } catch (error) {
             console.error(error);
@@ -2923,7 +3264,7 @@
         console.log(data)
         try {
             await DDEcontract.methods.adddata(data).send({"from":myaccounts,"gasLimit": 3000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-            alert("Data added!");
+            await Swal.fire("Data added!");
           } catch (error) {
             console.error(error);
         }
