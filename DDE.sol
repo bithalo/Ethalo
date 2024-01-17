@@ -23,6 +23,7 @@ contract TwoPartyEscrow {
         uint depositSender;
         uint depositRecipient;
         uint quantity;
+        uint rfee;
         uint[3] timelimit;
         uint[2] status;
         string message;
@@ -45,16 +46,52 @@ contract TwoPartyEscrow {
     mapping(string => uint) public taglength;
     mapping(string => uint[]) public openslot;
     mapping(string => uint) public openslotlength;
+    mapping(address => uint[2]) public completed;
+    mapping(address => address) public referral;
+    mapping(address => uint) public customFee; //Users may want to give special offers
+    uint public affiliateFee;
+    address public minter;
+
     string[] public publicdata;
     uint lock;
     address WETH;
 
     constructor(address _WETH) {
         WETH = _WETH;
+        minter = msg.sender;
     }
     
     receive() external payable {
         assert(msg.sender == WETH);
+    }
+
+    //If no affiliate is set, the fee is burned to encourage using the system
+    function changeAffiliate(address affiliate) public {
+        require(completed[affiliate][0] > 9); //Active users of the markets are the ones to promote it
+        referral[msg.sender] = affiliate;
+    }
+
+    function promoteAffiliate(address affiliate) public {
+        require(msg.sender == minter);
+        if(completed[affiliate][0] < 10) {
+            completed[affiliate][0] = 10;
+        }
+    }
+
+    function changeMinter(address new_minter) public {
+        require(msg.sender == minter);
+        minter = new_minter;
+    }
+
+    function changeFee(uint newfee) public {
+        require(msg.sender == minter);
+        require(newfee >= 0 && newfee <= 100); //1% maximum
+        affiliateFee = newfee;
+    }
+
+    function changeCustomFee(uint newfee) public {
+        require(newfee >= 0 && newfee <= 5000);
+        customFee[msg.sender] = newfee;
     }
 
     function deposit(address token, uint amount) public {
@@ -135,6 +172,7 @@ contract TwoPartyEscrow {
             depositSender: _depositSender,
             depositRecipient: _depositRecipient,
             quantity: _quantity,
+            rfee: uint(0),
             timelimit: [_timelimit[0],_timelimit[1],block.timestamp],
             status: [style,uint(0)],
             message: _message
@@ -187,7 +225,10 @@ contract TwoPartyEscrow {
         initialized[hash] = true;
         return hash;
     }
-    function acceptOffer(bytes32 hash, uint quantity, uint offerlimit) public {
+    function acceptOffer(bytes32 hash, uint quantity, uint offerlimit, address affiliate) public {
+        if(affiliateFee != 0 && affiliate != address(0)) {
+            referral[msg.sender] = affiliate;
+        }
         address sender = contracts[hash].sender;
         address recipient = contracts[hash].recipient;
         require(quantity > 0);
@@ -211,6 +252,10 @@ contract TwoPartyEscrow {
             require(userMarketID[hash] != 0); //Offer is no longer available
             require(quantity <= contracts[hash].quantity);
             style = newContract.status[0];
+            newContract.rfee = affiliateFee;
+            if(sender == address(0) && customFee[recipient] != 0) {
+                newContract.rfee = customFee[recipient];
+            }
             if(style == 0) {
                 contracts[hash].quantity -= quantity;
                 if(contracts[hash].quantity == 0) {
@@ -353,9 +398,31 @@ contract TwoPartyEscrow {
             contracts[hash].status[0] += 2;
         }
         if(contracts[hash].status[0] == 4) {
-            userBalance[recipient][contracts[hash].token] += (contracts[hash].amount + contracts[hash].depositRecipient);
+            uint total;
+            uint afee = affiliateFee;
+            if(contracts[hash].rfee != 0) {
+                afee = contracts[hash].rfee;
+            }
+            if(afee != 0) {
+                if(referral[sender] != address(0)) {
+                    total = ((contracts[hash].amount) * afee) / 10000;
+                    userBalance[referral[sender]][contracts[hash].token] += total;
+                } else {
+                    total = ((contracts[hash].amount) * affiliateFee) / 10000;
+                    userBalance[referral[recipient]][contracts[hash].token] += total;
+                }
+            }
+            userBalance[recipient][contracts[hash].token] += ((contracts[hash].amount - total) + contracts[hash].depositRecipient);
             userBalance[sender][contracts[hash].token] += (contracts[hash].depositSender);
         }
+        completed[sender][0] += 1;
+        completed[recipient][0] += 1;
+    }
+    function expireEscrow(bytes32 hash) public { //Useful for a reputation system
+        require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
+        require(block.timestamp > contracts[hash].timelimit[0]);
+        completed[contracts[hash].sender][1] += 1;
+        completed[contracts[hash].recipient][1] += 1;
     }
     function cancelPrivateOffer(bytes32 hash) public {
         require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
