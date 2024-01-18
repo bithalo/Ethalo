@@ -419,10 +419,13 @@ contract TwoPartyEscrow {
         completed[recipient][0] += 1;
     }
     function expireEscrow(bytes32 hash) public { //Useful for a reputation system
-        require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
+        require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);        
+        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4);
+        require(contracts[hash].status[0] > 0 && contracts[hash].status[1] > 0);
         require(block.timestamp > contracts[hash].timelimit[0]);
         completed[contracts[hash].sender][1] += 1;
         completed[contracts[hash].recipient][1] += 1;
+        contracts[hash].status = [uint(5),uint(5)];
     }
     function cancelPrivateOffer(bytes32 hash) public {
         require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
