@@ -516,7 +516,8 @@
     ];
     var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
     web3 = new Web3("https://rpc.ankr.com/eth_goerli");
-    DDEaddy = "0x08576389321C1999d1A66db093CDd8655615b4cE"; //Goerli testnet is default market view
+    DDEaddy = "0xCC4b13bcE47B6223e25399aF8c9a24cFB36a5728"; //Goerli testnet is default market view
+    var referral = '0x0000000000000000000000000000000000000000';  
     var DDEcontract2 = new web3.eth.Contract(DDEabi, DDEaddy);
     var marketOffers = {'indices':[], 'results':[]};
     //web3[0] = new Web3("https://cloudflare-eth.com");
@@ -592,7 +593,7 @@
         if (currentChainId == 5) {
             netname = "Goerli Testnet";
             netname2 = "ETH";
-            DDEaddy = "0x08576389321C1999d1A66db093CDd8655615b4cE";            
+            DDEaddy = "0xCC4b13bcE47B6223e25399aF8c9a24cFB36a5728";            
         }
         if (netname == "unknown") {
             document.getElementById("connectionstatus").innerHTML = "Unsupported network";
@@ -756,14 +757,14 @@
           mySelectElement.add(option);
         }
 
-        var selectedAPI = "6";
+        var selectedAPI = "0";
         const cached = localStorage.getItem(myaccounts+mychainid+":api");        
         if (cached) {
             const index = Array.from(mySelectElement.options).findIndex(option => option.value === cached.toString());
             mySelectElement.selectedIndex = index;
             selectedAPI = cached.toString();
             if (selectedAPI == 'a') {
-                selectedAPI = "6";
+                selectedAPI = "0";
             }
         }
         await getAPI(selectedAPI);
@@ -1095,6 +1096,8 @@
         await DDEcontract3.methods.getContract(DOMPurify.sanitize(hash)).call().then(async function (data) {
           var text = '';
           try {
+            console.log(JSON.stringify(data));
+            console.log(JSON.stringify(hash));
             text = await getOfferData(DOMPurify.sanitize(data.message));
           } catch (e) {
             console.log(e);
@@ -1118,6 +1121,16 @@
             ],
             message:DOMPurify.sanitize(text)
           };
+          try {
+              if(data.sender != "0x0000000000000000000000000000000000000000") {
+                  jsondata.reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(data.sender).call());
+              }
+              if(data.recipient != "0x0000000000000000000000000000000000000000") {
+                  jsondata.reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(data.recipient).call());
+              }
+          } catch (e) {
+              console.log("Error loading reputation data");
+          }
           if(text != '') {
               try {
                   var messageData = JSON.parse(jsondata.message);
@@ -1129,7 +1142,8 @@
               } catch (e) {
                   console.log("Error loading data");
                   jsondata.image = [''];
-                  jsondata.message = '';
+                  jsondata.message = text;
+                  console.log(text)
                   jsondata.contact = '';
               }
           } else {
@@ -1157,7 +1171,7 @@
         if (readMessages[i]) {
           continue;
         }
-        try {          
+        try {
           const offerHash = DOMPurify.sanitize(await DDEcontract.methods.openOffers(myaccounts, i).call());
           const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(offerHash).call());
           if (offerID == 0) {
@@ -1396,7 +1410,7 @@
               }
               if(parseFloat(timeRemaining) <= parseFloat(0)) {
                 escrowInfo += `<div>The time limit has expired and the funds have been burned. This contract is no longer available.</div>`
-                offerData3.expired = 1;
+                offerData3.expired = 2;
               }
           }
           var skipthis = 0;
@@ -1840,6 +1854,7 @@
       }
       var contact2 = '';
       var datalen = 0;
+      var reputation = 0;
       if(myaccounts != listing.recipient && listing.recipient != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
           try {
               datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.recipient, 3).call());
@@ -1848,6 +1863,12 @@
                   if(listing.contact != contact2) {
                       message.innerHTML += '<br><br>Recipients contact information: <br>' + contact2;
                   }
+              }
+              reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.recipient).call());
+              if(reputation[0] == 0 && reputation[1] == 0) {
+                message.innerHTML += '<br><br>Recipient is a new user of the markets. <br>' + contact2;
+              } else {
+                message.innerHTML += '<br><br>Recipients success rate: <br>' + 'Completed: ' + reputation[0] + '<br>' + 'Failed:' + reputation[1];
               }
           } catch(e) {
               console.log(e);
@@ -1861,6 +1882,12 @@
                   if(listing.contact != contact2) {
                       message.innerHTML += '<br><br>Senders contact information: <br>' + contact2;
                   }
+              }
+              reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.sender).call());
+              if(reputation[0] == 0 && reputation[1] == 0) {
+                message.innerHTML += '<br><br>Sender is a new user of the markets. <br>' + contact2;
+              } else {
+                message.innerHTML += '<br><br>Senders success rate: <br>' + 'Completed: ' + reputation[0] + '<br>' + 'Failed:' + reputation[1];
               }
           } catch(e) {
               console.log(e);
@@ -1913,12 +1940,30 @@
           buttonContainer.appendChild(cancelButton);
       }
       if(mode == 4) {
-          if(listing.expired == 1) {
+          if(listing.expired == 1 || listing.expired == 2) {
               const clearButton = document.createElement('button');
               clearButton.innerHTML = 'Clear Contract';
               clearButton.id = 'clearButton';
               buttonContainer.appendChild(clearButton);
               clearButton.onclick = async function() {
+                if(listing.expired == 2 && listing.status[0] < 5) {
+                    Swal.fire({
+                      title: 'It seems like this deal timed out. If this was due to any disagreement then before you clear the order would you like to report the result to the blockchain for reputation tracking?',
+                      showCancelButton: true,
+                      confirmButtonText: 'Yes',
+                      cancelButtonText: 'No',
+                      icon: 'question',
+                    }).then(async (result) => {
+                      if (result.isConfirmed) {
+                        try {
+                          await DDEcontract.methods.expireEscrow(listing.hash).send({"from":myaccounts,"gasLimit": 1000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
+                          await Swal.fire("Transaction result registered!");
+                        } catch (error) {
+                          console.error(error);
+                        }
+                      }
+                    });
+                }
                 const readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages3")) || {};
                 readMessages[listing.index] = true;
                 localStorage.setItem(myaccounts+":readmessages3", JSON.stringify(readMessages));
@@ -3082,7 +3127,8 @@
                     await DDEcontract.methods.acceptOffer(
                       mylisting.hash,
                       quantity,
-                      accepttimelimit
+                      accepttimelimit,
+                      referral
                     ).send({"from":myaccounts,"gasLimit": 4000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
                       await Swal.fire("Contract accepted!");
                       await loadUser();                      

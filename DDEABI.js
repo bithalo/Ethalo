@@ -15,6 +15,11 @@ DDEabi=[
 				"internalType": "uint256",
 				"name": "offerlimit",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "affiliate",
+				"type": "address"
 			}
 		],
 		"name": "acceptOffer",
@@ -70,6 +75,58 @@ DDEabi=[
 			}
 		],
 		"name": "cancelPrivateOffer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "affiliate",
+				"type": "address"
+			}
+		],
+		"name": "changeAffiliate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newfee",
+				"type": "uint256"
+			}
+		],
+		"name": "changeCustomFee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newfee",
+				"type": "uint256"
+			}
+		],
+		"name": "changeFee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "new_minter",
+				"type": "address"
+			}
+		],
+		"name": "changeMinter",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -189,6 +246,32 @@ DDEabi=[
 				"type": "bytes32"
 			}
 		],
+		"name": "expireEscrow",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "affiliate",
+				"type": "address"
+			}
+		],
+		"name": "promoteAffiliate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			}
+		],
 		"name": "removeExpiredTags",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -226,15 +309,8 @@ DDEabi=[
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_WETH",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
+		"stateMutability": "payable",
+		"type": "receive"
 	},
 	{
 		"inputs": [
@@ -273,8 +349,52 @@ DDEabi=[
 		"type": "function"
 	},
 	{
-		"stateMutability": "payable",
-		"type": "receive"
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_WETH",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "affiliateFee",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "completed",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -322,9 +442,33 @@ DDEabi=[
 				"type": "uint256"
 			},
 			{
+				"internalType": "uint256",
+				"name": "rfee",
+				"type": "uint256"
+			},
+			{
 				"internalType": "string",
 				"name": "message",
 				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "customFee",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -426,6 +570,11 @@ DDEabi=[
 						"type": "uint256"
 					},
 					{
+						"internalType": "uint256",
+						"name": "rfee",
+						"type": "uint256"
+					},
+					{
 						"internalType": "uint256[3]",
 						"name": "timelimit",
 						"type": "uint256[3]"
@@ -494,6 +643,11 @@ DDEabi=[
 					{
 						"internalType": "uint256",
 						"name": "quantity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rfee",
 						"type": "uint256"
 					},
 					{
@@ -590,6 +744,19 @@ DDEabi=[
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "minter",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -700,6 +867,25 @@ DDEabi=[
 				"internalType": "string",
 				"name": "",
 				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "referral",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
