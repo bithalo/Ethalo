@@ -260,6 +260,8 @@
         <button onclick="withdraw()" t-id="28">Withdraw tokens</button><br><br>
         <label for="myContactInfo" t-id="29">Contact Information(email/signal/telegram):</label><br>
         <input id="myContactInfo"></input><br><br>
+        <label for="myPassword" t-id="44">Password(for encryption):</label><br>
+        <input id="myPasswordInput" type="password"></input><br><br>
         <button onclick="registerData(document.getElementById('myContactInfo').value)" t-id="30">Register information to my address(contact/encryption/optional)</button><br>
         <div id="publicemail"></div><br><br>
         <label for="clearCompleted" t-id="31">Automatically clear completed contracts</label>
@@ -278,10 +280,15 @@
           <option value="0" t-id="39">Use default IPFS Pinata Gateway</option>
         </select>
         <br><br>
+        <h2 t-id="45">Earn</h2>
+        <p id="affiliateInfo" t-id="46">Not connected</p>
+        <button onclick="copyAffiliateLink()" t-id="47">Copy affiliate link</button><br><br>
+        <button onclick="changeAffiliate()" t-id="48">Change my affiliate</button><br><br>
+        <button onclick="setCustomFee()" t-id="49">Set custom referral fee</button><br><br>
     </div>
     <div class="main about">
         <h2 t-id="40">About</h2>
-        <p t-id="41">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 700px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><br><p t-id="43">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save well over 75% in shipping. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own "know your customer" if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. BitBay does not take any fees for the escrows. This system is entirely free to use. For more information on how all of this works you may visit: </p><a href="https://bitbay.market" target="_blank">https://bitbay.market</a>
+        <p t-id="41">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 700px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><p t-id="43">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save up to 75% in shipping in some cases. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own 'know your customer' if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. This system is ownerless and entirely free to use. However, there is a setting that can be activated for affiliates/referrals which can range from 0-1%. In order to encourage users to engage with affiliates, the fee is burned if it is not paid to an affiliate. This helps market the system by giving users a way to earn. A user of the markets is automatically an affiliate if they complete 10 deals. That allows them to use the markets for free if they choose to(as they can be their own affiliate) and it allows them to send users to the website through an affiliate link. Visiting through a link registers the affiliate to that account when a deal is accepted and let's them benefit from that referral. Also, some sellers may offer a more attractive referral fee which should allow affiliates to net more by mutual consent. For more information on how BitBay works you may visit: </p><a href="https://bitbay.market" target="_blank">https://bitbay.market</a>
     </div>
 </div>
 <div class="footer">
@@ -322,7 +329,7 @@
       console.log("Selected Language Code:", selectedLanguageCode);
       translateDocument(selectedLanguageCode);
     }
-    window.onload = populateLanguageSelect;
+    populateLanguageSelect();
 
     function translate(text, lang, x) {
         if(lang in languages && x in languages[lang]) {
@@ -524,6 +531,40 @@
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
     var isConnected = false;
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+        // Detect language
+    var qlang = getQueryParam('l') || 'en';  // Default to 'en' if not provided
+    var referralCode = getQueryParam('r') || 'default';
+    if(referralCode != 'default') {
+        referral = referralCode;
+        if (!web3.utils.isAddress(referral)) {
+            referral = '0x0000000000000000000000000000000000000000';
+        }
+    }
+    if (qlang !== 'en') {
+        var languageSelect = document.getElementById('languageSelect');
+        
+        // Find the index of the option with the specified value
+        var optionIndex = -1;
+        for (var i = 0; i < languageSelect.options.length; i++) {
+            if (languageSelect.options[i].value === qlang) {
+                optionIndex = i;
+                break;
+            }
+        }
+
+        // If the option is found, change the selected index and trigger the "change" event
+        if (optionIndex !== -1) {
+            languageSelect.selectedIndex = optionIndex;
+            var event = new Event('change');
+            languageSelect.dispatchEvent(event);
+        }
+    }
+
     window.addEventListener('ethereum#initialized', login, {
         once: true,
     });
@@ -1185,6 +1226,7 @@
             depositSender: DOMPurify.sanitize(data.depositSender),
             depositRecipient: DOMPurify.sanitize(data.depositRecipient),
             quantity: DOMPurify.sanitize(data.quantity),
+            rfee: DOMPurify.sanitize(data.rfee),
             timelimit: [
               DOMPurify.sanitize(data.timelimit[0]),
               DOMPurify.sanitize(data.timelimit[1]),
@@ -3205,6 +3247,9 @@
                     var result = await showListing(mylisting, 3)
                     if(result == false) {
                       return;
+                    }
+                    if (!web3.utils.isAddress(referral)) {
+                        referral = '0x0000000000000000000000000000000000000000';
                     }
                     await DDEcontract.methods.acceptOffer(
                       mylisting.hash,

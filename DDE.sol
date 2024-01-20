@@ -90,7 +90,7 @@ contract TwoPartyEscrow {
     }
 
     function changeCustomFee(uint newfee) public {
-        require(newfee >= 0 && newfee <= 5000);
+        require(newfee >= affiliateFee && newfee <= 5000);
         customFee[msg.sender] = newfee;
     }
 
@@ -226,7 +226,7 @@ contract TwoPartyEscrow {
         return hash;
     }
     function acceptOffer(bytes32 hash, uint quantity, uint offerlimit, address affiliate) public {
-        if(affiliateFee != 0 && affiliate != address(0)) {
+        if(affiliate != address(0) && completed[affiliate][0] > 9) {
             referral[msg.sender] = affiliate;
         }
         address sender = contracts[hash].sender;
@@ -252,9 +252,11 @@ contract TwoPartyEscrow {
             require(userMarketID[hash] != 0); //Offer is no longer available
             require(quantity <= contracts[hash].quantity);
             style = newContract.status[0];
-            newContract.rfee = affiliateFee;
-            if(sender == address(0) && customFee[recipient] != 0) {
-                newContract.rfee = customFee[recipient];
+            if(newContract.rfee == 0) {
+                newContract.rfee = affiliateFee;
+                if(sender == address(0) && customFee[recipient] != 0) {
+                    newContract.rfee = customFee[recipient];
+                }
             }
             if(style == 0) {
                 contracts[hash].quantity -= quantity;
@@ -398,7 +400,7 @@ contract TwoPartyEscrow {
             contracts[hash].status[0] += 2;
         }
         if(contracts[hash].status[0] == 4) {
-            uint total;
+            uint total = 0;
             uint afee = affiliateFee;
             if(contracts[hash].rfee != 0) {
                 afee = contracts[hash].rfee;
@@ -460,6 +462,11 @@ contract TwoPartyEscrow {
         require(contracts[markets[marketId]].sender == address(0) || contracts[markets[marketId]].recipient == address(0));
         require(contracts[markets[marketId]].sender == msg.sender || contracts[markets[marketId]].recipient == msg.sender);
         contracts[markets[marketId]].quantity = quantity;
+    }
+    function changeReferralFee(bytes32 hash, uint newfee) public {
+        require(contracts[hash].sender == address(0) && contracts[hash].recipient == msg.sender);
+        require(newfee >= affiliateFee && newfee <= 5000);
+        contracts[hash].rfee = newfee;
     }
     function getCompleted(address user) public view returns (uint[2] memory){
         return completed[user];
