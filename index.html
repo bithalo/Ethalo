@@ -523,7 +523,7 @@
     ];
     var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
     web3 = new Web3("https://rpc.ankr.com/eth_goerli");
-    DDEaddy = "0xCC4b13bcE47B6223e25399aF8c9a24cFB36a5728"; //Goerli testnet is default market view
+    DDEaddy = "0x6A473ff62c5A0AE3e5aa833914775Da915ce384d"; //Goerli testnet is default market view
     var referral = '0x0000000000000000000000000000000000000000';  
     var DDEcontract2 = new web3.eth.Contract(DDEabi, DDEaddy);
     var marketOffers = {'indices':[], 'results':[]};
@@ -634,7 +634,7 @@
         if (currentChainId == 5) {
             netname = "Goerli Testnet";
             netname2 = "ETH";
-            DDEaddy = "0xCC4b13bcE47B6223e25399aF8c9a24cFB36a5728";            
+            DDEaddy = "0x6A473ff62c5A0AE3e5aa833914775Da915ce384d";            
         }
         if (netname == "unknown") {
             document.getElementById("connectionstatus").innerHTML = "Unsupported network";
