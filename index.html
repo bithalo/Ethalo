@@ -260,7 +260,7 @@
         <button onclick="withdraw()" t-id="28">Withdraw tokens</button><br><br>
         <label for="myContactInfo" t-id="29">Contact Information(email/signal/telegram):</label><br>
         <input id="myContactInfo"></input><br><br>
-        <button onclick="registerEmail(document.getElementById('myContactInfo').value)" t-id="30">Register contact information to my address(optional)</button><br>
+        <button onclick="registerData(document.getElementById('myContactInfo').value)" t-id="30">Register information to my address(contact/encryption/optional)</button><br>
         <div id="publicemail"></div><br><br>
         <label for="clearCompleted" t-id="31">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
@@ -631,6 +631,12 @@
                     btext+="<br>"+balances[tokens[i].address].token+" balance deposited to markets: "+displayDecimals(tokens[i].address, balances[tokens[i].address].amount);
             });
         }
+        reputation = [0,0];
+        reputation[0] = await DDEcontract.methods.completed(myaccounts, 0).call();
+        reputation[1] = await DDEcontract.methods.completed(myaccounts, 1).call();
+        if((reputation[0] + reputation[1]) > 0) {
+            btext+="<br>Contracting success rate: " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
+        }
         await window.web3.eth.getBalance(myaccounts, function(err, result1) {
             if (err) {
                 console.log(err);
@@ -804,14 +810,84 @@
       }
     }
 
-    async function registerEmail(myemail) {
-        if (myemail && myemail !== "") {
-            try {
-                await DDEcontract.methods.adduserdata(myemail).send({"from":myaccounts,"gasLimit": 3000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
-                await Swal.fire("Data added!");
-              } catch (error) {
-                console.error(error);
+    async function getUserPublicKey() {
+      try {
+        // Generate a random message for the user to sign
+        const messageToSign = 'Hello, Ethereum!';
+
+        // Use eth_sign to sign the message
+        const signature = await web3.eth.personal.sign(messageToSign, myaccounts, '');
+
+        // Extract the public keys from the signature
+        const recoveredPublicKeys = await web3.eth.personal.ecRecover(messageToSign, signature);
+
+        // Convert each public key to an address and check for a match with the user's address
+        console.log(recoveredPublicKeys)
+        if (Array.isArray(recoveredPublicKeys)) {
+            for (const publicKey of recoveredPublicKeys) {
+              const address = web3.utils.toChecksumAddress(publicKey);
+              
+              if (address === myaccounts) {
+                return publicKey;
+              }
             }
+        } else {
+            const address = web3.utils.toChecksumAddress(recoveredPublicKeys);
+            if (address === myaccounts) {
+                console.log('Correct Public Key:', address);
+                return recoveredPublicKeys;
+            }
+        }
+        console.error('No matching public key found.');
+        return null;
+      } catch (error) {
+        console.error('Error getting user public key:', error);
+        return null;
+      }
+    }
+
+    async function registerData(myemail) {
+        const { value: formValues } = await Swal.fire({
+          title: '',
+          html:
+            '<input id="checkbox1" type="checkbox" name="registerEmail"> ' +
+            '<label for="checkbox1">Register email/contact information</label><br>' +
+            '<input id="checkbox2" type="checkbox" name="registerPublicKey"> ' +
+            '<label for="checkbox2">Register public key for privacy/encryption</label>',
+          focusConfirm: false,
+          preConfirm: () => {
+            return {
+              registerEmail: document.getElementById('checkbox1').checked,
+              registerPublicKey: document.getElementById('checkbox2').checked
+            };
+          }
+        });
+        var myuserdata = {};
+        // Output the selected values
+        if (formValues) {
+          if(formValues.registerEmail) {
+            myuserdata.mycontact = myemail
+          }
+          if(formValues.registerPublicKey) {
+            myuserdata.publickey = await getUserPublicKey();
+            if(myuserdata.publickey == null) {
+                Swal.fire("Public key unknown.");
+                return;
+            }
+          }
+        }
+        if(Object.keys(myuserdata).length === 0) {
+          return;
+        }
+        if('mycontact' in myuserdata && myuserdata.mycontact == "") {
+          await Swal.fire("Email is blank, try again");
+          return;
+        }
+        try {
+            await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,"gasLimit": 3000000,"gasPrice":null,"maxPriorityFeePerGas":null,"maxFeePerGas":null});
+            await Swal.fire("Data added!");
+          } catch (error) {
+            console.error(error);
         }
     }
 
@@ -911,6 +987,7 @@
     };
 
     // Function to retrieve a file from Pinata IPFS
+    // May also add https://ipfs.io/ipfs/...
     const retrieveFromPinataIPFS = async (hash) => {        
         var url = pinataGateway + hash;
         if(pinataGateway != "https://gateway.pinata.cloud/ipfs/") {
@@ -1096,8 +1173,6 @@
         await DDEcontract3.methods.getContract(DOMPurify.sanitize(hash)).call().then(async function (data) {
           var text = '';
           try {
-            console.log(JSON.stringify(data));
-            console.log(JSON.stringify(hash));
             text = await getOfferData(DOMPurify.sanitize(data.message));
           } catch (e) {
             console.log(e);
@@ -1122,11 +1197,16 @@
             message:DOMPurify.sanitize(text)
           };
           try {
+              var reputation = [0,0];
               if(data.sender != "0x0000000000000000000000000000000000000000") {
-                  jsondata.reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(data.sender).call());
+                reputation[0] = DOMPurify.sanitize(await DDEcontract3.methods.completed(data.sender, 0).call());
+                reputation[1] = DOMPurify.sanitize(await DDEcontract3.methods.completed(data.sender, 1).call());
+                jsondata.reputation = reputation;
               }
               if(data.recipient != "0x0000000000000000000000000000000000000000") {
-                  jsondata.reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(data.recipient).call());
+                reputation[0] = DOMPurify.sanitize(await DDEcontract3.methods.completed(data.recipient, 0).call());
+                reputation[1] = DOMPurify.sanitize(await DDEcontract3.methods.completed(data.recipient, 1).call());
+                jsondata.reputation = reputation;
               }
           } catch (e) {
               console.log("Error loading reputation data");
@@ -1854,7 +1934,7 @@
       }
       var contact2 = '';
       var datalen = 0;
-      var reputation = 0;
+      var reputation = [0,0];
       if(myaccounts != listing.recipient && listing.recipient != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
           try {
               datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.recipient, 3).call());
@@ -1864,7 +1944,8 @@
                       message.innerHTML += '<br><br>Recipients contact information: <br>' + contact2;
                   }
               }
-              reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.recipient).call());
+              reputation[0] = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.recipient, 0).call());
+              reputation[1] = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.recipient, 1).call());
               if(reputation[0] == 0 && reputation[1] == 0) {
                 message.innerHTML += '<br><br>Recipient is a new user of the markets. <br>' + contact2;
               } else {
@@ -1883,7 +1964,8 @@
                       message.innerHTML += '<br><br>Senders contact information: <br>' + contact2;
                   }
               }
-              reputation = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.sender).call());
+              reputation[0] = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.sender, 0).call());
+              reputation[1] = DOMPurify.sanitize(await DDEcontract.methods.completed(listing.sender, 1).call());
               if(reputation[0] == 0 && reputation[1] == 0) {
                 message.innerHTML += '<br><br>Sender is a new user of the markets. <br>' + contact2;
               } else {

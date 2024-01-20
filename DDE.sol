@@ -442,7 +442,9 @@ contract TwoPartyEscrow {
     function removeMarketOffer(bytes32 hash) public {
         uint marketId = userMarketID[hash];
         require(contracts[markets[marketId]].sender == address(0) || contracts[markets[marketId]].recipient == address(0));
-        require(contracts[markets[marketId]].sender == msg.sender || contracts[markets[marketId]].recipient == msg.sender);
+        if(block.timestamp < contracts[markets[marketId]].timelimit[2] + 31556952) {
+            require(contracts[markets[marketId]].sender == msg.sender || contracts[markets[marketId]].recipient == msg.sender);
+        }
         if(tagdata[hash].length > 0) {
             removeTags(hash);
         }
@@ -458,6 +460,9 @@ contract TwoPartyEscrow {
         require(contracts[markets[marketId]].sender == address(0) || contracts[markets[marketId]].recipient == address(0));
         require(contracts[markets[marketId]].sender == msg.sender || contracts[markets[marketId]].recipient == msg.sender);
         contracts[markets[marketId]].quantity = quantity;
+    }
+    function getCompleted(address user) public view returns (uint[2] memory){
+        return completed[user];
     }
     function getMarketOffer(uint marketId) public view returns (Contract memory) {
         return contracts[markets[marketId]];
