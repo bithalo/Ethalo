@@ -605,6 +605,7 @@
         document.getElementById("myoffers").innerHTML = ""; // clear the container first
         document.getElementById("mycontracts").innerHTML = ""; // clear the container first
         document.getElementById('publicemail').innerHTML = "";
+        document.getElementById('myPasswordInput').innerHTML = "";
         offerExpiration.selectedIndex = 0;
         currentMarketsLength = 0;
         userpubkey = "";
@@ -649,6 +650,21 @@
               maxPriorityFeePerGas: window.web3.utils.toWei('1.5', 'gwei'), // Max priority fee of 1.5 Gwei
               maxFeePerGas: window.web3.utils.toWei('1.6', 'gwei'), // Max base fee of 1.5 Gwei
             };
+            tokens = [
+              {
+                  address: "0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E",
+                  token: "ETH",
+                  image: "eth.png",
+                  decimals: "18"
+              },
+              {
+                  address: "0xb3460166784fd07A022E51547379352De4E98dF5",
+                  token: "WALRUS",
+                  image: "walrus.png",
+                  decimals: "8"
+              }
+            ];
+            tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
         }
         if (netname == "unknown") {
             document.getElementById("connectionstatus").innerHTML = "Unsupported network";
@@ -692,7 +708,7 @@
             });
         }
         reputation = [0,0,0];
-        reputation = DOMPurify.sanitize(await DDEcontract.methods.getCompleted(myaccounts).call());
+        reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
         if((reputation[0] + reputation[1]) > 0) {
             btext+="<br>Contracting success rate: " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
         }
@@ -708,9 +724,21 @@
         try {
             var afee = DOMPurify.sanitize(await DDEcontract.methods.affiliateFee().call());
             var cfee = DOMPurify.sanitize(await DDEcontract.methods.customFee(myaccounts).call());
-            var atext = "Base referral fee paid to affiliates: " + afee;
+            var atext = "Base referral fee paid to affiliates: " + (afee / 100).toFixed(2) + "%";
             if(cfee != 0) {
-              atext = "Custom referral fee paid to affiliates: " + cfee;
+              atext = "Custom referral fee paid to affiliates: " + (cfee / 100).toFixed(2) + "%";
+            }            
+            if(reputation[2] >= 10) {
+              atext += "<br>You are an affiliate! You may market this system using your affiliate link.";
+            } else {
+              var cooldown = DOMPurify.sanitize(await DDEcontract.methods.cooldown(myaccounts).call());
+              if(cooldown != 0 && (cooldown2 - CurrentTimeStamp) > 0) {
+                atext += "<br>Cooldown between next deal to qualify as an affiliate: " + ((parseFloat(cooldown) - parseFloat(CurrentTimeStamp)) / 60 / 60).toFixed(2) + "(days)";
+              } else {
+                var threshold = DOMPurify.sanitize(await DDEcontract.methods.minimumFeeThreshold(tokens[0].address).call());
+                atext += "<br>Minimum qualifying fee on next deal to become affiliate: " + displayDecimals(tokens[0].address, threshold);
+              }
+              atext += "<br>Qualifying contracts remaining until you can become an affiliate: " + (10 - reputation[2]);
             }
             var referral2 = DOMPurify.sanitize(await DDEcontract.methods.referral(myaccounts).call());
             if(referral2 == "0x0000000000000000000000000000000000000000" && referral == "0x0000000000000000000000000000000000000000") {
@@ -720,12 +748,17 @@
               atext += "<br>Current affiliate assigned to account: " + referral;
             }
             if(referral != "0x0000000000000000000000000000000000000000") {
-              var arep = DOMPurify.sanitize(await DDEcontract.methods.getCompleted(referral).call());
+              var arep = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(referral).call())));
               if(arep[2]>=10) {
                 atext += "<br>Future affiliate assigned on next contract: " + referral;
               } else {
                 atext += "<br>Linked affiliate is not valid because they have not completed 10 qualified deals yet: " + referral;
               }
+            }
+            if(reputation[0] + reputation[1] == 0) {
+              atext += "<br><br>You are new to the markets! Welcome to BitBay.";
+            } else {
+              atext += "<br><br>Contracting success rate: " + ((reputation[0] / (reputation[0] + reputation[1])) * 100).toFixed(2) + "%(" + reputation[0] + "/" + (reputation[0] + reputation[1]) + ")";
             }
             document.getElementById("affiliateInfo").innerHTML = atext;
         } catch(e) {
@@ -737,8 +770,27 @@
             datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 3).call());
             if(datalen > 0) {
                 contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(myaccounts, datalen-1).call()));
+                var datatext = '';
                 if("mycontact" in contact2) {
-                  document.getElementById('publicemail').innerHTML = "Registered contact information: " + contact2['mycontact'];
+                  datatext += "Registered contact information: " + contact2['mycontact'];
+                }
+                if("publickey" in contact2) {
+                  if(datatext != '') {
+                    datatext += '<br>';
+                  }
+                  var shortPublicKey = contact2['publickey'].substring(0, 10) + '...<span id="showMore" style="color:blue">(show more)</span>';
+                  datatext += "Public key(for encryption): " + shortPublicKey;
+                  document.getElementById('publicemail').innerHTML = datatext;
+                  document.getElementById('showMore').addEventListener('click', function() {
+                    var datatext2 = '';
+                    if("mycontact" in contact2) {
+                      datatext2 += "Registered contact information: " + contact2['mycontact'];
+                      datatext2 += '<br>';
+                    }
+                    document.getElementById('publicemail').innerHTML = datatext2 + "Public key(for encryption): " + contact2['publickey'];
+                  });
+                } else {
+                  document.getElementById('publicemail').innerHTML = datatext;
                 }
             } else {
                 document.getElementById('publicemail').innerHTML = "";
@@ -1065,7 +1117,7 @@
       langOptions.forEach((lang) => {
         swalOptions[lang] = lang;
       });
-      var arep = DOMPurify.sanitize(await DDEcontract.methods.getCompleted(myaccounts).call());
+      var arep = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
       if(arep[2]<10) {
         Swal.fire("You have not completed 10 deals with the minimum threshold and requirements yet. Only then can you become an affiliate.");
         return;
@@ -1125,15 +1177,15 @@
             return 'You need to enter something!';
           }
         },
-      }).then((result) => {
+      }).then((result) => async function() {
         if (result.isConfirmed) {
           const affiliate = result.value;
           if (!web3.utils.isAddress(referral)) {              
               Swal.fire("Address was not valid.");
               return;
           }
-          reputation = [0,0,0];
-          reputation = DOMPurify.sanitize(await DDEcontract.methods.getCompleted(affiliate).call());
+          var reputation = [0,0,0];
+          reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(affiliate).call())));
           if(reputation[2] >= 10) {
             await DDEcontract.methods.changeAffiliate(affiliate).send({"from":myaccounts,...gasOptions});
             Swal.fire("Success!");
@@ -1145,7 +1197,7 @@
       });
     }
     async function setCustomFee() {
-    await Swal.fire({
+      await Swal.fire({
         title: 'Please enter the percentage fee that you wish to offer to affiliates who help find customers for you.',
         input: 'range',
         inputAttributes: {
@@ -1162,9 +1214,9 @@
         },
         preConfirm: (value) => {
         }
-      }).then((result) => {
+      }).then((result) => async function() {
         if (result.isConfirmed) {
-          value = parseInt(value) * parseInt(100);
+          var value = parseInt(result.value) * parseInt(100);
           await DDEcontract.methods.changeCustomFee(value).send({"from":myaccounts,...gasOptions});
           Swal.fire("Success!");
         }
@@ -1481,11 +1533,11 @@
           try {
               var reputation = [0,0,0];
               if(jsondata.sender != "0x0000000000000000000000000000000000000000") {
-                reputation = DOMPurify.sanitize(await DDEcontract3.methods.getCompleted(jsondata.sender).call());
+                reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(jsondata.sender).call())));
                 jsondata.reputation = reputation;
               }
               if(jsondata.recipient != "0x0000000000000000000000000000000000000000") {
-                reputation = DOMPurify.sanitize(await DDEcontract3.methods.getCompleted(jsondata.recipient).call());
+                reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(jsondata.recipient).call())));
                 jsondata.reputation = reputation;
               }
           } catch (e) {
@@ -2037,15 +2089,30 @@
         document.head.appendChild(style);
     }
 
-    function displayDecimals(token, amount) {
-        var text = '';
+    function displayDecimals(token, amountString) {
+        var formattedAmount = '';
         for (var i = 0; i < tokens.length; i++) {
             if(tokens[i].address == token) {
-                text = parseFloat(amount / (10 ** tokens[i].decimals));
+                const length = amountString.length;
+
+                if (length <= tokens[i].decimals) {
+                  const zerosToAdd = tokens[i].decimals - length;
+                  amountString = '0'.repeat(zerosToAdd) + amountString;
+                }
+                const position = length - tokens[i].decimals;
+                formattedAmount = amountString.substring(0, position) + '.' + amountString.substring(position);
+                // Remove leading zeros
+                formattedAmount = formattedAmount.replace(/^0+/, '');
+                // If the string starts with a '.', prepend '0'
+                formattedAmount = formattedAmount.replace(/^\./, '0.');
+                // Remove trailing zeros
+                formattedAmount = formattedAmount.replace(/0+$/, '');
+                // If the string ends with a '.', remove it
+                formattedAmount = formattedAmount.replace(/\.$/, '');                
                 break;
             }
         }
-        return text
+        return formattedAmount || '0';
     }
 
     // function for searching the listings
@@ -2226,7 +2293,7 @@
                 }
               }
             }
-            reputation = DOMPurify.sanitize(await DDEcontract.methods.getCompleted(listing.recipient).call());
+            reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(listing.recipient).call())));
             if(reputation[0] == 0 && reputation[1] == 0) {
               message.innerHTML += '<br><br>Recipient is a new user of the markets. <br>';
             } else {
@@ -2247,7 +2314,7 @@
                 }
               }
             }
-            reputation = DOMPurify.sanitize(await DDEcontract.methods.getCompleted(listing.sender).call());
+            reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(listing.sender).call())));
             if(reputation[0] == 0 && reputation[1] == 0) {
               message.innerHTML += '<br><br>Sender is a new user of the markets. <br>';
             } else {
@@ -3195,16 +3262,18 @@
               } else {
                 otherparty = sender2;
               }
-              datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(otherparty, 3).call());
-              if(datalen > 0) {
+              if(otherparty != "0x0000000000000000000000000000000000000000") {
+                datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(otherparty, 3).call());
+                if(datalen > 0) {
                   contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(otherparty, datalen-1).call()));
-              }
-              if('publickey' in contact2 && userprivkey != '') {
-                if(myaccounts == sender2) {
-                  message = JSON.stringify({'recipient':cryptico.encrypt(message, theirpublickey[thisroom], userprivkey),'sender':cryptico.encrypt(message, userpubkey, userprivkey)});
-                }
-                if(myaccounts == recipient2) {
-                  message = JSON.stringify({'sender':cryptico.encrypt(message, theirpublickey[thisroom], userprivkey),'recipient':cryptico.encrypt(message, userpubkey, userprivkey)});
+                  if('publickey' in contact2 && userprivkey != '') {
+                    if(myaccounts == sender2) {
+                      message = JSON.stringify({'recipient':cryptico.encrypt(message, theirpublickey[thisroom], userprivkey),'sender':cryptico.encrypt(message, userpubkey, userprivkey)});
+                    }
+                    if(myaccounts == recipient2) {
+                      message = JSON.stringify({'sender':cryptico.encrypt(message, theirpublickey[thisroom], userprivkey),'recipient':cryptico.encrypt(message, userpubkey, userprivkey)});
+                    }
+                  }
                 }
               }
           } catch(e) {
@@ -3276,7 +3345,7 @@
                   }).then((result) => {
                     if (result.isConfirmed) {
                       var emailSubject = encodeURIComponent('You have received an offer on the BitBay marketplace');
-                      var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have sent you an offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. If you have any questions about my offer please let me know. Thank you and have a nice day.');
+                      var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have sent you an offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about my offer please let me know. Thank you and have a nice day.');
                       const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
                       window.location.href = mailtoLink;
                     }
@@ -3569,7 +3638,7 @@
                         }).then((result) => {
                           if (result.isConfirmed) {
                             var emailSubject = encodeURIComponent('Your offer on BitBay markets was accepted');
-                            var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. If you have any questions about our contract please let me know. Thank you and have a nice day.');
+                            var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.');
                             const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
                             window.location.href = mailtoLink;
                           }
@@ -3637,7 +3706,7 @@
                     }).then((result) => {
                       if (result.isConfirmed) {
                         var emailSubject = encodeURIComponent('Your offer on BitBay markets was accepted');
-                        var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. If you have any questions about our contract please let me know. Thank you and have a nice day.');
+                        var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.');
                         const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
                         window.location.href = mailtoLink;
                       }
@@ -3682,7 +3751,7 @@
             readMessages[listing.index] = true;
             localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));            
             await loadUser();
-            dialog.remove();           
+            dialog.remove();
           });
 
           cancelBtn.addEventListener("click", async () => {
@@ -3693,7 +3762,8 @@
                     myaccounts
                   ).send({"from":myaccounts,...gasOptions});
                   await Swal.fire("Contract removed!");
-                  await loadUser();                
+                  await loadUser();
+                  dialog.remove();
             } catch (error) {
                 console.error(error);
             }
@@ -3706,6 +3776,7 @@
                   ).send({"from":myaccounts,...gasOptions});
                   await Swal.fire("Contract removed!");
                   await loadUser();
+                  dialog.remove();
                 } else {
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash,
@@ -3713,6 +3784,7 @@
                   ).send({"from":myaccounts,...gasOptions});
                   await Swal.fire("Contract removed!");
                   await loadUser();
+                  dialog.remove();
                 }
             } catch (error) {
                 console.error(error);
