@@ -49,7 +49,8 @@ languages['ar']={
   "46":{"#ar":"غير متصل"},
   "47":{"#ar":"نسخ الرابط التابع"},
   "48":{"#ar":"تغيير رابط الإحالة الخاص بي"},
-  "49":{"#ar":"تعيين رسوم الإحالة المخصصة"}
+  "49":{"#ar":"تعيين رسوم الإحالة المخصصة"},
+  "50":{"#ar": "محاولة إخطار العملاء المحتملين عبر عميل البريد الإلكتروني الافتراضي (عند الاقتضاء)"}
 };
 
 
@@ -102,7 +103,8 @@ languages['ch']={
   "46":{"#ch":"未连接"},
   "47":{"#ch":"复制推广链接"},
   "48":{"#ch":"更改我的推广链接"},
-  "49":{"#ch":"设置自定义推荐费"}
+  "49":{"#ch":"设置自定义推荐费"},
+  "50":{"#ch": "尝试通过默认电子邮件客户端通知潜在客户（如果适用）"}
 };
 
 languages['en']={
@@ -154,7 +156,8 @@ languages['en']={
   "46":{"#en":"Not connected"},
   "47":{"#en":"Copy affiliate link"},
   "48":{"#en":"Change my affiliate"},
-  "49":{"#en":"Set custom referral fee"}
+  "49":{"#en":"Set custom referral fee"},
+  "50":{"#en": "Attempt to notify prospects through default email client(when applicable)"}
 };
 
 languages['fr']={
@@ -206,7 +209,8 @@ languages['fr']={
   "46": {"#fr": "Non connecté"},
   "47": {"#fr": "Copier le lien d'affiliation"},
   "48": {"#fr": "Changer mon lien d'affiliation"},
-  "49": {"#fr": "Définir des frais de parrainage personnalisés"}
+  "49": {"#fr": "Définir des frais de parrainage personnalisés"},
+  "50": {"#fr": "Tentative de notifier les prospects via le client de messagerie électronique par défaut (si applicable)"}
 };
 
 languages['ge']={
@@ -258,7 +262,8 @@ languages['ge']={
   "46": {"#ge": "Nicht verbunden"},
   "47": {"#ge": "Affiliate-Link kopieren"},
   "48": {"#ge": "Meinen Affiliate-Link ändern"},
-  "49": {"#ge": "Benutzerdefinierte Empfehlungsgebühr festlegen"}
+  "49": {"#ge": "Benutzerdefinierte Empfehlungsgebühr festlegen"},
+  "50": {"#ge": "Versuch, potenzielle Kunden über den Standard-E-Mail-Client zu benachrichtigen (falls zutreffend)"}
 };
 
 languages['it']={
@@ -310,7 +315,8 @@ languages['it']={
   "46": {"#it": "Non connesso"},
   "47": {"#it": "Copia il link di affiliazione"},
   "48": {"#it": "Cambia il mio link di affiliazione"},
-  "49": {"#it": "Imposta la tariffa di referral personalizzata"}
+  "49": {"#it": "Imposta la tariffa di referral personalizzata"},
+  "50": {"#it": "Tentativo di notificare i potenziali clienti tramite il client di posta elettronica predefinito (quando applicabile)"}
 };
 
 languages['ja']={
@@ -348,7 +354,7 @@ languages['ja']={
   "32":{"#ja":"更新/復元 以前にクリアされた契約"},
   "33":{"#ja":"プライベートオファーの有効期限: "},
   "34":{"#ja":"なし"},
-  "35" :{"#ja":"2 週間"},
+  "35":{"#ja":"2 週間"},
   "36":{"#ja":"1 か月"},
   "37":{"#ja" :"キャッシュされたサイト/ユーザー データをバックアップします"},
   "38":{"#ja":"サイト/ユーザー データをファイルからロードします"},
@@ -357,12 +363,13 @@ languages['ja']={
   "41":{"#ja":"破られない契約の世界へようこそ 。 これらは二者間のエスクロー（二重預金）契約であり、破棄することはできず、第三者の仲裁人を必要としません。 両方のユーザーは、共同アカウントへの支払いとともにカスタマイズ可能な入金を行います。 取引がうまくいけば、両者は契約を締結します。 一方の当事者がもう一方の当事者をだまそうとすると、最終的には取引が期限切れになり、誰も得をせず、窃盗は利益を生みません。 これにより、ユーザーは、一緒に勝つか一緒に負けるかのどちらかであるため、正直になり、契約を最後まで遵守する必要があります。"},
   "42":{"#ja":"市場自体は Solidity チェーンの上で運営されています。 イーサリアムやポリゴンなど。 オファーは、商品、サービス、物々交換、P2P 取引など多岐にわたります。 この Web ページは完全にオープン ソースであり、クライアント側で実行されるため、ユーザーはこのコードを github からダウンロードしてローカルで実行して、セキュリティをさらに強化することもできます。 2014 年に BitHalo によって開発されたこのプロトコルは、イーサリアムよりも前であり、世界初のスマート コントラクトでした。 これは、完全に分散化された市場向けの Web ベースのインターフェイスです。"},
   "43":{"#ja":"商品を販売する場合、ユーザーはドロップシッピングサービスや、大手企業で一般的に見られる配送料に対抗するために割引配送を提供するサービスを必ず検討したいと思うでしょう。 これを行うには、場合によっては配送料を最大 75% 節約できるサードパーティの配送アカウントにサインアップする必要があります。 売り手はエスクロー中に買い手に送料を請求することもあります。買い手は金額が保証金を超えないように注意するか、自分で配送ラベルを購入するように注意する必要があります。 ユーザーはエスクロー プロセスを通じて相互に通信を維持するように努める必要があり、エスクロー中に双方が保護されるようにキーのバックアップを作成することをお勧めします。 これらの市場は AI (webgpt など) やコミュニティ主導のモデレーションを通じてモデレートできますが、投稿内容のリスクと自分のエスクローについてはユーザーが全責任を負います。 このことを念頭に置いて、お住まいの国で違法なコンテンツを投稿しないことを強くお勧めします。 現金を伴う取引の場合、ユーザーは必要に応じて独自のデューデリジェンスを行い、「顧客を知る」必要があります。 国際商取引およびサービスの世界で詐欺行為を排除するために二重預金エスクローを使用することは、誰にとっても最大の利益になります。 仲裁人は不当な取引裁定の真実を知ることができず、共謀して多大な損失を引き起こす可能性があり、またより大きなコストも発生する可能性があるため、ユーザーが契約を自分で管理する場合にはこれが利点となります。 ユーザーは望ましい結果を達成するために互いに協力する必要があります。 ユーザーは、IPFS を使用してオファーをホストする人でもあります。 したがって、独自の IPFS ノードを実行して市場をアーカイブすることをお勧めします。 連絡先情報をブロックチェーンに登録することをお勧めします。 これにより、契約の相手方は、交渉に関する質問がある場合にあなたに連絡する方法を確実に知ることができます。 コードはローカルで実行でき、コードと Web サイトがホストされている github ページにアクセスして監査することもできます。 このシステムには所有者がなく、完全に無料で使用できます。 ただし、アフィリエイト/紹介に対して有効化できる設定があり、その範囲は 0 ～ 1% です。 ユーザーにアフィリエイトへの参加を促すため、アフィリエイトに料金が支払われない場合、料金は無駄になります。 これにより、ユーザーに収入を得る方法が提供され、システムのマーケティングに役立ちます。 マーケットのユーザーは、10 件の取引を完了すると、自動的にアフィリエイトになります。 これにより、必要に応じて (独自のアフィリエイトになれるため) マーケットを無料で使用できるようになり、アフィリエイト リンクを通じてユーザーを Web サイトに誘導できるようになります。 リンクを通じてアクセスすると、取引が受け入れられたときにアフィリエイトがそのアカウントに登録され、その紹介の恩恵を受けることができます。 また、販売者の中には、より魅力的な紹介料を提示する場合もあり、これによりアフィリエイターは相互の合意によりより多くの利益を得ることができます。 BitBay の仕組みの詳細については、次のサイトをご覧ください。"},
-  "44": {"#ja": "パスワード（暗号化用）："},
-  "45": {"#ja": "稼ぐ"},
-  "46": {"#ja": "未接続"},
-  "47": {"#ja": "アフィリエイトリンクをコピー"},
-  "48": {"#ja": "私のアフィリエイトを変更"},
-  "49": {"#ja": "カスタム紹介手数料を設定"}
+  "44":{"#ja": "パスワード（暗号化用）："},
+  "45":{"#ja": "稼ぐ"},
+  "46":{"#ja": "未接続"},
+  "47":{"#ja": "アフィリエイトリンクをコピー"},
+  "48":{"#ja": "私のアフィリエイトを変更"},
+  "49":{"#ja": "カスタム紹介手数料を設定"},
+  "50":{"#ja": "（該当する場合）デフォルトの電子メールクライアントを介して見込み顧客に通知を試みる"} 
 };
 
 languages['ko']={
@@ -414,7 +421,8 @@ languages['ko']={
   "46": {"#ko": "연결 안 됨"},
   "47": {"#ko": "제휴 링크 복사"},
   "48": {"#ko": "내 제휴 변경"},
-  "49": {"#ko": "맞춤형 추천 수수료 설정"}
+  "49": {"#ko": "맞춤형 추천 수수료 설정"},
+  "50": {"#ko": "기본 이메일 클라이언트를 통해 (해당 경우에) 잠재고객에게 통지 시도"}
 }
 
 languages['po']={
@@ -466,7 +474,8 @@ languages['po']={
   "46": {"#po": "Não conectado"},
   "47": {"#po": "Copiar link de afiliado"},
   "48": {"#po": "Alterar meu afiliado"},
-  "49": {"#po": "Definir taxa de indicação personalizada"}
+  "49": {"#po": "Definir taxa de indicação personalizada"},
+  "50": {"#po": "Tentativa de notificar prospects através do cliente de e-mail padrão (quando aplicável)"}
 };
 
 languages['ru'] = {
@@ -518,7 +527,8 @@ languages['ru'] = {
   "46": {"#ru": "Нет соединения"},
   "47": {"#ru": "Копировать партнерскую ссылку"},
   "48": {"#ru": "Изменить мой партнер"},
-  "49": {"#ru": "Установить свою комиссию за рефералов"}
+  "49": {"#ru": "Установить свою комиссию за рефералов"},
+  "50": {"#ru": "Попытка уведомления потенциальных клиентов через стандартного почтового клиента (по возможности)"}
 }
 
 languages['sp'] = {
@@ -564,12 +574,12 @@ languages['sp'] = {
   "40": {"#sp": "Acerca de nosotros"},
   "41": {"#sp": "Bienvenido al mundo de los contratos irrompibles. Estos son contratos de custodia entre dos partes (doble depósito) que no pueden romperse y no requieren árbitros de terceros. Ambos usuarios colocan un depósito personalizable junto con un pago en una cuenta conjunta. Si el trato va bien, ambos lo confirman. Si una de las partes intenta estafar a la otra, el trato eventualmente expirará y fracasará, de modo que nadie gana y el robo no es rentable. Esto obliga a los usuarios a ser honestos y cumplir con sus acuerdos, ya que o ganan juntos o pierden juntos."},
   "42": {"#sp": "Los propios mercados se ejecutan en cadenas Solidity como Ethereum y Polygon. Las ofertas pueden variar desde bienes, servicios, trueque hasta trading P2P. Dado que esta página web es de código abierto y se ejecuta en el lado del cliente, el usuario también puede descargar este código desde GitHub y ejecutarlo localmente para una mayor seguridad. Este protocolo, que fue pionero de BitHalo en 2014, precedió a Ethereum y fue el primer contrato inteligente del mundo. Esta es una interfaz web para mercados totalmente descentralizados."},
-  "43": {"#sp": "Para vender productos, los usuarios definitivamente querrán considerar un servicio de envío directo o un servicio que ofrezca envío con descuento para competir con las tarifas de envío que normalmente se encuentran en las principales empresas. Para hacer esto, debe registrarse para obtener una cuenta de envío de terceros que debería permitirle ahorrar hasta un 75% en el envío en algunos casos. Los vendedores también pueden cobrar a los compradores por el envío mientras están en depósito en garantía y los compradores deben tener cuidado de asegurarse de que el monto no exceda los depósitos o de que ellos mismos compren la etiqueta de envío. Los usuarios deben intentar mantenerse en comunicación entre sí durante el proceso de depósito en garantía y se recomienda tener una copia de seguridad de sus claves para que ambas partes estén protegidas durante el depósito en garantía. Aunque estos mercados podrían moderarse mediante IA (como webgpt) y moderación impulsada por la comunidad, los usuarios son totalmente responsables de los riesgos de lo que publican y de sus propios depósitos en garantía. Teniendo esto en cuenta, se recomienda encarecidamente no publicar contenido que sea ilegal en el país donde reside. Para acuerdos que involucran efectivo, los usuarios deben hacer su propia diligencia debida y su propio 'conozca a su cliente' si es necesario. Lo mejor para todos es utilizar el depósito en garantía doble para deshacerse del engaño en el mundo del comercio y los servicios internacionales. Es una ventaja que los usuarios administren los contratos ellos mismos porque los árbitros no pueden conocer la verdad de un acuerdo que falla injustamente y pueden confabularse causando grandes pérdidas y también incurriendo en un mayor costo. Los usuarios se ven obligados a trabajar entre sí para lograr un resultado deseable. Los usuarios también son quienes alojan las ofertas utilizando IPFS. Por lo tanto, es una buena práctica ejecutar su propio nodo IPFS para archivar los mercados. Se recomienda que registre su información de contacto en blockchain. Esto garantiza que las contrapartes del contrato sepan cómo ponerse en contacto con usted para cualquier pregunta sobre las negociaciones. El código se puede ejecutar localmente y también se puede auditar visitando la página de GitHub donde están alojados el código y el sitio web. Este sistema no tiene propietario y su uso es totalmente gratuito. Sin embargo, hay una configuración que se puede activar para afiliados/referidos que puede oscilar entre 0 y 1%. Para alentar a los usuarios a interactuar con afiliados, la tarifa se gasta si no se paga a un afiliado. Esto ayuda a comercializar el sistema al brindarles a los usuarios una forma de ganar dinero. Un usuario de los mercados se convierte automáticamente en afiliado si completa 10 transacciones. Eso les permite utilizar los mercados de forma gratuita si así lo desean (ya que pueden ser su propio afiliado) y les permite enviar usuarios al sitio web a través de un enlace de afiliado. La visita a través de un enlace registra al afiliado en esa cuenta cuando se acepta una oferta y le permite beneficiarse de esa referencia. Además, algunos vendedores pueden ofrecer una tarifa de referencia más atractiva que debería permitir a los afiliados obtener más ganancias de mutuo acuerdo. Para obtener más información sobre cómo funciona BitBay, puede visitar: ",
+  "43": {"#sp": "Para vender productos, los usuarios definitivamente querrán considerar un servicio de envío directo o un servicio que ofrezca envío con descuento para competir con las tarifas de envío que normalmente se encuentran en las principales empresas. Para hacer esto, debe registrarse para obtener una cuenta de envío de terceros que debería permitirle ahorrar hasta un 75% en el envío en algunos casos. Los vendedores también pueden cobrar a los compradores por el envío mientras están en depósito en garantía y los compradores deben tener cuidado de asegurarse de que el monto no exceda los depósitos o de que ellos mismos compren la etiqueta de envío. Los usuarios deben intentar mantenerse en comunicación entre sí durante el proceso de depósito en garantía y se recomienda tener una copia de seguridad de sus claves para que ambas partes estén protegidas durante el depósito en garantía. Aunque estos mercados podrían moderarse mediante IA (como webgpt) y moderación impulsada por la comunidad, los usuarios son totalmente responsables de los riesgos de lo que publican y de sus propios depósitos en garantía. Teniendo esto en cuenta, se recomienda encarecidamente no publicar contenido que sea ilegal en el país donde reside. Para acuerdos que involucran efectivo, los usuarios deben hacer su propia diligencia debida y su propio 'conozca a su cliente' si es necesario. Lo mejor para todos es utilizar el depósito en garantía doble para deshacerse del engaño en el mundo del comercio y los servicios internacionales. Es una ventaja que los usuarios administren los contratos ellos mismos porque los árbitros no pueden conocer la verdad de un acuerdo que falla injustamente y pueden confabularse causando grandes pérdidas y también incurriendo en un mayor costo. Los usuarios se ven obligados a trabajar entre sí para lograr un resultado deseable. Los usuarios también son quienes alojan las ofertas utilizando IPFS. Por lo tanto, es una buena práctica ejecutar su propio nodo IPFS para archivar los mercados. Se recomienda que registre su información de contacto en blockchain. Esto garantiza que las contrapartes del contrato sepan cómo ponerse en contacto con usted para cualquier pregunta sobre las negociaciones. El código se puede ejecutar localmente y también se puede auditar visitando la página de GitHub donde están alojados el código y el sitio web. Este sistema no tiene propietario y su uso es totalmente gratuito. Sin embargo, hay una configuración que se puede activar para afiliados/referidos que puede oscilar entre 0 y 1%. Para alentar a los usuarios a interactuar con afiliados, la tarifa se gasta si no se paga a un afiliado. Esto ayuda a comercializar el sistema al brindarles a los usuarios una forma de ganar dinero. Un usuario de los mercados se convierte automáticamente en afiliado si completa 10 transacciones. Eso les permite utilizar los mercados de forma gratuita si así lo desean (ya que pueden ser su propio afiliado) y les permite enviar usuarios al sitio web a través de un enlace de afiliado. La visita a través de un enlace registra al afiliado en esa cuenta cuando se acepta una oferta y le permite beneficiarse de esa referencia. Además, algunos vendedores pueden ofrecer una tarifa de referencia más atractiva que debería permitir a los afiliados obtener más ganancias de mutuo acuerdo. Para obtener más información sobre cómo funciona BitBay, puede visitar: "},
   "44": {"#sp": "Contraseña (para cifrado):"},
   "45": {"#sp": "Ganar"},
   "46": {"#sp": "No conectado"},
   "47": {"#sp": "Copiar enlace de afiliado"},
   "48": {"#sp": "Cambiar mi afiliado"},
-  "49": {"#sp": "Establecer tarifa de referencia personalizada"}
-  }
+  "49": {"#sp": "Establecer tarifa de referencia personalizada"},
+  "50": {"#sp": "Intento de notificar a los posibles clientes a través del cliente de correo electrónico predeterminado (cuando sea aplicable)"}
 };
