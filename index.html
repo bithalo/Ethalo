@@ -10,6 +10,8 @@
 <script type="text/javascript" src="./axios.min.js"></script>
 <script type="text/javascript" src="./web3.min.js"></script>
 <script type="text/javascript" src="./jdenticon.min.js"></script>
+<script type="text/javascript" src="./simple-scrollbar.min.js"></script>
+<link rel="stylesheet" href="./simple-scrollbar.css">
 <html>
 <head>
     <meta charset="UTF-8">
@@ -18,6 +20,46 @@
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <title t-id="1">BitBay Decentralized Markets</title>
     <style>
+        .swal2-popup {
+          background-color: #ededed; /* Background color */
+          color: #000000; /* Text color */
+          border: 2px solid #3d0064; /* Border color */
+          border-radius: 4px; /* Border radius */
+          font-size: 11px;
+          font-family: 'Courier New', monospace; /* Custom font */
+          font-weight: normal;
+          z-index: 1000;
+        }
+        .swal2-title {
+          color: #3d0064; /* Title text color */
+        }
+        .swal2-content {
+          color: #3d0064; /* Content text color */
+        }
+        .swal2-confirm,
+        .swal2-cancel {
+          background-color: #ededed; /* Confirm and cancel button background color */
+          color: #3d0064; /* Button text color */
+        }
+        /* Hover effect for buttons */
+        .swal2-confirm:hover,
+        .swal2-cancel:hover {
+          background-color: #0086e3;
+        }
+        /* Icon color */
+        .swal2-icon {
+          color: #3d0064;
+        }
+        .swal2-range {
+          background-color: #ededed; /* Set your desired background color */
+          border: 2px solid #3d0064;
+        }
+
+        /* Customize the appearance of the scrollbar thumb (handle) */
+        .simple-scrollbar .ss-scroll::-webkit-scrollbar-thumb {
+          background-color: #555;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -36,7 +78,7 @@
         .container {
             display: flex;
             flex-direction: row;
-            height: 100vh;
+            height: 100vh;            
         }
         .sidebar {
             width: 100px;
@@ -71,7 +113,7 @@
         .sidebar button span {
             line-height: 1; /* Set line-height to 1 to avoid vertical shifting */
         }
-        .main {
+        .main {            
             flex: 1;
             padding: 20px;
             display: none;
@@ -192,13 +234,45 @@
             max-height: calc(100% - 100px); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
         }
+        .square-button {
+          display: inline-block;
+          border: 1px solid #3d0064;
+          padding: 5px 5px;
+          margin-bottom: 5px;
+          border-radius: 0; /* Make it square */
+          background-color: #3498db; /* Set default background color */
+          color: #ffffff; /* Set default text color */
+          cursor: pointer;
+          transition: background-color 0.3s, color 0.3s; /* Add transition effect */
+        }
+
+        .square-button:hover {
+          background-color: #003357; /* Invert background color on hover */
+          color: #dcdcdc; /* Invert text color on hover */
+        }
+        .square-button2 {
+          display: inline-block;
+          border: 1px solid #3d0064;
+          padding: 5px 5px;
+          margin-bottom: 5px;
+          border-radius: 0; /* Make it square */
+          background-color: #ebebeb; /* Set default background color */
+          color: #000000; /* Set default text color */
+          cursor: pointer;
+          transition: background-color 0.3s, color 0.3s; /* Add transition effect */
+        }
+
+        .square-button2:hover {
+          background-color: #003357; /* Invert background color on hover */
+          color: #dcdcdc; /* Invert text color on hover */
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <img src="bitbay.png" alt="Logo" height="20px" width="20px">
         <h1 t-id="2">BitBay Decentralized Markets</h1>
-        <img id="selectedFlag" src="english.png" alt="Selected Flag">
+        <img id="selectedFlag" src="default.png" alt="Selected Flag">
         <select id="languageSelect" style="margin-right: 20px; font-size: 10px; width: 75px;">
           <option value="default" disabled selected>Default</option>
         </select>
@@ -215,7 +289,7 @@
             <button onclick="showMain('account')" id="accountButton"><img src="account.png" alt="Account" style="display: block;"><span class="text" t-id="8">Account</span></button>
             <button onclick="showMain('about')" id="aboutButton"><img src="about.png" alt="About" style="display: block;"><span class="text" t-id="9">About</span></button>
         </div>
-    <div class="main markets">
+    <div class="main markets" ss-container>
         <div class="header2">
             <a href="#" t-id="10" onclick="changeSearchText('goods')">Goods</a>
             <a href="#" t-id="11" onclick="changeSearchText('services')">Services</a>
@@ -225,11 +299,13 @@
         </div>
         <h2 t-id="15">Markets</h2>
         <div class="top-bar">
-            <button onclick="createContract()" t-id="16">Create Contract/Offer</button>
+            <button onclick="createContract()" class="square-button" t-id="16">Create Contract/Offer</button>
             <div class="search">
                 <img src="search.png" height="20px" width="20px" alt="Search">
                 <input type="text" id="searchText" placeholder="Search" onkeyup="searchListings(this.value)">
-                <button onclick="searchListings(getElementById('searchText').value, 1)" t-id="17">Search</button><div id="loadingStatus"></div>
+                <button onclick="searchListings(getElementById('searchText').value, 1)" t-id="17">Search</button>
+                &nbsp&nbsp<button id="favorites-button" onclick="searchFavorites()" style="background: transparent; border-style: none;"><span id="star-symbol" style="font-size: 20px;">&bigstar;</span><span id="favorites-text"></span></button>
+                <div id="loadingStatus"></div>
                 <div class="pagination">
                     <br>
                     <button onclick="previousPage()" t-id="18">Previous</button>
@@ -246,15 +322,15 @@
             <!-- populated by JavaScript -->
         </div>
     </div>
-    <div class="main offers">
+    <div class="main offers" ss-container>
         <h2 t-id="23">Offers</h2>
         <div id="myoffers" class="myoffers"></div>
     </div>
-    <div class="main contracts">
+    <div class="main contracts" ss-container>
         <h2 t-id="24">Contracts</h2>
         <div id="mycontracts" class="mycontracts"></div>
     </div>
-    <div class="main account">
+    <div class="main account" ss-container>
         <h2 t-id="25">Account</h2>
         <p id="account" t-id="26">Please connect metamask</p>
         <button onclick="deposit()" t-id="27">Deposit tokens</button>
@@ -268,7 +344,7 @@
         <label for="clearCompleted" t-id="31">Automatically clear completed contracts</label>
         <input id="clearCompleted" type="checkbox"></input><br><br>
         <label for="emailClient" t-id="50">Attempt to notify prospects through default email client(when applicable)</label>
-        <input id="emailClient" type="checkbox"></input><br><br>
+        <input id="emailClient" type="checkbox" checked></input><br><br>
         <button onclick="RefreshContracts()" t-id="32">Refresh/restore previously cleared contracts</button><br><br>
         <label for="offerExpiration" t-id="33">Private offers expire: </label>
         <select id="offerExpiration">
@@ -289,9 +365,9 @@
         <button onclick="changeAffiliate()" t-id="48">Change my affiliate</button><br><br>
         <button onclick="setCustomFee()" t-id="49">Set custom referral fee</button><br><br>
     </div>
-    <div class="main about">
-        <h2 t-id="40">About</h2>
-        <p t-id="41">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 700px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><p t-id="43">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save up to 75% in shipping in some cases. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own 'know your customer' if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. This system is ownerless and entirely free to use. However, there is a setting that can be activated for affiliates/referrals which can range from 0-1%. In order to encourage users to engage with affiliates, the fee is burned if it is not paid to an affiliate. This helps market the system by giving users a way to earn. A user of the markets is automatically an affiliate if they complete 10 deals. That allows them to use the markets for free if they choose to(as they can be their own affiliate) and it allows them to send users to the website through an affiliate link. Visiting through a link registers the affiliate to that account when a deal is accepted and let's them benefit from that referral. Also, some sellers may offer a more attractive referral fee which should allow affiliates to net more by mutual consent. For more information on how BitBay works you may visit: </p><a href="https://bitbay.market" target="_blank">https://bitbay.market</a>
+    <div class="main about" ss-container>
+        <h2 t-id="40" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">About</h2>
+        <p t-id="41" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><p t-id="43" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save up to 75% in shipping in some cases. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own 'know your customer' if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. This system is ownerless and entirely free to use. However, there is a setting that can be activated for affiliates/referrals which can range from 0-1%. In order to encourage users to engage with affiliates, the fee is burned if it is not paid to an affiliate. This helps market the system by giving users a way to earn. A user of the markets is automatically an affiliate if they complete 10 deals. That allows them to use the markets for free if they choose to(as they can be their own affiliate) and it allows them to send users to the website through an affiliate link. Visiting through a link registers the affiliate to that account when a deal is accepted and let's them benefit from that referral. Also, some sellers may offer a more attractive referral fee which should allow affiliates to net more by mutual consent. For more information on how BitBay works you may visit: </p><a href="https://bitbay.market" target="_blank" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">https://bitbay.market</a>
     </div>
 </div>
 <div class="footer">
@@ -301,6 +377,7 @@
     <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
 </div>
 <script>
+    document.querySelectorAll('button:not([class]):not(.sidebar button)').forEach(button => button.classList.add('square-button2'));
     function populateLanguageSelect() {
       const languageSelect = document.getElementById("languageSelect");
 
@@ -530,7 +607,9 @@
     var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
     web3 = new Web3("https://rpc.ankr.com/eth_goerli");
     DDEaddy = "0xaeDD3311b0ab10Ac1837bB5BcC0B51Bd7f8C4C2C"; //Goerli testnet is default market view
-    var referral = "0x0000000000000000000000000000000000000000";  
+    var referral = "0x0000000000000000000000000000000000000000";
+    var baseFee = 0;
+    var myFavorites = [];
     var DDEcontract2 = new web3.eth.Contract(DDEabi, DDEaddy);
     var marketOffers = {'indices':[], 'results':[]};
     //web3[0] = new Web3("https://cloudflare-eth.com");
@@ -611,6 +690,8 @@
         userpubkey = "";
         userprivkey = "";
         gasOptions = {};
+        baseFee = 0;
+        myFavorites = [];
     }
 
     async function login() {
@@ -691,9 +772,25 @@
         }
         loadAutoClearState();
         loadEmailClientState();
+        const theFavorites =  localStorage.getItem(myaccounts + ":myFavorites");
+        if(theFavorites) {
+          myFavorites = JSON.parse(theFavorites);
+        }
+        checkFavorites();
         const userPWHash = localStorage.getItem(myaccounts + ":password");
         if(userPWHash) {
-          await getUserPassword();
+          const userPWHash2 = localStorage.getItem(myaccounts + ":savedpw");
+          if(!userPWHash2) {
+            await getUserPassword();
+          } else {
+            document.getElementById("myPasswordInput").value = userPWHash2;
+            userprivkey=userPWHash2;
+            for(var i=1; i<50000; i++) {
+              userprivkey=Crypto.SHA256(userprivkey);
+            }
+            userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
+            userpubkey = cryptico.publicKeyString(userprivkey);
+          }
         }
         const currentBlockNumber = await web3.eth.getBlockNumber();
         const currentBlock = await web3.eth.getBlock(currentBlockNumber);
@@ -725,6 +822,7 @@
             var afee = DOMPurify.sanitize(await DDEcontract.methods.affiliateFee().call());
             var cfee = DOMPurify.sanitize(await DDEcontract.methods.customFee(myaccounts).call());
             var atext = "Base referral fee paid to affiliates: " + (afee / 100).toFixed(2) + "%";
+            baseFee = afee;
             if(cfee != 0) {
               atext = "Custom referral fee paid to affiliates: " + (cfee / 100).toFixed(2) + "%";
             }            
@@ -766,11 +864,12 @@
         }
         var contact2 = '';
         var datalen = 0;
+        var shortPublicKey = '';
+        var datatext = '';
         try {
             datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 3).call());
             if(datalen > 0) {
                 contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(myaccounts, datalen-1).call()));
-                var datatext = '';
                 if("mycontact" in contact2) {
                   datatext += "Registered contact information: " + contact2['mycontact'];
                 }
@@ -778,7 +877,7 @@
                   if(datatext != '') {
                     datatext += '<br>';
                   }
-                  var shortPublicKey = contact2['publickey'].substring(0, 10) + '...<span id="showMore" style="color:blue">(show more)</span>';
+                  shortPublicKey = contact2['publickey'].substring(0, 10) + '...<span id="showMore" style="color:blue">(show more)</span>';
                   datatext += "Public key(for encryption): " + shortPublicKey;
                   document.getElementById('publicemail').innerHTML = datatext;
                   document.getElementById('showMore').addEventListener('click', function() {
@@ -798,6 +897,22 @@
         } catch(e) {
             console.log(e);
         }
+        if(shortPublicKey == '' && userpubkey != '') {
+          shortPublicKey = userpubkey.substring(0, 10) + '...<span id="showMore" style="color:blue">(show more)</span>';
+          datatext += "Public key(for encryption): " + shortPublicKey;
+          document.getElementById('publicemail').innerHTML = datatext;
+          document.getElementById('showMore').addEventListener('click', function() {
+            var datatext2 = '';
+            try {
+              if("mycontact" in contact2) {
+                datatext2 += "Registered contact information: " + contact2['mycontact'];
+                datatext2 += '<br>';
+              }
+            } catch {              
+            }
+            document.getElementById('publicemail').innerHTML = datatext2 + "Public key(for encryption): " + userpubkey;
+          });
+        }
         if(login == 1) {
             await getUserAPI(currentChainId);
             await loadMarkets(1, 50);
@@ -806,6 +921,23 @@
         }
         await populateOffers();
     }
+
+    function checkFavorites() {
+      if(myFavorites.length > 0) {
+        document.getElementById("star-symbol").style.color = "#ed5f00";
+      } else {
+        document.getElementById("star-symbol").style.color = "#000000";
+      }
+    }
+
+    document.getElementById('favorites-button').addEventListener('mouseover', function() {
+      document.getElementById('favorites-text').innerHTML = 'Favorites';
+      document.getElementById('favorites-text').style.color = 'black';
+    });
+
+    document.getElementById('favorites-button').addEventListener('mouseout', function() {
+      document.getElementById('favorites-text').innerHTML = '';
+    });
 
     myContactInfo.addEventListener('blur', async function(event) {
         await saveContactInfo(document.getElementById("myContactInfo").value);
@@ -984,17 +1116,19 @@
           confirmButtonText: 'Set Password',
           preConfirm: async (confirmedPassword) => {
             // Compare the entered password with the original password
-            if (confirmedPassword === passwordValue) {
+            if (confirmedPassword === passwordValue || Crypto.SHA256(confirmedPassword) === passwordValue) {
               // Passwords match, proceed to set in localStorage
-              const hashedPassword = Crypto.SHA256(passwordValue);
-              userprivkey=passwordValue;
-              for(var i=0; i<50000; i++) {
+              var hashedPassword = confirmedPassword;
+              hashedPassword = Crypto.SHA256(hashedPassword);
+              userprivkey=hashedPassword;
+              for(var i=1; i<50000; i++) {
                 userprivkey=Crypto.SHA256(userprivkey);
               }
               userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
               userpubkey = cryptico.publicKeyString(userprivkey);
-              localStorage.setItem(myaccounts + ':password', hashedPassword);
-              console.log('Password saved in localStorage:', hashedPassword);
+              document.getElementById("myPasswordInput").value = hashedPassword;
+              localStorage.setItem(myaccounts + ':password', Crypto.SHA256(hashedPassword+"1"));
+              console.log('Password saved in localStorage:', Crypto.SHA256(hashedPassword+"1"));
               await Swal.fire({
                 title: 'Register Public Key',
                 text: 'Would you like to register this public key to your account now? This is how users will know how to encrypt their offers to you.',
@@ -1007,6 +1141,18 @@
                   await registerData();
                 }
               });
+              await Swal.fire({
+                title: 'Remember Password',
+                text: 'Would you like your device to remember this password? It is convenient to remember it however it is more secure to type it every time you log in.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+              }).then(async (result) => {
+                if (result.isConfirmed) {
+                  localStorage.setItem(myaccounts + ':savedpw', hashedPassword);
+                }
+              });      
             } else {
               await Swal.fire('Passwords do not match');
               document.getElementById("myPasswordInput").value = '';
@@ -1021,7 +1167,7 @@
     async function getUserPassword() {
       const userPWHash = localStorage.getItem(myaccounts + ":password");
       const passwordValue = document.getElementById("myPasswordInput").value;
-      if(userPWHash != Crypto.SHA256(passwordValue)) {
+      if(userPWHash != Crypto.SHA256(passwordValue+"1") && userPWHash != Crypto.SHA256(Crypto.SHA256(passwordValue)+"1")) {
         await Swal.fire({
           title: 'Confirm Password',
           input: 'password',
@@ -1030,12 +1176,15 @@
           confirmButtonText: 'Confirm Password',
           preConfirm: async (confirmedPassword) => {
             // Compare the entered password with the original password
-            if (Crypto.SHA256(confirmedPassword) === userPWHash) {
-              document.getElementById("myPasswordInput").value = confirmedPassword;
-              userprivkey=passwordValue;
-              for(var i=0; i<50000; i++) {
+            if (Crypto.SHA256(Crypto.SHA256(confirmedPassword)+"1") === userPWHash) {
+              // Passwords match, proceed to set in localStorage
+              var hashedPassword = confirmedPassword;
+              hashedPassword = Crypto.SHA256(hashedPassword);
+              userprivkey=hashedPassword;
+              for(var i=1; i<50000; i++) {
                 userprivkey=Crypto.SHA256(userprivkey);
               }
+              document.getElementById("myPasswordInput").value = hashedPassword;
               userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
               userpubkey = cryptico.publicKeyString(userprivkey);
             } else {
@@ -1071,6 +1220,7 @@
           '<input id="checkbox2" type="checkbox" name="registerPublicKey"> ' +
           '<label for="checkbox2">Register public key for privacy/encryption</label>',
         focusConfirm: false,
+        showCancelButton: true,
         preConfirm: () => {
           return {
             registerEmail: document.getElementById('checkbox1').checked,
@@ -1177,7 +1327,7 @@
             return 'You need to enter something!';
           }
         },
-      }).then((result) => async function() {
+      }).then(async (result) => {
         if (result.isConfirmed) {
           const affiliate = result.value;
           if (!web3.utils.isAddress(referral)) {              
@@ -1198,23 +1348,21 @@
     }
     async function setCustomFee() {
       await Swal.fire({
-        title: 'Please enter the percentage fee that you wish to offer to affiliates who help find customers for you.',
+        title: 'Set base affiliate fee',
+        text: 'Please enter the percentage fee that you wish to offer to affiliates who help find customers for you.',
         input: 'range',
         inputAttributes: {
-          min: 0,
+          min: (baseFee / 100).toFixed(1),
           max: 50,
           step: 0.1,
           value: 0 // Set the initial value as needed
         },
-        inputValue: 0, // Set the initial value as needed
+        inputValue: (baseFee / 100).toFixed(1), // Set the initial value as needed
         showCancelButton: true,
         inputLabel: 'Percentage',
-        inputFormat: (value) => {
-          return (value / 10).toFixed(1) + '%'; // Format the displayed value as percentage
-        },
         preConfirm: (value) => {
         }
-      }).then((result) => async function() {
+      }).then(async (result) => {
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
           await DDEcontract.methods.changeCustomFee(value).send({"from":myaccounts,...gasOptions});
@@ -1384,6 +1532,110 @@
         var sortHits = 0;
         marketOffers['results'] = [];
         if (searchText !== '') {
+          if (Array.isArray(searchText)) {
+            var expiredOffers = [];
+            for (var myinx = 0; myinx < searchText.length; myinx++) {
+              if(myinx == high) {
+                break;
+              }
+              try {
+                const hash = searchText[myinx];
+                const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
+                if (offerID == 0) {
+                  expiredOffers.push(hash);
+                } else {
+                  jsondata = await getOrderHash(hash);
+                  if(parseInt(jsondata.timelimit[1]) != 0) {
+                    if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                      marketOffers[hash] = jsondata;
+                      if(!marketOffers['results'].includes(hash)) {
+                          marketOffers.results.push(hash);
+                      }
+                    } else {
+                      expiredOffers.push(hash);
+                    }
+                  } else {
+                    marketOffers[hash] = jsondata;
+                    if(!marketOffers['results'].includes(hash)) {
+                        marketOffers.results.push(hash);
+                    }
+                  }
+                }
+                await populateListings("", 2);
+              } catch (e) {
+                  console.log("Error loading offer: ",e);
+              }
+            }
+            if(expiredOffers.length > 0) {
+              for (var myinx = 0; myinx < expiredOffers.length; myinx++) {
+                myFavorites.splice(myFavorites.indexOf(expiredOffers[myinx]),1);
+              }
+              localStorage.setItem(myaccounts + ':myFavorites', JSON.stringify(myFavorites));
+            }
+            await populateListings("", 2);
+            return;
+          } else if(searchText.includes("userStore:")){
+            var expiredOffers = [];
+            const userAddress = searchText.split("userStore:")[1].trim();
+            var added = 0;
+            try {
+              var mylen = 0;
+              if(!web3.utils.isAddress(userAddress)) {
+              } else {
+                mylen = DOMPurify.sanitize(await DDEcontract3.methods.getArrayLength(userAddress, 0).call());
+                var cached = localStorage.getItem(userAddress+":userStoreCache");
+                if (cached) {
+                  expiredOffers = JSON.parse(cached);
+                }
+              }
+              var validOffers = 0;
+              for (var myinx = 0; myinx < mylen; myinx++) {
+                if(validOffers == high) {
+                  break;
+                }                
+                if(expiredOffers.includes(myinx)) {
+                  continue;
+                }
+                validOffers++;
+                try {
+                  const hash = DOMPurify.sanitize(await DDEcontract3.methods.openOffers(userAddress, myinx).call());
+                  const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
+                  if (offerID == 0) {
+                    expiredOffers.push(myinx);
+                    added = 1;
+                  } else {
+                    jsondata = await getOrderHash(hash);
+                    if(parseInt(jsondata.timelimit[1]) != 0) {
+                      if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                        marketOffers[hash] = jsondata;
+                        if(!marketOffers['results'].includes(hash)) {
+                            marketOffers.results.push(hash);
+                        }
+                      } else {
+                        expiredOffers.push(myinx);
+                        added = 1;
+                      }
+                    } else {
+                        marketOffers[hash] = jsondata;
+                        if(!marketOffers['results'].includes(hash)) {
+                            marketOffers.results.push(hash);
+                        }
+                    }
+                  }
+                  await populateListings("", 2);
+                } catch (e) {
+                    console.log("Error loading offer: ",e);
+                }
+              }
+              if(expiredOffers.length > 0 && added == 1) {
+                localStorage.setItem(userAddress + ':userStoreCache', JSON.stringify(expiredOffers));
+              }
+            } catch (e) {
+              console.log("Error loading offer: ",e);
+            }
+            await populateListings("", 2);
+            return;
+          } else {
             sortHits = 1;
             const keywords = searchText.split(/[,\s]+/); // Split by commas and one or more whitespace characters            
             await Promise.all(keywords.map(async keyword => {
@@ -1417,7 +1669,11 @@
                                     if(parseInt(jsondata.timelimit[1]) != 0) {
                                         if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                                             marketOffers[hash] = jsondata;
+                                        } else {
+                                          return;
                                         }
+                                    } else {
+                                        marketOffers[hash] = jsondata;
                                     }
                                 }
                                 if(!marketOffers['results'].includes(hash)) {
@@ -1430,7 +1686,14 @@
                         }
                     }
                 });
-            }));            
+            }));
+            if(marketOffers.results.length==0) {
+                await populateListings(searchText);
+            } else {
+                await populateListings("", 1);
+            }
+            return;
+          }
         } else {
             var searchThis = [];
             for (index; index < mlength; index++) {
@@ -1439,19 +1702,24 @@
                     await DDEcontract3.methods.markets(index).call().then(async function (hash) {
                         hash = DOMPurify.sanitize(hash);
                         jsondata = await getOrderHash(hash);
-                        if(!marketOffers.hasOwnProperty(index)) {
-                            marketOffers.indices.push(index);
-                        }
                         if(parseInt(jsondata.timelimit[1]) != 0) {
                             if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                                if(!marketOffers.hasOwnProperty(index)) {
+                                    marketOffers.indices.push(index);
+                                }
                                 marketOffers[index] = hash;
                                 if(hash in marketOffers) {
                                     searchThis = marketOffers[hash]['searchTerms'];
                                 }
                                 marketOffers[hash] = jsondata;
                                 marketOffers[hash]['searchTerms'] = searchThis;
+                            } else {
+                              return;
                             }
                         } else {
+                            if(!marketOffers.hasOwnProperty(index)) {
+                                marketOffers.indices.push(index);
+                            }
                             marketOffers[index] = hash;
                             if(hash in marketOffers) {
                                 searchThis = marketOffers[hash]['searchTerms'];
@@ -1506,6 +1774,32 @@
           var text = '';
           try {
             text = await getOfferData(DOMPurify.sanitize(data.message));
+            try {
+              var testdata = JSON.parse(text);
+              if('recipient' in testdata && 'sender' in testdata) {
+                if(DOMPurify.sanitize(data.sender) == myaccounts) {
+                  var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey).plaintext;
+                  console.log(message)
+                  var padding = message.split("#*#*#")[1];
+                  if(padding.length > 30) {
+                    text = message.split("#*#*#")[0];
+                  } else {
+                    throw new Error("Not enough padding");
+                  }
+                } else if(DOMPurify.sanitize(data.recipient) == myaccounts) {
+                  var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey).plaintext;
+                  var padding = message.split("#*#*#")[1];
+                  if(padding.length > 30) {
+                    text = message.split("#*#*#")[0];
+                  } else {
+                    throw new Error("Not enough padding");
+                  }
+                }
+              }
+            } catch (e) {
+              console.log(e);
+              console.log("Decryption failed");
+            }
           } catch (e) {
             console.log(e);
           }
@@ -1533,15 +1827,21 @@
           try {
               var reputation = [0,0,0];
               if(jsondata.sender != "0x0000000000000000000000000000000000000000") {
-                reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(jsondata.sender).call())));
-                jsondata.reputation = reputation;
+                reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract3.methods.getCompleted(jsondata.sender).call())));
+                jsondata.reputationSender = reputation;
               }
               if(jsondata.recipient != "0x0000000000000000000000000000000000000000") {
-                reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(jsondata.recipient).call())));
-                jsondata.reputation = reputation;
+                reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract3.methods.getCompleted(jsondata.recipient).call())));
+                jsondata.reputationRecipient = reputation;
               }
           } catch (e) {
               console.log("Error loading reputation data");
+          }
+          try {
+              jsondata.tags = [];              
+              jsondata.tags = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract3.methods.getTags(hash).call())));
+          } catch (e) {
+              console.log("Error loading tags");
           }
           if(text != '') {
               try {
@@ -2010,19 +2310,26 @@
                         foundKeyword = true;
                         break;
                     }
-                    if (offer['searchTerms'].includes(keyword.toLowerCase())) {
-                        foundKeyword = true;
-                        break;
+                    try {
+                        if (offer['searchTerms'].includes(keyword.toLowerCase())) {
+                            foundKeyword = true;
+                            break;
+                        }
+                    } catch {
+                        continue;
                     }
                 }
                 if (!foundKeyword) {
                     continue;
                 }
             } else {
-                if(marketOffers.results.length > 0) {
+                if(marketOffers.results.length > 0 || sortHits == 2) {
                     if (i < marketOffers.results.length) {
                         offer = marketOffers[marketOffers.results[i]];
                     } else {
+                        if(sortHits == 2) {
+                          continue;
+                        }
                         offer = marketOffers[marketOffers[marketOffers.indices[i]]];
                     }
                 } else {
@@ -2034,7 +2341,6 @@
             } else {
                 myhashes[offer.hash] = 1;
             }
-
             var gridItem = document.createElement('div');
             gridItem.classList.add('listing-grid-item');
             var tempimg = '';
@@ -2123,9 +2429,16 @@
         if(deep == 1) {
             document.getElementById("loadingStatus").innerHTML = "Loading..."
             await loadMarkets(0, 50, searchText);
-            document.getElementById("loadingStatus").innerHTML = ""
+            document.getElementById("loadingStatus").innerHTML = "";
+        } else {
+          await populateListings(searchText);
         }
-        await populateListings(searchText);
+    }
+
+    async function searchFavorites() {
+      document.getElementById("loadingStatus").innerHTML = "Loading..."
+      await loadMarkets(0, 50, myFavorites);
+      document.getElementById("loadingStatus").innerHTML = "";
     }
 
     // function for showing the next page of listings
@@ -2153,11 +2466,11 @@
 
     // Function to show the details popup for a listing
     async function showListing(listing, mode=0) {
-      const popupContainer = document.createElement('div');
+      const popupContainer = document.createElement('div');      
       popupContainer.classList.add('popup-container');
 
       const popup = document.createElement('div');
-      popup.classList.add('popup');
+      popup.classList.add('popup');      
 
       const closeButton = document.createElement('span');
       closeButton.innerHTML = '&times;';
@@ -2230,6 +2543,16 @@
       const details = document.createElement('div');
       details.classList.add('popup-details');
       
+      function copyToClipboard(mytext) {
+        const tempInput = document.createElement('input');
+        document.body.appendChild(tempInput);
+        tempInput.value = mytext;
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        Swal.fire('Address copied to clipboard!');
+      }
+
       const sender = document.createElement('p');
       var text = "Sender: ";
       if(listing.sender == "0x0000000000000000000000000000000000000000") {
@@ -2239,8 +2562,43 @@
             text = "You are the one receiving the funds.";
         }
         sender.innerHTML = "<br>" + text;
-      } else {
-        sender.innerHTML = "<br>" + text + listing.sender;
+      } else {        
+        sender.innerHTML = "<br>" + text;
+        const senderContainer = document.createElement('span');
+        const senderTextSpan = document.createElement('span');
+        senderTextSpan.style.fontSize = '12px';
+        senderTextSpan.textContent = listing.sender;
+        senderTextSpan.style.cursor = 'pointer';
+        senderTextSpan.style.textDecoration = 'underline';
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = '📄';
+        copyButton.onclick = function() {
+          copyToClipboard(listing.sender);
+        };
+
+        senderTextSpan.onclick = function() {
+          Swal.fire({
+            title: 'Show listings',
+            text: 'Would you like to see more listings from this user?',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            icon: 'question',
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              popupContainer.remove();
+              showMain('markets');
+              document.getElementById("searchText").value="userStore:"+listing.sender;
+              loadMarkets(0, 50, "userStore:"+listing.sender);
+            }
+          });
+        };
+
+        senderContainer.appendChild(senderTextSpan);
+        senderContainer.appendChild(document.createTextNode('\u00A0'));
+        senderContainer.appendChild(copyButton);
+        sender.appendChild(senderContainer);
       }
 
       const recipient = document.createElement('p');
@@ -2253,15 +2611,60 @@
         }
         recipient.innerHTML = text2;
       } else {
-        recipient.innerHTML = text2 + listing.recipient;
+          recipient.innerHTML = text2;
+          const recipientContainer = document.createElement('span');
+          const recipientTextSpan = document.createElement('span');
+          recipientTextSpan.style.fontSize = '12px';
+          recipientTextSpan.textContent = listing.recipient;
+          recipientTextSpan.style.cursor = 'pointer';
+          recipientTextSpan.style.textDecoration = 'underline';
+          const copyButton = document.createElement('button');
+          copyButton.textContent = '📄';
+          copyButton.onclick = function() {
+            copyToClipboard(listing.recipient);
+          };
+          recipientTextSpan.onclick = function() {
+            Swal.fire({
+              title: 'Show listings',
+              text: 'Would you like to see more listings from this user?',
+              showCancelButton: true,
+              confirmButtonText: 'Yes',
+              cancelButtonText: 'No',
+              icon: 'question',
+            }).then(async (result) => {
+              if (result.isConfirmed) {
+                popupContainer.remove();
+                showMain('markets');
+                document.getElementById("searchText").value="userStore:"+listing.recipient;
+                loadMarkets(0, 50, "userStore:"+listing.recipient);
+              }
+            });
+          };
+          recipientContainer.appendChild(recipientTextSpan);
+          recipientContainer.appendChild(document.createTextNode('\u00A0'));
+          recipientContainer.appendChild(copyButton);
+          recipient.appendChild(recipientContainer);
       }
 
       const token = document.createElement('p');
       token.innerHTML = 'Token: ' + tokennames[listing.token];
 
       const amount = document.createElement('p');
-      amount.innerHTML = 'Amount: ' + displayDecimals(listing.token,listing.amount);
-      
+      amount.innerHTML = 'Amount: ' + displayDecimals(listing.token,listing.amount);      
+
+      if(listing.rfee != 0) {
+        var theFee = document.createElement('p');
+        theFee.innerHTML = 'Referral fee(estimated): ' + (listing.rfee / 100).toFixed(2) + "%";
+      }
+      if(listing.referred != "0x0000000000000000000000000000000000000000") {
+        var theReferred = document.createElement('p');
+        theReferred.innerHTML = 'Referral address: ' + listing.referred;
+      }
+      if(listing.tags && listing.tags.length != 0) {
+        var theTags = document.createElement('p');
+        theTags.innerHTML = 'Tags: ' + listing.tags.join(', ');
+      }
+
       const depositSender = document.createElement('p');
       depositSender.innerHTML = 'Deposit Sender: ' + displayDecimals(listing.token,listing.depositSender);
       
@@ -2344,8 +2747,12 @@
           if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
             const quantityButton = document.createElement('button');
             quantityButton.innerHTML = 'Update Quantity';
-            quantityButton.onclick = () => updateQuantity(listing);
+            quantityButton.onclick = async () => await updateQuantity(listing);
             buttonContainer.appendChild(quantityButton);
+            const feeButton = document.createElement('button');
+            feeButton.innerHTML = 'Edit referral fee';
+            feeButton.onclick = async () => await updateFee(listing);
+            buttonContainer.appendChild(feeButton);
           }
           const cancelButton = document.createElement('button');
           cancelButton.innerHTML = 'Cancel offer';
@@ -2380,7 +2787,8 @@
                 var returnThis = 0;
                 if(listing.expired == 2 && listing.status[0] < 5) {
                     Swal.fire({
-                      title: 'It seems like this deal timed out. If this was due to any disagreement then before you clear the order would you like to report the result to the blockchain for reputation tracking?',
+                      title: 'Contract destroyed',
+                      text: 'It seems like this deal timed out. If this was due to any disagreement then before you clear the order would you like to report the result to the blockchain for reputation tracking?',
                       showCancelButton: true,
                       confirmButtonText: 'Yes',
                       cancelButtonText: 'No',
@@ -2464,7 +2872,7 @@
                       `;
                       dialog.style.display = "block";
                       dialog.style.position = "fixed";
-                      dialog.style.zIndex = 9999;
+                      dialog.style.zIndex = 999;
                       dialog.style.backgroundColor = "white";
                       dialog.style.padding = "20px";
                       dialog.style.borderRadius = "10px";
@@ -2559,11 +2967,19 @@
       details.appendChild(recipient);
       details.appendChild(token);
       details.appendChild(amount);
-
       details.appendChild(depositSender);
       details.appendChild(depositRecipient);
       details.appendChild(quantity);
       details.appendChild(timelimit);
+      if(listing.rfee != 0) {
+        details.appendChild(theFee);
+      }
+      if(listing.referred != "0x0000000000000000000000000000000000000000") {
+        details.appendChild(theReferred);
+      }
+      if(listing.tags && listing.tags.length != 0) {
+        details.appendChild(theTags);
+      }
 
       if(mode == 4) {
         timelimit.innerHTML = 'Time Until Funds Expire: ' + listing.timeRemaining + ' days';
@@ -2571,10 +2987,42 @@
         extra.innerHTML = '<br>Notifications: <br>' + listing.escrowInfo;
         details.appendChild(extra)
       }
+      message.style.whiteSpace = 'normal';
       details.appendChild(message);
 
-      popup.appendChild(closeButton);
+      const topBar = document.createElement('div');
+      if(mode == 0 && (listing.sender=="0x0000000000000000000000000000000000000000" || listing.recipient=="0x0000000000000000000000000000000000000000" )) {
+        const starButton = document.createElement('span');
+        starButton.style.fontSize = "20px";
+        starButton.innerHTML = '&star;';
+        starButton.classList.add('favorites-button2');
+        starButton.style.left = 10;
+        starButton.style.color = "#000000";        
+        if(myFavorites.includes(listing.hash)) {
+          starButton.style.color = "#ed5f00";
+          starButton.innerHTML = '&bigstar;';
+        }
+        starButton.onclick = function() {
+          if(myFavorites.includes(listing.hash)) {
+            myFavorites.splice(myFavorites.indexOf(listing.hash),1);
+            starButton.innerHTML = '&star;';
+            starButton.style.color = "#000000";
+          } else {
+            myFavorites.push(listing.hash);
+            starButton.innerHTML = '&bigstar;';
+            starButton.style.color = "#ed5f00";
+          }
+          checkFavorites();
+          localStorage.setItem(myaccounts + ':myFavorites', JSON.stringify(myFavorites));
+        };
+        topBar.appendChild(starButton);
+      }
+      topBar.appendChild(closeButton);
+      popup.appendChild(topBar);
       popup.appendChild(imageContainer);
+      details.style.whiteSpace = 'nowrap';
+      details.style.marginRight = '10px'; 
+      details.style.marginLeft = '10px'; 
       popup.appendChild(details);
       popup.appendChild(buttonContainer);
       popupContainer.appendChild(popup);
@@ -2595,6 +3043,7 @@
           display: flex;
           justify-content: center;
           align-items: center;
+          z-index: 999;
         }
 
         .popup {
@@ -2602,7 +3051,7 @@
           background-color: white;
           padding: 20px;
           max-width: 600px;
-          max-height: 80%;
+          max-height: 90%;
           overflow-y: auto;
         }
 
@@ -2647,6 +3096,8 @@
         }
       `;
       document.head.appendChild(style);
+      //SimpleScrollbar.initEl(popup);
+
       if(myimgs.length !== 0) {
         showSlides(1);
       }
@@ -3262,19 +3713,40 @@
               } else {
                 otherparty = sender2;
               }
+              var returnThis = 0;
               if(otherparty != "0x0000000000000000000000000000000000000000") {
                 datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(otherparty, 3).call());
                 if(datalen > 0) {
                   contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(otherparty, datalen-1).call()));
                   if('publickey' in contact2 && userprivkey != '') {
+                    var paddedMessage = message + "#*#*#" + (new Date().getTime()) + Crypto.SHA256(new Date().getTime());
                     if(myaccounts == sender2) {
-                      message = JSON.stringify({'recipient':cryptico.encrypt(message, theirpublickey[thisroom], userprivkey),'sender':cryptico.encrypt(message, userpubkey, userprivkey)});
+                      message = JSON.stringify({'recipient':cryptico.encrypt(paddedMessage, contact2['publickey'], userprivkey),'sender':cryptico.encrypt(paddedMessage, userpubkey, userprivkey)});
                     }
                     if(myaccounts == recipient2) {
-                      message = JSON.stringify({'sender':cryptico.encrypt(message, theirpublickey[thisroom], userprivkey),'recipient':cryptico.encrypt(message, userpubkey, userprivkey)});
+                      message = JSON.stringify({'sender':cryptico.encrypt(paddedMessage, contact2['publickey'], userprivkey),'recipient':cryptico.encrypt(paddedMessage, userpubkey, userprivkey)});
                     }
+                    console.log(message)
+                  } else if ('publickey' in contact2 && userprivkey == '') {
+                    await Swal.fire({
+                      title: 'Encrypt offer',
+                      text: 'Your counterparty has listed a key for encryption. If you would like your order be encrypted you should set a password for your account. Would you like to do that before proceeding?',
+                      icon: 'question',
+                      showCancelButton: true,
+                      confirmButtonText: 'Yes',
+                      cancelButtonText: 'No',
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        popupContainer.remove();
+                        returnThis = 1;
+                        return;
+                      }
+                    });
                   }
                 }
+              }
+              if(returnThis == 1) {
+                return false;
               }
           } catch(e) {
               console.log(e);
@@ -3305,11 +3777,13 @@
           data2.image = [];
           data2.message = "IPFS link: " + data2.message;
           data2.timelimit = [data2.timelimit];
+          data2.rfee = baseFee;
+          data2.referred = counterdata.referred;
           //if(Object.keys(counterdata).length !== 0) {
           //  data2.amount *= quantity;
           //  data2.depositSender *= quantity;
           //  data2.depositRecipient *= quantity;
-          //}
+          //}          
           console.log(data2);
           //May eventually want to check for duplicate contract hash submission
           var result = await showListing(data2, 3)
@@ -3318,6 +3792,13 @@
             return;
           }
           try {
+              const cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'}));
+              console.log(cHash);
+              if(DOMPurify.sanitize(await DDEcontract.methods.initialized(cHash).call()) == "true") {
+                await Swal.fire("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again.");
+                popupContainer.remove();
+                return;
+              }
               // Call solidity function to create contract
               await DDEcontract.methods.createContract(
                 data.sender,
@@ -3327,7 +3808,7 @@
                 data.depositSender,
                 data.depositRecipient,
                 data.quantity,
-                [data.timelimit, expiration],
+                [data.timelimit.toString(), expiration.toString()],
                 style,
                 data.message,
                 myterms
@@ -3424,7 +3905,7 @@
         `;
         dialog.style.display = "block";
         dialog.style.position = "fixed";
-        dialog.style.zIndex = 9999;
+        dialog.style.zIndex = 999;
         dialog.style.backgroundColor = "white";
         dialog.style.padding = "20px";
         dialog.style.borderRadius = "10px";
@@ -3545,7 +4026,7 @@
                   `;
                   dialog.style.display = "block";
                   dialog.style.position = "fixed";
-                  dialog.style.zIndex = 9999;
+                  dialog.style.zIndex = 999;
                   dialog.style.backgroundColor = "white";
                   dialog.style.padding = "20px";
                   dialog.style.borderRadius = "10px";
@@ -3622,7 +4103,7 @@
                     await DDEcontract.methods.acceptOffer(
                       mylisting.hash,
                       quantity,
-                      accepttimelimit,
+                      accepttimelimit.toString(),
                       referral
                     ).send({"from":myaccounts,...gasOptions});
                       await Swal.fire("Contract accepted!");
@@ -3732,7 +4213,7 @@
           `;
           dialog.style.display = "block";
           dialog.style.position = "fixed";
-          dialog.style.zIndex = 9999;
+          dialog.style.zIndex = 999;
           dialog.style.backgroundColor = "white";
           dialog.style.padding = "20px";
           dialog.style.borderRadius = "10px";
@@ -3803,7 +4284,7 @@
       `;
       dialog.style.display = "block";
       dialog.style.position = "fixed";
-      dialog.style.zIndex = 9999;
+      dialog.style.zIndex = 999;
       dialog.style.backgroundColor = "white";
       dialog.style.padding = "20px";
       dialog.style.borderRadius = "10px";
@@ -3826,20 +4307,48 @@
         try {
               var quantity = parseInt(document.getElementById('new-quantity').value);
               if(quantity == 0) {
-                await Swal.fire("Quantity can not be changed to zero!");
                 dialog.remove();
+                await Swal.fire("Quantity can not be changed to zero!");                
                 return;
               }
               await DDEcontract.methods.updateQuantity(
                 listing.hash,
                 quantity
               ).send({"from":myaccounts,...gasOptions});
+                dialog.remove();
                 await Swal.fire("Quantity updated!");
                 await loadUser();
+                return;
         } catch (error) {
             console.error(error);
         }
         dialog.remove();
+      });
+    }
+
+    async function updateFee(listing) {
+      await Swal.fire({
+        title: 'Set order fee',
+        text: 'Please enter the percentage fee that you wish to offer to affiliates for this order.',
+        input: 'range',
+        inputAttributes: {
+          min: (baseFee / 100).toFixed(1),
+          max: 50,
+          step: 0.1,
+          value: 0 // Set the initial value as needed
+        },
+        inputValue: (baseFee / 100).toFixed(1), // Set the initial value as needed
+        showCancelButton: true,
+        inputLabel: 'Percentage',
+        preConfirm: (value) => {
+        }
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          var value = parseInt(result.value) * parseInt(100);
+          await DDEcontract.methods.changeReferralFee(listing.hash,value).send({"from":myaccounts,...gasOptions});
+          Swal.fire("Success!");
+          await loadUser();
+        }
       });
     }
 
