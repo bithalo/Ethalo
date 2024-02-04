@@ -82,12 +82,21 @@
         }
         .sidebar {
             width: 75px;
-            background-color: #f2f2f2;
+            background: transparent;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 10px;
             padding-bottom: 30px;
+        }
+        .sidebar-background {
+          position: absolute;
+          width: 75px;
+          height: 100%;
+          padding-top: 10px;
+          padding-bottom: 30px;
+          background-image: url('./purple-gradient.png');
+          z-index: -1;
         }
         .sidebar button {
             width: 50px;
@@ -96,7 +105,7 @@
             margin-bottom: 20px;
             border: none;
             border-radius: 5px;
-            background-color: transparent;
+            background-color: #f2f2f2;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -105,6 +114,7 @@
         }
         .sidebar button:hover {
             box-shadow: 0 0 10px #7c7c7c;
+            background-color: rgba(255, 255, 255, 0.85);
         }
         .sidebar button img {
             margin-top: 10px;
@@ -184,9 +194,18 @@
           .tabcontent {
             font-size: 13px;
           }
+          .sidebar-background {
+            position: absolute;
+            width: 100px;
+            height: 100%;
+            padding-top: 10px;
+            padding-bottom: 30px;
+            background-image: url('./purple-gradient.png');
+            z-index: -1;
+          }
           .sidebar {
               width: 100px;
-              background-color: #f2f2f2;
+              background-color: transparent;
               display: flex;
               flex-direction: column;
               align-items: center;
@@ -200,7 +219,6 @@
               margin-bottom: 10px;
               border: none;
               border-radius: 5px;
-              background-color: transparent;
               cursor: pointer;
               display: flex;
               flex-direction: column;
@@ -363,13 +381,15 @@
         </div>
     </div>
     <div class="container">
-        <div class="sidebar">
-            <button onclick="showMain('markets')" id="marketsButton"><img src="markets.png" alt="Markets" style="display: block;"><span class="text" t-id="5">Markets</span></button>
-            <button onclick="showMain('offers')" id="offersButton"><img src="ethalo.png" alt="Offers" style="display: block;"><span class="text" t-id="6">Offers</span></button>
-            <button onclick="showMain('contracts')" id="contractsButton"><img src="contracts.png" alt="Contracts" style="display: block;"><span class="text" t-id="7">Contracts</span></button>
-            <button onclick="showMain('account')" id="accountButton"><img src="account.png" alt="Account" style="display: block;"><span class="text" t-id="8">Account</span></button>
-            <button onclick="showMain('about')" id="aboutButton"><img src="about.png" alt="About" style="display: block;"><span class="text" t-id="9">About</span></button>
-        </div>
+      <div class="sidebar-background">
+      </div>
+      <div class="sidebar">
+          <button onclick="showMain('markets')" id="marketsButton"><img src="markets.png" alt="Markets" style="display: block;"><span class="text" t-id="5">Markets</span></button>
+          <button onclick="showMain('offers')" id="offersButton"><img src="ethalo.png" alt="Offers" style="display: block;"><span class="text" t-id="6">Offers</span></button>
+          <button onclick="showMain('contracts')" id="contractsButton"><img src="contracts.png" alt="Contracts" style="display: block;"><span class="text" t-id="7">Contracts</span></button>
+          <button onclick="showMain('account')" id="accountButton"><img src="account.png" alt="Account" style="display: block;"><span class="text" t-id="8">Account</span></button>
+          <button onclick="showMain('about')" id="aboutButton"><img src="about.png" alt="About" style="display: block;"><span class="text" t-id="9">About</span></button>
+      </div>
     <div class="main markets">
         <div class="header2">
             <a href="#" t-id="10" onclick="changeSearchText('goods')">Goods</a>
@@ -1518,7 +1538,10 @@
         // Get the text from Pinata IPFS using the IPFS hash
         text = await retrieveFromPinataIPFS(ipfsHash);
         if(text == "error") {
-            return "error";
+            text = await retrieveFromIPFS(ipfsHash);
+            if(text == "error") {
+              return "error";
+            }
         }
 
         // Hash the text using web3 keccak and check if it matches the stored text hash
@@ -1557,9 +1580,15 @@
         }
     };
 
-    // Function to retrieve a file from Pinata IPFS
-    // May also add https://ipfs.io/ipfs/...
-    const retrieveFromPinataIPFS = async (hash) => {        
+    // Function to retrieve a file from IPFS
+    const retrieveFromIPFS = async (hash) => {
+      var url = "https://ipfs.io/ipfs/"+hash;
+      const response = await fetch(url);
+      var result = await response.text();
+      result = DOMPurify.sanitize(result);
+      return result;
+    }
+    const retrieveFromPinataIPFS = async (hash) => {
         var url = pinataGateway + hash;
         if(pinataGateway != "https://gateway.pinata.cloud/ipfs/") {
             if(pinataToken == '') {
