@@ -226,7 +226,7 @@
               text-align: center;
           }
           .sidebar button img {
-              margin-top: 10px;
+              margin-top: 15px;
               width: 30px;
               height: 30px;
           }
@@ -275,6 +275,7 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 -2px 5px #ccc;
+            z-index: 10;            
         }
         .footer img {
             width: 30px;
@@ -283,33 +284,37 @@
             cursor: pointer;
         }
         .main.markets {
-            min-height: calc(100% - 100px); /* Subtract footer height */
-            max-height: calc(100% - 100px); /* Subtract footer height */
+            min-height: calc(100% - 75); /* Subtract footer height */
+            max-height: calc(100% - 75); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
-            margin-bottom: 50px;
+            margin-bottom: 100px;
         }
         .main.offers {
-            min-height: calc(100% - 100px); /* Subtract footer height */
-            max-height: calc(100% - 100px); /* Subtract footer height */
+            min-height: calc(100% - 75); /* Subtract footer height */
+            max-height: calc(100% - 75); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
+            margin-bottom: 100px;
         }
         .main.contracts {
-            min-height: calc(100% - 100px); /* Subtract footer height */
-            max-height: calc(100% - 100px); /* Subtract footer height */
+            min-height: calc(100% - 75); /* Subtract footer height */
+            max-height: calc(100% - 75); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
+            margin-bottom: 100px;
         }
         .main.account {
-            min-height: calc(100% - 100px); /* Subtract footer height */
-            max-height: calc(100% - 100px); /* Subtract footer height */
+            min-height: calc(100% - 75); /* Subtract footer height */
+            max-height: calc(100% - 75); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
+            margin-bottom: 100px;
         }
         .main.account * {
             font-size: 12px;
         }
         .main.about {
-            min-height: calc(100% - 100px); /* Subtract footer height */
-            max-height: calc(100% - 100px); /* Subtract footer height */
+            min-height: calc(100% - 75); /* Subtract footer height */
+            max-height: calc(100% - 75); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
+            margin-bottom: 100px;
         }
         .main.markets::after {
           content: '';
@@ -326,12 +331,13 @@
           content: '';
           background: url('./free-balloon.png') no-repeat;
           position: absolute;
-          top: 0;
+          top: -5%;
           left: 50%;
           right: 0;
           bottom: 0;
           opacity: 0.07; /* Adjust the opacity value as needed */
           z-index: -1;
+          overflow-y: hidden;
         }
         .square-button {
           display: inline-block;
@@ -379,6 +385,12 @@
             <button t-id="3" onclick="login()">Connect Metamask</button>
             <div id="connectionstatus" class="connectionstatus" t-id="4">Not connected</div>
         </div>
+    </div>
+    <div class="footer">
+        <a href="https://bitbay.market" target="_blank"><img src="bitbay.png" text="BitBay"></a>
+        <a href="https://t.me/bitbayofficial" target="_blank"><img src="telegram.png" alt="Telegram"></a>
+        <a href="https://medium.com/bitbay-blog" target="_blank"><img src="medium.png" alt="Medium"></a>
+        <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
     </div>
     <div class="container">
       <div class="sidebar-background">
@@ -472,12 +484,6 @@
         <p t-id="41" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><p t-id="43" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save up to 75% in shipping in some cases. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own 'know your customer' if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. This system is ownerless and entirely free to use. However, there is a setting that can be activated for affiliates/referrals which can range from 0-1%. In order to encourage users to engage with affiliates, the fee is burned if it is not paid to an affiliate. This helps market the system by giving users a way to earn. A user of the markets is automatically an affiliate if they complete 10 deals. That allows them to use the markets for free if they choose to(as they can be their own affiliate) and it allows them to send users to the website through an affiliate link. Visiting through a link registers the affiliate to that account when a deal is accepted and let's them benefit from that referral. Also, some sellers may offer a more attractive referral fee which should allow affiliates to net more by mutual consent. For more information on how BitBay works you may visit: </p><a href="https://bitbay.market" target="_blank" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">https://bitbay.market</a>
         <div id="abount-container">
     </div>
-</div>
-<div class="footer">
-    <a href="https://bitbay.market" target="_blank"><img src="bitbay.png" text="BitBay"></a>
-    <a href="https://t.me/bitbayofficial" target="_blank"><img src="telegram.png" alt="Telegram"></a>
-    <a href="https://medium.com/bitbay-blog" target="_blank"><img src="medium.png" alt="Medium"></a>
-    <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
 </div>
 <script>
     document.querySelectorAll('button').forEach(button => {
@@ -1897,22 +1903,27 @@
             try {
               var testdata = JSON.parse(text);
               if('recipient' in testdata && 'sender' in testdata) {
-                if(DOMPurify.sanitize(data.sender) == myaccounts) {
-                  var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey+"!").plaintext;
-                  console.log(message)
-                  var padding = message.split("#*#*#")[1];
-                  if(padding.length > 30) {
-                    text = message.split("#*#*#")[0];
-                  } else {
-                    throw new Error("Not enough padding");
-                  }
-                } else if(DOMPurify.sanitize(data.recipient) == myaccounts) {
-                  var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey+"!").plaintext;
-                  var padding = message.split("#*#*#")[1];
-                  if(padding.length > 30) {
-                    text = message.split("#*#*#")[0];
-                  } else {
-                    throw new Error("Not enough padding");
+                var cached = await getFile(Crypto.SHA256(text));
+                if (!Array.isArray(cached)) {
+                  text = cached;
+                } else {
+                  if(DOMPurify.sanitize(data.sender) == myaccounts) {
+                    var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey).plaintext;
+                    console.log(message)
+                    var padding = message.split("#*#*#")[1];
+                    if(padding.length > 30) {
+                      text = message.split("#*#*#")[0];
+                    } else {
+                      throw new Error("Not enough padding");
+                    }
+                  } else if(DOMPurify.sanitize(data.recipient) == myaccounts) {
+                    var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey).plaintext;
+                    var padding = message.split("#*#*#")[1];
+                    if(padding.length > 30) {
+                      text = message.split("#*#*#")[0];
+                    } else {
+                      throw new Error("Not enough padding");
+                    }
                   }
                 }
               }
@@ -1963,19 +1974,24 @@
           } catch (e) {
               console.log("Error loading tags");
           }
-          if(text != '') {
-              try {
+          if(text != '') {            
+              try {                  
                   var messageData = JSON.parse(jsondata.message);
-                  var myimg = Array.isArray(messageData.image) ? messageData.image : [''];
-                  storeFile(Crypto.SHA256(JSON.stringify(myimg)), myimg);
-                  jsondata.image = Crypto.SHA256(JSON.stringify(myimg));
-                  jsondata.message = messageData.message;
-                  jsondata.contact = messageData.contact;
+                  if('recipient' in messageData && 'cipher' in messageData.recipient) {
+                    jsondata.image = [''];
+                    jsondata.message = DOMPurify.sanitize(text);
+                    jsondata.contact = '';
+                  } else {
+                    var myimg = Array.isArray(messageData.image) ? messageData.image : [''];
+                    storeFile(Crypto.SHA256(JSON.stringify(myimg)), myimg);
+                    jsondata.image = Crypto.SHA256(JSON.stringify(myimg));
+                    jsondata.message = messageData.message;
+                    jsondata.contact = messageData.contact;
+                  }
               } catch (e) {
                   console.log("Error loading data");
                   jsondata.image = [''];
-                  jsondata.message = text;
-                  console.log(text)
+                  jsondata.message = DOMPurify.sanitize(text);
                   jsondata.contact = '';
               }
           } else {
@@ -1986,7 +2002,7 @@
         });
         return jsondata;
     }
-
+    lastNotified = 0;
     async function populateOffers() {
       var list = document.createElement("ul");
       var readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages")) || {};
@@ -2051,7 +2067,7 @@
             notify = 1;
           }
           li.onclick = function() {
-            document.getElementById("offersButton").style.backgroundColor = "transparent";
+            document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
             showListing(offerData, 1);
           };
           list.appendChild(li);
@@ -2079,6 +2095,13 @@
         try {
           const offerHash2 = DOMPurify.sanitize(await DDEcontract.methods.privateOffers(myaccounts, i).call());
           const offerData2 = await getOrderHash(offerHash2);
+          if(offerData2.message.includes('"recipient":') && offerData2.message.includes('"cipher":') && offerData2.message.includes('"status":')) {
+            const testThis = JSON.parse(offerData2.message)
+            if('recipient' in testThis && 'cipher' in testThis.recipient && parseInt(new Date().getTime()/1000) > lastNotified + 300) {
+              lastNotified = parseInt(new Date().getTime()/1000);
+              await Swal.fire("Decryption error! Please attempt to decrypt your order manually with the correct password.");
+            }
+          }
           if (offerData2.status[0] > 0 && offerData2.status[1] > 0) {
             readMessages[i] = true;
             localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));
@@ -2123,28 +2146,28 @@
           offerData2.index = i;
           if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
             li2.onclick = function() {
-              document.getElementById("offersButton").style.backgroundColor = "transparent";
+              document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
               showListing(offerData2, 1);
             };
             list.appendChild(li2);
           }
           if(myaccounts == offerData2.sender && offerData2.status[0] == 0) {
             li2.onclick = function() {
-              document.getElementById("offersButton").style.backgroundColor = "transparent";
+              document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
               showListing(offerData2, 2);
             };
             list2.appendChild(li2);
           }
           if(myaccounts == offerData2.recipient && offerData2.status[1] == 1) {
             li2.onclick = function() {
-              document.getElementById("offersButton").style.backgroundColor = "transparent";
+              document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
               showListing(offerData2, 1);
             };
             list.appendChild(li2);
           }
           if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
             li2.onclick = function() {
-              document.getElementById("offersButton").style.backgroundColor = "transparent";
+              document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
               showListing(offerData2, 2);
             };
             list2.appendChild(li2);
@@ -2325,7 +2348,7 @@
           }
           offerData3.index = i;          
           li3.onclick = function() {
-            document.getElementById("contractsButton").style.backgroundColor = "transparent";
+            document.getElementById("contractsButton").style.backgroundColor = "#f2f2f2";
             showListing(offerData3, 4);
           };
           list3.appendChild(li3);          
@@ -2597,6 +2620,74 @@
 
     // Function to show the details popup for a listing
     async function showListing(listing, mode=0) {
+      if(listing.message.includes('"recipient":') && listing.message.includes('"cipher":') && listing.message.includes('"status":')) {
+        await Swal.fire({
+          title: 'Encrypted listing',
+          text: 'It seems like you did not have the decryption key for this order. Would you like to enter the password to decrypt it now?',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+          icon: 'question',
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            var thisText = listing.message;
+            try {
+              userprivkey2='';
+              await Swal.fire({
+                title: 'Confirm Password',
+                input: 'password',
+                inputPlaceholder: 'Please enter decryption password',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm Password',
+                preConfirm: async (confirmedPassword) => {
+                  var hashedPassword = confirmedPassword;
+                  hashedPassword = Crypto.SHA256(hashedPassword);
+                  userprivkey2=hashedPassword;
+                  for(var i=1; i<50000; i++) {
+                    userprivkey2=Crypto.SHA256(userprivkey2);
+                  }
+                  userprivkey2 = cryptico.generateRSAKey(userprivkey2, 1024);
+                }
+              });
+              var testdata = JSON.parse(thisText);
+              var successful = 0;
+              if(DOMPurify.sanitize(listing.sender) == myaccounts) {
+                var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey2).plaintext;
+                var padding = message.split("#*#*#")[1];
+                if(padding.length > 30) {
+                  thisText = message.split("#*#*#")[0];
+                  successful = 1;
+                } else {
+                  throw new Error("Not enough padding");
+                }
+              } else if(DOMPurify.sanitize(listing.recipient) == myaccounts) {
+                var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey2).plaintext;
+                var padding = message.split("#*#*#")[1];
+                if(padding.length > 30) {
+                  thisText = message.split("#*#*#")[0];
+                  successful = 1;
+                } else {
+                  throw new Error("Not enough padding");
+                }
+              }
+              if(successful == 0) {
+                throw new Error("Failed");
+              }
+              var messageData = JSON.parse(thisText);
+              var myimg = Array.isArray(messageData.image) ? messageData.image : [''];
+              storeFile(Crypto.SHA256(JSON.stringify(myimg)), myimg);
+              storeFile(Crypto.SHA256(listing.message), thisText);
+              listing.image = Crypto.SHA256(JSON.stringify(myimg));
+              listing.message = messageData.message;
+              listing.contact = messageData.contact;
+            } catch (e) {
+              console.log(e);
+              console.log("Decryption failed");
+              await Swal.fire("Decryption failed");
+            }
+          }
+        });
+      }
       const popupContainer = document.createElement('div');      
       popupContainer.classList.add('popup-container');
 
