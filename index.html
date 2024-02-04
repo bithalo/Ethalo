@@ -1586,27 +1586,89 @@
         }
     };
 
+    var maxFileSize = (1024 * 1024) * 7;
+    async function customFetch(url, maxSize, onProgress) {
+      return new Promise((resolve, reject) => {
+        let downloadedContent = ''; // Accumulate downloaded content
+        fetch(url).then(response => {
+          if (!response.ok) {
+            reject(new Error(`Network response was not ok: ${response.statusText}`));
+            return;
+          }
+
+          const reader = response.body.getReader();
+
+          function read() {
+            reader.read().then(({ done, value }) => {
+              if (done) {
+                resolve(downloadedContent);
+                return;
+              }
+
+              // Check if the downloaded content exceeds the maxSize
+              if (downloadedContent.length + value.length > maxSize) {
+                reject(new Error('File size exceeds the maximum allowed size.'));
+                return;
+              }
+
+              // Update downloaded content
+              downloadedContent += new TextDecoder().decode(value);
+
+              // Call the onProgress callback with the current progress
+              onProgress(downloadedContent.length);
+
+              // Continue reading the next chunk
+              read();
+            });
+          }
+
+          // Start reading the response stream
+          read();
+        }).catch(error => {
+          reject(error);
+        });
+      });
+    }
+
     // Function to retrieve a file from IPFS
     const retrieveFromIPFS = async (hash) => {
       var url = "https://ipfs.io/ipfs/"+hash;
-      const response = await fetch(url);
-      var result = await response.text();
-      result = DOMPurify.sanitize(result);
+      try {
+        //const response = await fetch(url);
+        const response = await customFetch(url, maxFileSize, progress => {
+          //console.log(`Download progress: ${progress} bytes`);
+          //Users may potentially be notified about download progress of files
+        });
+        //var result = await response.text();
+        var result = DOMPurify.sanitize(response);
+      } catch (error) {
+        console.error(`Error during download: ${error.message}`);
+        return "error";
+      }
       return result;
     }
     const retrieveFromPinataIPFS = async (hash) => {
-        var url = pinataGateway + hash;
-        if(pinataGateway != "https://gateway.pinata.cloud/ipfs/") {
-            if(pinataToken == '') {
-                url = "https://gateway.pinata.cloud/ipfs/" + hash;
-            } else {
-                url += "?pinataGatewayToken=" + pinataToken;
-            }
-        }
-        const response = await fetch(url);
-        var result = await response.text();
-        result = DOMPurify.sanitize(result);
-        return result;
+      var url = pinataGateway + hash;
+      if(pinataGateway != "https://gateway.pinata.cloud/ipfs/") {
+          if(pinataToken == '') {
+              url = "https://gateway.pinata.cloud/ipfs/" + hash;
+          } else {
+              url += "?pinataGatewayToken=" + pinataToken;
+          }
+      }
+      try {
+        //const response = await fetch(url);
+        const response = await customFetch(url, maxFileSize, progress => {
+          //console.log(`Download progress: ${progress} bytes`);
+          //Users may potentially be notified about download progress of files
+        });
+        //var result = await response.text();
+        var result = DOMPurify.sanitize(response);
+      } catch (error) {
+        console.error(`Error during download: ${error.message}`);
+        return "error";
+      }
+      return result;
     };
 
     async function checkMarketUpdate() {
@@ -1900,6 +1962,9 @@
           var text = '';
           try {
             text = await getOfferData(DOMPurify.sanitize(data.message));
+            //if(text=="error") {
+            //  return false
+            //}
             try {
               var testdata = JSON.parse(text);
               if('recipient' in testdata && 'sender' in testdata) {
@@ -2072,7 +2137,7 @@
           };
           list.appendChild(li);
         } catch (error) {
-          break;
+          console.log(error);
         }
       }
       if(notify == 1) {
@@ -2173,7 +2238,7 @@
             list2.appendChild(li2);
           }
         } catch (error) {
-          break;
+          console.log(error);
         }
       }
       if(notify == 1) {
@@ -2353,8 +2418,7 @@
           };
           list3.appendChild(li3);          
         } catch (error) {
-          console.log(error)
-          break;
+          console.log(error);
         }
       }
       if(notify == 1) {
