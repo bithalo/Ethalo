@@ -81,7 +81,7 @@
             height: 100vh;            
         }
         .sidebar {
-            width: 100px;
+            width: 75px;
             background-color: #f2f2f2;
             display: flex;
             flex-direction: column;
@@ -90,9 +90,10 @@
             padding-bottom: 30px;
         }
         .sidebar button {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 10px;
+            width: 50px;
+            height: 50px;
+            font-size: 10px;
+            margin-bottom: 20px;
             border: none;
             border-radius: 5px;
             background-color: transparent;
@@ -107,8 +108,8 @@
         }
         .sidebar button img {
             margin-top: 10px;
-            width: 30px;
-            height: 30px;
+            width: 20px;
+            height: 20px;
         }
         .sidebar button span {
             line-height: 1; /* Set line-height to 1 to avoid vertical shifting */
@@ -120,6 +121,10 @@
         }
         .main.show {
             display: block;
+        }
+        .connectionstatus {
+          font-size: 8.5px;
+          display: none;
         }
         .header {
             height: 50px;
@@ -155,10 +160,57 @@
             margin-left: 10px;
             flex: 1;
         }
+        .escrow-container {
+          font-size: 10px;
+        }
+        .tabcontent {
+          font-size: 10px;
+        }
         @media screen and (min-width: 600px) {
+          body .main.account * {
+              font-size: 13px;
+          }
           .header2 a {
             font-size: 11px;
             margin-right: 20px;
+          }
+          .connectionstatus {
+            font-size: 8.5px;
+            display: block;
+          }
+          .escrow-container {
+            font-size: 13px;
+          }
+          .tabcontent {
+            font-size: 13px;
+          }
+          .sidebar {
+              width: 100px;
+              background-color: #f2f2f2;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              padding-top: 10px;
+              padding-bottom: 30px;
+          }
+          .sidebar button {
+              width: 80px;
+              height: 80px;
+              font-size: 13px;
+              margin-bottom: 10px;
+              border: none;
+              border-radius: 5px;
+              background-color: transparent;
+              cursor: pointer;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              text-align: center;
+          }
+          .sidebar button img {
+              margin-top: 10px;
+              width: 30px;
+              height: 30px;
           }
         }
         @media screen and (min-width: 800px) {
@@ -168,6 +220,10 @@
           .header2 a {
             font-size: 14px;
             margin-right: 30px;
+          }
+          .connectionstatus {
+            font-size: 12px;
+            display: block;
           }
         }
         .header button {
@@ -229,10 +285,35 @@
             max-height: calc(100% - 100px); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
         }
+        .main.account * {
+            font-size: 12px;
+        }
         .main.about {
             min-height: calc(100% - 100px); /* Subtract footer height */
             max-height: calc(100% - 100px); /* Subtract footer height */
             overflow-y: auto; /* Enable vertical scrolling if content overflows */
+        }
+        .main.markets::after {
+          content: '';
+          background: url('./bitbay-dynamic-peg-hero2x-v3.png') center/cover;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          opacity: 0.25; /* Adjust the opacity value as needed */
+          z-index: -1;
+        }
+        .main.account::after {
+          content: '';
+          background: url('./free-balloon.png') no-repeat;
+          position: absolute;
+          top: 0;
+          left: 50%;
+          right: 0;
+          bottom: 0;
+          opacity: 0.07; /* Adjust the opacity value as needed */
+          z-index: -1;
         }
         .square-button {
           display: inline-block;
@@ -271,9 +352,9 @@
 <body>
     <div class="header">
         <img src="bitbay.png" alt="Logo" height="20px" width="20px">
-        <h1 t-id="2">BitBay Decentralized Markets</h1>
+        <h1 t-id="2">BitBay Decentralized Markets</h1>&nbsp
         <img id="selectedFlag" src="default.png" alt="Selected Flag">
-        <select id="languageSelect" style="margin-right: 20px; font-size: 10px; width: 75px;">
+        <select id="languageSelect" style="margin-right: 15px; font-size: 10px; width: auto;">
           <option value="default" disabled selected>Default</option>
         </select>
         <div class="connect">
@@ -289,7 +370,7 @@
             <button onclick="showMain('account')" id="accountButton"><img src="account.png" alt="Account" style="display: block;"><span class="text" t-id="8">Account</span></button>
             <button onclick="showMain('about')" id="aboutButton"><img src="about.png" alt="About" style="display: block;"><span class="text" t-id="9">About</span></button>
         </div>
-    <div class="main markets" ss-container>
+    <div class="main markets">
         <div class="header2">
             <a href="#" t-id="10" onclick="changeSearchText('goods')">Goods</a>
             <a href="#" t-id="11" onclick="changeSearchText('services')">Services</a>
@@ -322,16 +403,16 @@
             <!-- populated by JavaScript -->
         </div>
     </div>
-    <div class="main offers" ss-container>
+    <div class="main offers">
         <h2 t-id="23">Offers</h2>
         <div id="myoffers" class="myoffers"></div>
     </div>
-    <div class="main contracts" ss-container>
+    <div class="main contracts">
         <h2 t-id="24">Contracts</h2>
         <div id="mycontracts" class="mycontracts"></div>
     </div>
-    <div class="main account" ss-container>
-        <h2 t-id="25">Account</h2>
+    <div class="main account">
+        <h2 t-id="25" style="font-size: 16px">Account</h2>
         <p id="account" t-id="26">Please connect metamask</p>
         <button onclick="deposit()" t-id="27">Deposit tokens</button>
         <button onclick="withdraw()" t-id="28">Withdraw tokens</button><br><br>
@@ -359,15 +440,17 @@
           <option value="0" t-id="39">Use default IPFS Pinata Gateway</option>
         </select>
         <br><br>
-        <h2 t-id="45">Earn</h2>
+        <h2 t-id="45" style="font-size: 16px">Earn</h2>
         <p id="affiliateInfo" t-id="46">Not connected</p>
         <button onclick="copyAffiliateLink()" t-id="47">Copy affiliate link</button><br><br>
         <button onclick="changeAffiliate()" t-id="48">Change my affiliate</button><br><br>
         <button onclick="setCustomFee()" t-id="49">Set custom referral fee</button><br><br>
     </div>
-    <div class="main about" ss-container>
+    <div class="main about" style="background-image: src('./bitbay-dynamic-peg-hero2x.png');"> <!-- ss-container tag can be used for custom scrollers but it's not totally cross platform -->
+        <div id="abount-container" style="width: 100%; max-width: 900px; border: 1px solid #3d0064; padding: 10px; margin-right: 15px; margin-bottom: 25px; align-items: center; display: block; margin-left: auto; margin-right: auto;">
         <h2 t-id="40" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">About</h2>
         <p t-id="41" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><p t-id="43" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save up to 75% in shipping in some cases. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own 'know your customer' if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. This system is ownerless and entirely free to use. However, there is a setting that can be activated for affiliates/referrals which can range from 0-1%. In order to encourage users to engage with affiliates, the fee is burned if it is not paid to an affiliate. This helps market the system by giving users a way to earn. A user of the markets is automatically an affiliate if they complete 10 deals. That allows them to use the markets for free if they choose to(as they can be their own affiliate) and it allows them to send users to the website through an affiliate link. Visiting through a link registers the affiliate to that account when a deal is accepted and let's them benefit from that referral. Also, some sellers may offer a more attractive referral fee which should allow affiliates to net more by mutual consent. For more information on how BitBay works you may visit: </p><a href="https://bitbay.market" target="_blank" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">https://bitbay.market</a>
+        <div id="abount-container">
     </div>
 </div>
 <div class="footer">
@@ -377,7 +460,11 @@
     <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
 </div>
 <script>
-    document.querySelectorAll('button:not([class]):not(.sidebar button)').forEach(button => button.classList.add('square-button2'));
+    document.querySelectorAll('button').forEach(button => {
+      if (!button.classList.length && !button.closest('.sidebar')) {
+        button.classList.add('square-button2');
+      }
+    });
     function populateLanguageSelect() {
       const languageSelect = document.getElementById("languageSelect");
 
@@ -752,6 +839,10 @@
             return;
         }
         document.getElementById("connectionstatus").innerHTML = "Connected to " + netname;
+        const metabutton = document.querySelector('[t-id="3"]');
+        if (metabutton && window.innerWidth <= 800) {
+            metabutton.textContent = 'Connected';
+        }
         web3.eth.getGasPrice().then(function (theGasPrice) {
             gasPrice = DOMPurify.sanitize(theGasPrice);
         });
@@ -1778,7 +1869,7 @@
               var testdata = JSON.parse(text);
               if('recipient' in testdata && 'sender' in testdata) {
                 if(DOMPurify.sanitize(data.sender) == myaccounts) {
-                  var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey).plaintext;
+                  var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey+"!").plaintext;
                   console.log(message)
                   var padding = message.split("#*#*#")[1];
                   if(padding.length > 30) {
@@ -1787,7 +1878,7 @@
                     throw new Error("Not enough padding");
                   }
                 } else if(DOMPurify.sanitize(data.recipient) == myaccounts) {
-                  var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey).plaintext;
+                  var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey+"!").plaintext;
                   var padding = message.split("#*#*#")[1];
                   if(padding.length > 30) {
                     text = message.split("#*#*#")[0];
@@ -1907,8 +1998,12 @@
           const svgString = jdenticon.toSvg(offerHash, 25);
           const base64String = btoa(svgString);
           const dataUrl = `data:image/svg+xml;base64,${base64String}`;
+          var offerHashDisp = offerHash;
+          if(window.innerWidth < 550) {
+            offerHashDisp = offerHashDisp.substring(0, 32) + '...';
+          }
           li.innerHTML = `
-            <div>Order hash: <img src="${dataUrl}" width="25" height="25"></img> ${offerHash}</div>
+            <div>Order hash: <img src="${dataUrl}" width="25" height="25"></img> ${offerHashDisp}</div>
             <div>Counter-Party Address: ${counterpartyLabel}</div>
             <div>Token: ${offerData.token}</div>
             <div>Amount: ${displayDecimals(offerData.token, offerData.amount)}</div>
@@ -1973,8 +2068,12 @@
           const svgString2 = jdenticon.toSvg(offerHash2, 25);
           const base64String2 = btoa(svgString2);
           const dataUrl2 = `data:image/svg+xml;base64,${base64String2}`;
+          var offerHashDisp2 = offerHash2;
+          if(window.innerWidth < 550) {
+            offerHashDisp2 = offerHashDisp2.substring(0, 32) + '...';
+          }
           li2.innerHTML = `
-            <div>Order hash: <img src="${dataUrl2}" width="25" height="25"></img> ${offerHash2}</div>
+            <div>Order hash: <img src="${dataUrl2}" width="25" height="25"></img> ${offerHashDisp2}</div>
             <div>Counter-Party Address: ${counterpartyLabel2}</div>
             <div>Token: ${offerData2.token}</div>
             <div>Amount: ${displayDecimals(offerData2.token, offerData2.amount)}</div>
@@ -2105,9 +2204,12 @@
           const currentBlock = await web3.eth.getBlock(currentBlockNumber);
           const blockTimestamp = DOMPurify.sanitize(currentBlock.timestamp);
           const timeRemaining = (parseFloat(parseInt(offerData3.timelimit[0]) - parseInt(blockTimestamp)) / parseFloat(60 * 60 * 24)).toFixed(2);
-
+          var offerHashDisp3 = offerHash3;
+          if(window.innerWidth < 550) {
+            offerHashDisp3 = offerHashDisp3.substring(0, 32) + '...';
+          }
           li3.innerHTML = `
-            <div>Order hash: <img src="${dataUrl3}" width="25" height="25"></img> ${offerHash3}</div>
+            <div>Order hash: <img src="${dataUrl3}" width="25" height="25"></img> ${offerHashDisp3}</div>
             <div>Counter-Party Address: ${counterpartyLabel3}</div>
             <div>Token: ${offerData3.token}</div>
             <div>Amount: ${displayDecimals(offerData3.token, offerData3.amount)}</div>
@@ -2383,8 +2485,8 @@
 
             .listing-grid-item {
                 border: 1px solid #ccc;
-                padding: 10px;
                 text-align: center;
+                background-color: white;
             }
 
             .listing-image img {
@@ -2658,7 +2760,11 @@
       }
       if(listing.referred != "0x0000000000000000000000000000000000000000") {
         var theReferred = document.createElement('p');
-        theReferred.innerHTML = 'Referral address: ' + listing.referred;
+        const theReferredTextSpan = document.createElement('span');
+        theReferredTextSpan.style.fontSize = '12px';
+        theReferredTextSpan.textContent = listing.referred;
+        theReferred.innerHTML = 'Referral address: ';
+        theReferred.appendChild(theReferredTextSpan);
       }
       if(listing.tags && listing.tags.length != 0) {
         var theTags = document.createElement('p');
