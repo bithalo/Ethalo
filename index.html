@@ -11,6 +11,7 @@
 <script type="text/javascript" src="./web3.min.js"></script>
 <script type="text/javascript" src="./jdenticon.min.js"></script>
 <script type="text/javascript" src="./simple-scrollbar.min.js"></script>
+<link rel="stylesheet" href="./open-sans.css">
 <link rel="stylesheet" href="./simple-scrollbar.css">
 <html>
 <head>
@@ -102,10 +103,11 @@
             width: 50px;
             height: 50px;
             font-size: 10px;
+            margin-top: 10px;
             margin-bottom: 20px;
             border: none;
             border-radius: 5px;
-            background-color: #f2f2f2;
+            background-color: #d5d4e2;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -138,12 +140,15 @@
         }
         .header {
             height: 50px;
-            background-color: #f2f2f2;
+            background-color: #322c62;
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 300;
             display: flex;
             flex-direction: row;
             align-items: center;
             padding: 0 20px;
-            box-shadow: 0 2px 5px #ccc;
+            box-shadow: 0 2px 5px #7d71c3;
         }
         .header2 {
             height: 50px;
@@ -234,6 +239,7 @@
         @media screen and (min-width: 800px) {
           .header h1 {
             font-size: 20px; /* Adjust the font size for larger screens */
+            font-weight: 600;
           }
           .header2 a {
             font-size: 14px;
@@ -269,12 +275,12 @@
             bottom: 0;
             height: 50px;
             width: 100%;
-            background-color: #f2f2f2;
+            background-color: #5c519e;
             display: flex;
             flex-direction: row;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 -2px 5px #ccc;
+            box-shadow: 0 -2px 5px #322c62;
             z-index: 10;            
         }
         .footer img {
@@ -344,7 +350,7 @@
           border: 1px solid #3d0064;
           padding: 5px 5px;
           margin-bottom: 5px;
-          border-radius: 0; /* Make it square */
+          border-radius: 4px; /* Make it square */
           background-color: #3498db; /* Set default background color */
           color: #ffffff; /* Set default text color */
           cursor: pointer;
@@ -360,7 +366,7 @@
           border: 1px solid #3d0064;
           padding: 5px 5px;
           margin-bottom: 5px;
-          border-radius: 0; /* Make it square */
+          border-radius: 4px; /* Make it square */
           background-color: #ebebeb; /* Set default background color */
           color: #000000; /* Set default text color */
           cursor: pointer;
@@ -389,8 +395,8 @@
     <div class="footer">
         <a href="https://bitbay.market" target="_blank"><img src="bitbay.png" text="BitBay"></a>
         <a href="https://t.me/bitbayofficial" target="_blank"><img src="telegram.png" alt="Telegram"></a>
-        <a href="https://medium.com/bitbay-blog" target="_blank"><img src="medium.png" alt="Medium"></a>
-        <a href="https://github.com/bitbaymarket" target="_blank"><img src="github.png" alt="Github"></a>
+        <a href="https://medium.com/bitbay-blog" target="_blank"><img src="./medium-1.png" alt="Medium"></a>
+        <a href="https://github.com/bitbaymarket" target="_blank"><img src="./github-1.png" alt="Github"></a>
     </div>
     <div class="container">
       <div class="sidebar-background">
@@ -4041,14 +4047,19 @@
           } catch(e) {
               console.log(e);
           }
+          const byteLength = new TextEncoder().encode(message).length;
+          if (byteLength > parseInt(maxFileSize * .97)) {
+            await Swal.fire("Message exceeds maximum byte size: " + maxFileSize);
+            return false;
+          }
           var result = await postOfferData(message);
           if(result == "error") {
-              await Swal.fire("Error posting message data to IPFS.");
-              return false;
+            await Swal.fire("Error posting message data to IPFS.");
+            return false;
           }
           if(result.length > 100) {
-              await Swal.fire("Error message length was unusually long. Please check IPFS hash result.");
-              return false;
+            await Swal.fire("Error message length was unusually long. Please check IPFS hash result.");
+            return false;
           }
           message = result;
           // Construct data object
