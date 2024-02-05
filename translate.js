@@ -275,7 +275,7 @@ languages['it']={
   "6": {"#it": "Offerte"},
   "7": {"#it": "Contratti"},
   "8": {"#it": "Account"},
-  "9": {"#it": "Informazioni"},
+  "9": {"#it": "Info"},
   "10": {"#it": "Merci"},
   "11": {"#it": "Servizi"},
   "12": {"#it": "Baratto"},
