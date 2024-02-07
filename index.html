@@ -700,7 +700,8 @@
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
-    var gasOptions = {};
+    var gasOptions = [{},{}];    
+    var gasSetting = 0;
     var balances = {};
     var baseBalance = 0;
     var myContactInfo = document.getElementById("myContactInfo");
@@ -808,7 +809,8 @@
         currentMarketsLength = 0;
         userpubkey = "";
         userprivkey = "";
-        gasOptions = {};
+        gasOptions = [{},{}];
+        gasSetting = 0;
         baseFee = 0;
         myFavorites = [];
     }
@@ -841,14 +843,22 @@
         currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
         var netname = "unknown";
         var netname2 = "ETH";
+        web3.eth.getGasPrice().then(function (theGasPrice) {
+            gasPrice = window.web3.utils.toWei(DOMPurify.sanitize(theGasPrice), 'mwei');
+        });
         if (currentChainId == 5) {
             netname = "Goerli Testnet";
             netname2 = "ETH";
             DDEaddy = "0xaeDD3311b0ab10Ac1837bB5BcC0B51Bd7f8C4C2C";     
-            gasOptions = {
+            gasOptions[0] = {
               gasLimit: 4000000,
+              gasPrice: null,
               maxPriorityFeePerGas: window.web3.utils.toWei('1.5', 'gwei'), // Max priority fee of 1.5 Gwei
               maxFeePerGas: window.web3.utils.toWei('1.6', 'gwei'), // Max base fee of 1.5 Gwei
+            };
+            gasOptions[1] = {
+              gasLimit: 4000000,
+              gasPrice: gasPrice
             };
             tokens = [
               {
@@ -875,9 +885,6 @@
         if (metabutton && window.innerWidth <= 800) {
             metabutton.textContent = 'Connected';
         }
-        web3.eth.getGasPrice().then(function (theGasPrice) {
-            gasPrice = DOMPurify.sanitize(theGasPrice);
-        });
         myaccounts = DOMPurify.sanitize(myaccounts2[0]);
         var cached = await getContactInfo(myaccounts);
         document.getElementById("myContactInfo").value = cached;
@@ -915,6 +922,10 @@
             userpubkey = cryptico.publicKeyString(userprivkey);
           }
         }
+        const gasSetting2 = localStorage.getItem(myaccounts+":gasOption");        
+        if(gasSetting2 && gasSetting == "1") {
+          gasSetting = 1;
+        }
         const currentBlockNumber = await web3.eth.getBlockNumber();
         const currentBlock = await web3.eth.getBlock(currentBlockNumber);
         CurrentTimeStamp = DOMPurify.sanitize(currentBlock.timestamp);
@@ -929,7 +940,7 @@
         }
         reputation = [0,0,0];
         reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
-        if((reputation[0] + reputation[1]) > 0) {
+        if((parseInt(reputation[0]) + parseInt(reputation[1])) > 0) {
             btext+="<br>Contracting success rate: " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
         }
         await window.web3.eth.getBalance(myaccounts, function(err, result1) {
@@ -953,7 +964,7 @@
               atext += "<br>You are an affiliate! You may market this system using your affiliate link.";
             } else {
               var cooldown = DOMPurify.sanitize(await DDEcontract.methods.cooldown(myaccounts).call());
-              if(cooldown != 0 && (cooldown2 - CurrentTimeStamp) > 0) {
+              if(cooldown != 0 && (cooldown - CurrentTimeStamp) > 0) {
                 atext += "<br>Cooldown between next deal to qualify as an affiliate: " + ((parseFloat(cooldown) - parseFloat(CurrentTimeStamp)) / 60 / 60).toFixed(2) + "(days)";
               } else {
                 var threshold = DOMPurify.sanitize(await DDEcontract.methods.minimumFeeThreshold(tokens[0].address).call());
@@ -976,10 +987,10 @@
                 atext += "<br>Linked affiliate is not valid because they have not completed 10 qualified deals yet: " + referral;
               }
             }
-            if(reputation[0] + reputation[1] == 0) {
+            if(parseInt(reputation[0]) + parseInt(reputation[1]) == 0) {
               atext += "<br><br>You are new to the markets! Welcome to BitBay.";
             } else {
-              atext += "<br><br>Contracting success rate: " + ((reputation[0] / (reputation[0] + reputation[1])) * 100).toFixed(2) + "%(" + reputation[0] + "/" + (reputation[0] + reputation[1]) + ")";
+              atext += "<br><br>Contracting success rate: " + ((reputation[0] / (reputation[0] + reputation[1])) * 100).toFixed(2) + "%(" + reputation[0] + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
             }
             document.getElementById("affiliateInfo").innerHTML = atext;
         } catch(e) {
@@ -1043,6 +1054,16 @@
             await checkMarketUpdate();
         }
         await populateOffers();
+    }
+
+    async function showError(error) {
+      if (error.message.includes("specified gasPrice but also included maxFeePerGas")) {
+        await Swal.fire("Web3 gas assignment failed. Will change to blockchain recommended gas options.");
+        gasSetting = 1;
+        localStorage.setItem(myaccounts+":gasOption", "1");
+      } else {
+        await Swal.fire({title: "Error sending transaction", text: error.message, icon: 'error', confirmButtonText: 'OK'});
+      }
     }
 
     function checkFavorites() {
@@ -1373,10 +1394,11 @@
         return;
       }
       try {
-          await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions});
+          await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions[gasSetting]});
           await Swal.fire("Data added!");
-        } catch (error) {
+        } catch (error) {          
           console.error(error);
+          await showError(error);
       }
     }
 
@@ -1460,9 +1482,15 @@
           var reputation = [0,0,0];
           reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(affiliate).call())));
           if(reputation[2] >= 10) {
-            await DDEcontract.methods.changeAffiliate(affiliate).send({"from":myaccounts,...gasOptions});
-            Swal.fire("Success!");
-            referral = affiliate;
+            try {
+              await DDEcontract.methods.changeAffiliate(affiliate).send({"from":myaccounts,...gasOptions[gasSetting]});
+              Swal.fire("Success!");
+              referral = affiliate;
+            } catch (e) {
+              console.log(e);
+              await showError(e);
+              return;
+            }
           } else {
             Swal.fire("This person has not completed enough qualified deals yet.");
           }
@@ -1488,8 +1516,13 @@
       }).then(async (result) => {
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
-          await DDEcontract.methods.changeCustomFee(value).send({"from":myaccounts,...gasOptions});
-          Swal.fire("Success!");
+          try {
+            await DDEcontract.methods.changeCustomFee(value).send({"from":myaccounts,...gasOptions[gasSetting]});
+            Swal.fire("Success!");
+          } catch (e) {
+            console.log(e);
+            await showError(e);
+          }
         }
       });
     }
@@ -3030,11 +3063,11 @@
       if(mode == 0 || mode == 2) {
           const acceptButton = document.createElement('button');
           acceptButton.innerHTML = 'Accept offer';
-          acceptButton.onclick = () => acceptOffer(listing);
+          acceptButton.onclick = () => {acceptOffer(listing); popupContainer.remove();};
 
           const counterButton = document.createElement('button');
           counterButton.innerHTML = 'Counter-offer';
-          counterButton.onclick = () => counterOffer(listing);
+          counterButton.onclick = () => {counterOffer(listing); popupContainer.remove();};
 
           buttonContainer.appendChild(acceptButton);
           buttonContainer.appendChild(counterButton);
@@ -3043,22 +3076,22 @@
           if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
             const quantityButton = document.createElement('button');
             quantityButton.innerHTML = 'Update Quantity';
-            quantityButton.onclick = async () => await updateQuantity(listing);
+            quantityButton.onclick = async () => {await updateQuantity(listing); popupContainer.remove();};
             buttonContainer.appendChild(quantityButton);
             const feeButton = document.createElement('button');
             feeButton.innerHTML = 'Edit referral fee';
-            feeButton.onclick = async () => await updateFee(listing);
+            feeButton.onclick = async () => {await updateFee(listing); popupContainer.remove();};
             buttonContainer.appendChild(feeButton);
           }
           const cancelButton = document.createElement('button');
           cancelButton.innerHTML = 'Cancel offer';
-          cancelButton.onclick = () => cancelOffer(listing);
+          cancelButton.onclick = async () => {await cancelOffer(listing); popupContainer.remove();};
           buttonContainer.appendChild(cancelButton);
       }
       if(mode == 2) {
           const cancelButton = document.createElement('button');
           cancelButton.innerHTML = 'Cancel offer';
-          cancelButton.onclick = () => cancelOffer(listing, 1);
+          cancelButton.onclick = async () => {await cancelOffer(listing, 1); popupContainer.remove();};
           buttonContainer.appendChild(cancelButton);
       }
       if(mode == 3) {
@@ -3092,12 +3125,13 @@
                     }).then(async (result) => {
                       if (result.isConfirmed) {
                         try {
-                          await DDEcontract.methods.expireEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions});
+                          await DDEcontract.methods.expireEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
                           await Swal.fire("Transaction result registered!");
                           popupContainer.remove();
                           returnThis=1;
                         } catch (error) {
                           console.error(error);
+                          await showError(error);                          
                         }
                       }
                     });
@@ -3123,12 +3157,13 @@
                   acceptTime.id = 'acceptTime';                  
                   acceptTime.onclick = async function() {
                     try {
-                      await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[1]).send({"from":myaccounts,...gasOptions});
+                      await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[1]).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire("Time extended!");
                       await loadUser();
                       popupContainer.remove();
                     } catch (error) {
                       console.error(error);
+                      await showError(error);
                     }
                   }
                   buttonContainer.appendChild(acceptTime);
@@ -3141,12 +3176,13 @@
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
-                      await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[2]).send({"from":myaccounts,...gasOptions});
+                      await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[2]).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire("Time extended!");
                       await loadUser();
                       popupContainer.remove();
                     } catch (error) {
                       console.error(error);
+                      await showError(error);
                     }
                   }
                   buttonContainer.appendChild(acceptTime);
@@ -3188,13 +3224,14 @@
                       confirmBtn.addEventListener("click", async () => {                        
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                         dialog.remove();
-                        await DDEcontract.methods.requestExtension(listing.hash, myaccounts, newtime).send({"from":myaccounts,...gasOptions});
+                        await DDEcontract.methods.requestExtension(listing.hash, myaccounts, newtime).send({"from":myaccounts,...gasOptions[gasSetting]});
                         await Swal.fire("Time extension requested!");
                         await loadUser();
                         popupContainer.remove();
                       });
                   } catch (error) {
                     console.error(error);
+                    await showError(error);
                   }
               }              
               buttonContainer.appendChild(extendTime);
@@ -3214,7 +3251,7 @@
                       return;
                     }
                   }
-                  await DDEcontract.methods.cancelEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions});
+                  await DDEcontract.methods.cancelEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
                   if(listing.status[1] == 1) {
                     await Swal.fire("Contract cancellation request sent!");
                   } else {
@@ -3224,6 +3261,7 @@
                   popupContainer.remove();
                 } catch (error) {
                   console.error(error);
+                  await showError(error);
                 }
               }
               buttonContainer.appendChild(cancelButton);
@@ -3243,7 +3281,7 @@
                       return;
                     }
                   }
-                  await DDEcontract.methods.completeEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions});
+                  await DDEcontract.methods.completeEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
                   if(listing.status[1] == 1) {
                     await Swal.fire("Contract completion request sent!");
                   } else {
@@ -3253,6 +3291,7 @@
                   popupContainer.remove();
                 } catch (error) {
                   console.error(error);
+                  await showError(error);
                 }
               }
               buttonContainer.appendChild(confirmButton);
@@ -3470,12 +3509,13 @@
           // If the selected token is ETH, deposit WETH instead
           try {
             var value = web3.utils.toWei(amount.toString(), 'ether');
-            await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,...gasOptions});
+            await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,...gasOptions[gasSetting]});
             await Swal.fire("Deposit success!");
             await loadUser();
             popupContainer.remove();
           } catch (error) {
             console.error(error);
+            await showError(error);
           }
         } else {
           // If the selected token is not ETH, deposit the selected token
@@ -3486,15 +3526,16 @@
 
             if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
               await Swal.fire("Waiting for approval...");
-              await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions});
+              await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions[gasSetting]});
             }
 
-            await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,...gasOptions});
+            await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,...gasOptions[gasSetting]});
             await Swal.fire("Deposit success!");
             await loadUser();
             popupContainer.remove();
           } catch (error) {
             console.error(error);
+            await showError(error);
           }
         }
       });
@@ -3594,12 +3635,13 @@
           var amount = parseFloat(document.getElementById('amount-input').value);          
           var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
           try {
-            await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,...gasOptions});
+            await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,...gasOptions[gasSetting]});
             await Swal.fire("Withdraw success!");
             await loadUser();
             popupContainer.remove();
           } catch (error) {
             console.error(error);
+            await showError(error);
           }
       });
 
@@ -4113,7 +4155,7 @@
                 style,
                 data.message,
                 myterms
-              ).send({"from":myaccounts,...gasOptions});
+              ).send({"from":myaccounts,...gasOptions[gasSetting]});
                 await Swal.fire("Contract creation success!");
                 await loadUser();
                 if(emailClient.checked && sender2 != "0x0000000000000000000000000000000000000000" && recipient2 != "0x0000000000000000000000000000000000000000" && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
@@ -4136,6 +4178,7 @@
                 popupContainer.remove();
               } catch (error) {
                 console.error(error);
+                await showError(error);
           }
         });
 
@@ -4406,7 +4449,7 @@
                       quantity,
                       accepttimelimit.toString(),
                       referral
-                    ).send({"from":myaccounts,...gasOptions});
+                    ).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire("Contract accepted!");
                       await loadUser();
                       if(emailClient.checked && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
@@ -4426,7 +4469,7 @@
                           }
                         });
                       }
-                    });
+                  });
                 }
               } else {
                 quantity = mylisting.quantity;
@@ -4472,9 +4515,9 @@
                 await DDEcontract.methods.acceptOffer(
                   mylisting.hash,
                   quantity,
-                  accepttimelimit,
+                  accepttimelimit.toString(),
                   referral
-                ).send({"from":myaccounts,...gasOptions});
+                ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire("Contract accepted!");
                   await loadUser();
                   if(emailClient.checked && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
@@ -4497,6 +4540,7 @@
               }
         } catch (error) {
             console.error(error);
+            await showError(error);
         }
     }
     async function counterOffer(listing) {
@@ -4542,12 +4586,13 @@
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash,
                     myaccounts
-                  ).send({"from":myaccounts,...gasOptions});
+                  ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire("Contract removed!");
                   await loadUser();
                   dialog.remove();
             } catch (error) {
                 console.error(error);
+                await showError(error);
             }
           });
       } else {
@@ -4555,7 +4600,7 @@
                 if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
                   await DDEcontract.methods.removeMarketOffer(
                     listing.hash
-                  ).send({"from":myaccounts,...gasOptions});
+                  ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire("Contract removed!");
                   await loadUser();
                   dialog.remove();
@@ -4563,13 +4608,14 @@
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash,
                     myaccounts
-                  ).send({"from":myaccounts,...gasOptions});
+                  ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire("Contract removed!");
                   await loadUser();
                   dialog.remove();
                 }
             } catch (error) {
                 console.error(error);
+                await showError(error);
             }
       }      
     }
@@ -4615,13 +4661,14 @@
               await DDEcontract.methods.updateQuantity(
                 listing.hash,
                 quantity
-              ).send({"from":myaccounts,...gasOptions});
+              ).send({"from":myaccounts,...gasOptions[gasSetting]});
                 dialog.remove();
                 await Swal.fire("Quantity updated!");
                 await loadUser();
                 return;
         } catch (error) {
             console.error(error);
+            await showError(error);
         }
         dialog.remove();
       });
@@ -4646,9 +4693,14 @@
       }).then(async (result) => {
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
-          await DDEcontract.methods.changeReferralFee(listing.hash,value).send({"from":myaccounts,...gasOptions});
-          Swal.fire("Success!");
-          await loadUser();
+          try {
+            await DDEcontract.methods.changeReferralFee(listing.hash,value).send({"from":myaccounts,...gasOptions[gasSetting]});
+            Swal.fire("Success!");
+            await loadUser();
+          } catch (error) {
+            console.log(error);
+            await showError(error);
+          }
         }
       });
     }
@@ -4657,10 +4709,11 @@
         var data = CryptoJS.AES.encrypt(JSON.stringify(text), AESkey).toString();
         console.log(data)
         try {
-            await DDEcontract.methods.adddata(data).send({"from":myaccounts,...gasOptions});
+            await DDEcontract.methods.adddata(data).send({"from":myaccounts,...gasOptions[gasSetting]});
             await Swal.fire("Data added!");
           } catch (error) {
             console.error(error);
+            await showError(error);
         }
     }
     async function getAPI(index) {
