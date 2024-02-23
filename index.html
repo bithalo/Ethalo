@@ -384,7 +384,7 @@
         <img src="bitbay.png" alt="Logo" height="20px" width="20px">
         <h1 t-id="2">BitBay Decentralized Markets</h1>&nbsp
         <img id="selectedFlag" src="default.png" alt="Selected Flag">
-        <select id="languageSelect" style="margin-right: 15px; font-size: 10px; width: auto;">
+        <select id="languageSelect" style="margin-right: 15px; font-size: 10px; width: 100px;">
           <option value="default" disabled selected>Default</option>
         </select>
         <div class="connect">
@@ -726,7 +726,7 @@
     ];
     var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
     web3 = new Web3("https://rpc.ankr.com/eth_goerli");
-    DDEaddy = "0xaeDD3311b0ab10Ac1837bB5BcC0B51Bd7f8C4C2C"; //Goerli testnet is default market view
+    DDEaddy = "0xcE36f7754abDc89B2e30bdfa91b151BC9799e342"; //Goerli testnet is default market view
     var referral = "0x0000000000000000000000000000000000000000";
     var baseFee = 0;
     var myFavorites = [];
@@ -736,6 +736,10 @@
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
     var isConnected = false;
+    var notifyFavorites = localStorage.getItem(myaccounts + ":notifyFavorites");
+    if(!notifyFavorites) {
+      notifyFavorites = "0";
+    }
     function getQueryParam(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
@@ -849,7 +853,7 @@
         if (currentChainId == 5) {
             netname = "Goerli Testnet";
             netname2 = "ETH";
-            DDEaddy = "0xaeDD3311b0ab10Ac1837bB5BcC0B51Bd7f8C4C2C";     
+            DDEaddy = "0xcE36f7754abDc89B2e30bdfa91b151BC9799e342";     
             gasOptions[0] = {
               gasLimit: 4000000,
               gasPrice: null,
@@ -965,7 +969,7 @@
             } else {
               var cooldown = DOMPurify.sanitize(await DDEcontract.methods.cooldown(myaccounts).call());
               if(cooldown != 0 && (cooldown - CurrentTimeStamp) > 0) {
-                atext += "<br>Cooldown between next deal to qualify as an affiliate: " + ((parseFloat(cooldown) - parseFloat(CurrentTimeStamp)) / 60 / 60).toFixed(2) + "(days)";
+                atext += "<br>Cooldown between next deal to qualify as an affiliate: " + ((parseFloat(cooldown) - parseFloat(CurrentTimeStamp)) / 60 / 60 / 24).toFixed(2) + "(days)";
               } else {
                 var threshold = DOMPurify.sanitize(await DDEcontract.methods.minimumFeeThreshold(tokens[0].address).call());
                 atext += "<br>Minimum qualifying fee on next deal to become affiliate: " + displayDecimals(tokens[0].address, threshold);
@@ -977,7 +981,7 @@
               atext += "<br>No affiliate assigned! It's recommended to assign one so the fee is not burned.";
             }
             if(referral2 != "0x0000000000000000000000000000000000000000") {
-              atext += "<br>Current affiliate assigned to account: " + referral;
+              atext += "<br>Current affiliate assigned to account: " + referral2;
             }
             if(referral != "0x0000000000000000000000000000000000000000") {
               var arep = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(referral).call())));
@@ -2046,7 +2050,10 @@
             amount: DOMPurify.sanitize(data.amount),
             depositSender: DOMPurify.sanitize(data.depositSender),
             depositRecipient: DOMPurify.sanitize(data.depositRecipient),
-            quantity: DOMPurify.sanitize(data.quantity),
+            quantity: [
+              DOMPurify.sanitize(data.quantity[0]),
+              DOMPurify.sanitize(data.quantity[1]),
+            ],
             rfee: DOMPurify.sanitize(data.rfee),
             timelimit: [
               DOMPurify.sanitize(data.timelimit[0]),
@@ -2156,7 +2163,7 @@
             <div>Counter-Party Address: ${counterpartyLabel}</div>
             <div>Token: ${offerData.token}</div>
             <div>Amount: ${displayDecimals(offerData.token, offerData.amount)}</div>
-            <div>Quantity: ${offerData.quantity}</div>
+            <div>Quantity: ${offerData.quantity[0]}(Total) - ${offerData.quantity[1]}(Maximum)</div>
             <div>Time Limit: ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
             <div>Message: ${offerData.message.slice(0, 20)}...</div><br>
           `;
@@ -2233,7 +2240,7 @@
             <div>Counter-Party Address: ${counterpartyLabel2}</div>
             <div>Token: ${offerData2.token}</div>
             <div>Amount: ${displayDecimals(offerData2.token, offerData2.amount)}</div>
-            <div>Quantity: ${offerData2.quantity}</div>
+            <div>Quantity: ${offerData2.quantity[0]}</div>
             <div>Time Limit: ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
             <div>Message: ${offerData2.message.slice(0, 20)}...</div><br>
           `;          
@@ -2369,7 +2376,7 @@
             <div>Counter-Party Address: ${counterpartyLabel3}</div>
             <div>Token: ${offerData3.token}</div>
             <div>Amount: ${displayDecimals(offerData3.token, offerData3.amount)}</div>
-            <div>Quantity: ${offerData3.quantity}</div>
+            <div>Quantity: ${offerData3.quantity[0]}</div>
             <div>Time Until Funds Expire: ${timeRemaining} days</div>            
           `;
           offerData3.timeRemaining = timeRemaining;
@@ -2723,6 +2730,15 @@
 
     // Function to show the details popup for a listing
     async function showListing(listing, mode=0) {
+      if(notifyFavorites == "0" && mode == 0) {
+        await Swal.fire({
+          icon: 'info',
+          title: 'Welcome',
+          text: 'Welcome to the markets. As you browse you may choose to add orders to your favorites list by clicking the star. This may function as a useful cart or history for deals you wish to revisit. Please review the amount, currency, deposits, time limit and deal structure carefully before accepting. Always attempt to remain in close contact with your counter-party to ensure success. With that said enjoy using one of the safest escrows in the world!',
+        });
+        notifyFavorites = "1";
+        localStorage.setItem(myaccounts+":notifyFavorites", notifyFavorites);
+      }
       if(listing.message.includes('"recipient":') && listing.message.includes('"cipher":') && listing.message.includes('"status":')) {
         await Swal.fire({
           title: 'Encrypted listing',
@@ -3001,7 +3017,10 @@
       depositRecipient.innerHTML = 'Deposit Recipient: ' + displayDecimals(listing.token,listing.depositRecipient);
       
       const quantity = document.createElement('p');
-      quantity.innerHTML = 'Quantity: ' + listing.quantity;
+      quantity.innerHTML = 'Quantity: ' + listing.quantity[0];
+      if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
+        quantity.innerHTML = 'Quantity: ' + listing.quantity[0] + '(total) - ' + listing.quantity[1] + '(maximum)';
+      }
       
       const timelimit = document.createElement('p');
       timelimit.innerHTML = 'Time limit: ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' weeks';
@@ -3070,7 +3089,9 @@
           counterButton.onclick = () => {counterOffer(listing); popupContainer.remove();};
 
           buttonContainer.appendChild(acceptButton);
-          buttonContainer.appendChild(counterButton);
+          if(parseInt(listing.status[0]) != 2 && parseInt(listing.status[0]) != 3) {
+            buttonContainer.appendChild(counterButton);
+          }
       }
       if(mode == 1) {
           if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
@@ -3233,7 +3254,7 @@
                     console.error(error);
                     await showError(error);
                   }
-              }              
+              }
               buttonContainer.appendChild(extendTime);
               const cancelButton = document.createElement('button');
               cancelButton.innerHTML = 'Cancel Contract';
@@ -3332,7 +3353,7 @@
         starButton.innerHTML = '&star;';
         starButton.classList.add('favorites-button2');
         starButton.style.left = 10;
-        starButton.style.color = "#000000";        
+        starButton.style.color = "#000000";
         if(myFavorites.includes(listing.hash)) {
           starButton.style.color = "#ed5f00";
           starButton.innerHTML = '&bigstar;';
@@ -3756,51 +3777,55 @@
               <select id="contractType">
                 <option value="public">Public Offer</option>
                 <option value="private">Private Offer</option>
-              </select><br>
+              </select><br><span class="vertical-spacer"></span>
               <div id="counterPartyAddressField" style="display:none;">
                 <label for="counterPartyAddress">Counter-Party Address:</label>
                 <input type="text" id="counterPartyInput">
-              </div><br>
+              </div><br><span class="vertical-spacer"></span>
               <label for="senderReceiver">Sender or Receiver:</label>
               <select id="senderReceiver">
                 <option value="receiver">I'm the one receiving the funds</option>
                 <option value="sender">I'm the one sending the funds</option>                
-              </select><br>
+              </select><br><span class="vertical-spacer"></span>
               <label for="token">Token:</label>
               <select id="token-select">
                 <!-- options added dynamically through javascript -->
-              </select><br>
-              <label for="quantity">Quantity:</label>
-              <input type="number" id="order-quantity" value="1"><br>
+              </select><br><span class="vertical-spacer"></span>
+              <label for="order-quantity">Quantity:</label>
+              <input type="number" id="order-quantity" value="1" style="width: 75px;">
+              <label for="order-maximum">Maximum:</label>
+              <input type="number" id="order-maximum" value="1" style="width: 75px;"><br><span class="vertical-spacer"></span>
               <label for="amount">Amount:</label>
-              <input type="number" id="amount-input" step="0.000000000000000001"><br>
+              <input type="number" id="amount-input" step="0.000000000000000001"><br><span class="vertical-spacer"></span>
               <label for="depositSettings">Deposit Settings:</label>
               <select id="depositSettings">
                 <option value="recommended">Use recommended deposit settings</option>
                 <option value="custom">Custom deposits</option>
-              </select><br>
+              </select><br><span class="vertical-spacer"></span>
               <div id="senderDepositField" style="display:none;">
                 <label for="senderDeposit">Sender Deposit:</label>
                 <input type="number" id="sender-deposit-input" step="0.000000000000000001">
-              </div><br>
+              </div><br><span class="vertical-spacer"></span>
               <div id="receiverDepositField" style="display:none;">
                 <label for="receiverDeposit">Receiver Deposit:</label>
                 <input type="number" id="recipient-deposit-input" step="0.000000000000000001">
-              </div><br>
+              </div><br><span class="vertical-spacer"></span>
               <label for="timeLimit">Time Limit (in weeks):</label>
-              <input type="number" id="timeLimit" value="4"><br>
-              <p id="timeLimitWarning" style="display:none;">Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.</p><br>
-              <label for="contractDetails">Contract Details:</label><br>
-              <textarea id="contractDetails"></textarea><br>
+              <input type="number" id="timeLimit" value="4"><br><span class="vertical-spacer"></span>
+              <p id="timeLimitWarning" style="display:none;">Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.</p><br><span class="vertical-spacer"></span>
+              <label for="contractDetails">Contract Details:</label><br><span class="vertical-spacer"></span>
+              <textarea id="contractDetails"></textarea><br><span class="vertical-spacer"></span>
               <label for="contractImage">Contract Images:</label>
-              <input type="file" id="contractImage" multiple><br><br>
+              <input type="file" id="contractImage" multiple><br><br><span class="vertical-spacer"></span>
               <button type="button" id="changefile" style="display:none;">Change Images</button>
-              <label for="contactInfo">Contact Information(email/signal/telegram):</label><br>
-              <input id="contactInfo"></textarea><br>
+              <label for="contactInfo">Contact Information(email/signal/telegram):</label><br><span class="vertical-spacer"></span>
+              <input id="contactInfo"></textarea><br><span class="vertical-spacer"></span>
               <label for="key-words" id="key-label">Search key words(optional):</label>
-              <button type="button" id="key-words">Add search terms</button><br>
+              <button type="button" id="key-words">Add search terms</button><br><span class="vertical-spacer"></span>
+              <label for="allowcounters">Allow counter offers  </label>
+              <input type="checkbox" id="allowcounters"><br><span class="vertical-spacer"></span>
               <label for="autoaccept">Automatically accept matching offers  </label>
-              <input type="checkbox" id="autoaccept"><br><br>
+              <input type="checkbox" id="autoaccept"><br><br><span class="vertical-spacer"></span>
               <button type="submit">Submit</button>
             </form>
           </div>
@@ -3820,12 +3845,13 @@
 
         // Get necessary DOM elements
         var contractType = form.querySelector('#contractType');
-        var counterPartyAddressField = form.querySelector('#counterPartyAddressField');        
+        var counterPartyAddressField = form.querySelector('#counterPartyAddressField');
         var depositSelect = form.querySelector('#depositSettings');
         var senderDepositInput = form.querySelector('#senderDepositField');
         var recipientDepositInput = form.querySelector('#receiverDepositField');
         var imageInput = form.querySelector('#contractImage');
         var auto = form.querySelector('#autoaccept');
+        var allowcounters = form.querySelector('#allowcounters');
         var adjusttime = form.querySelector('#timeLimit');
         var addWord = form.querySelector("#key-words");
         var addWordLabel = form.querySelector("#key-label");
@@ -3837,17 +3863,29 @@
         senderDepositInput.style.display = 'none';
         recipientDepositInput.style.display = 'none';
 
+        auto.addEventListener('change', async() => {
+          if (auto.checked) {
+            await Swal.fire({
+              icon: 'info',
+              title: 'Autoaccept',
+              text: 'Please be aware when you automatically accept deals you must occassionally check the software to make sure you are aware of when deals enter escrow just in case the counter-party does not alert you. This way losses do not occur and deals will not expire.',
+            });
+          }
+        });
+
         // Event listener for type select
         contractType.addEventListener('change', () => {
           if (contractType.value === 'private') {
             counterPartyAddressField.style.display = 'block';
             auto.style.display = 'none';
+            allowcounters.style.display = 'none';
             myterms = [];
             addWord.style.display = 'none';
             addWordLabel.style.display = 'none';
           } else {
             counterPartyAddressField.style.display = 'none';
             auto.style.display = 'block';
+            allowcounters.style.display = 'block';
             addWord.style.display = 'block';
             addWordLabel.style.display = 'block';
           }
@@ -3893,6 +3931,7 @@
           form.querySelector('#contractType').selectedIndex = 1;
           counterPartyAddressField.style.display = 'block';
           auto.style.display = 'none';
+          allowcounters.style.display = 'none';
           if(myaccounts === counterdata.recipient) {
             form.querySelector("#senderReceiver").selectedIndex = 0;
             form.querySelector("#counterPartyInput").value = counterdata.sender;
@@ -3951,14 +3990,14 @@
           var counterPartyInput = document.getElementById("counterPartyInput").value;
           var sender = "0x0000000000000000000000000000000000000000";
           var recipient = "0x0000000000000000000000000000000000000000";
+          const currentBlockNumber = await web3.eth.getBlockNumber();
+          const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+          const blockTimestamp = DOMPurify.sanitize(currentBlock.timestamp);
           if (contractType.value === 'private') {
                 sender = counterPartyInput;
                 recipient = myaccounts;
                 var offerExpirationSelect = document.getElementById("offerExpiration");
                 var selectedValue = offerExpirationSelect.value;
-                const currentBlockNumber = await web3.eth.getBlockNumber();
-                const currentBlock = await web3.eth.getBlock(currentBlockNumber);
-                const blockTimestamp = DOMPurify.sanitize(currentBlock.timestamp);
                 if (selectedValue === "never") {
                   expiration = 0; // Set the time limit to 0 seconds for "Never" option
                 } else if (selectedValue === "two-weeks") {
@@ -3972,6 +4011,7 @@
           }
           var senderReceiver = document.getElementById("senderReceiver").value;
           var quantity = parseInt(document.getElementById('order-quantity').value);
+          var maximum = parseInt(document.getElementById('order-maximum').value);
           var amount = document.getElementById("amount-input").value;
           var depositType = form.querySelector("#depositSettings").value;
           var depositSender = document.getElementById("sender-deposit-input").value;
@@ -4025,10 +4065,16 @@
             } else {
               style = 0;
             }
+            if(document.getElementById("allowcounters").checked == true) {
+              style += 2;
+            }
           }
           var multiplier = 1;
-          if(style == 0) {
-            multiplier = quantity;
+          if(style == 0 || style == 2) {
+            multiplier = maximum;
+            if(maximum > quantity) {
+              multiplier = quantity;
+            }
           }
           if(myaccounts == sender2) {
             if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(amount).add(web3.utils.toBN(depositSender)).mul(web3.utils.toBN(multiplier)))) {
@@ -4112,7 +4158,7 @@
             amount: amount,
             depositSender: depositSender,
             depositRecipient: depositRecipient,
-            quantity: quantity,
+            quantity: [quantity, maximum],
             timelimit: parseInt(timeLimit * 7 * 24 * 60 * 60),
             message: message
           };
@@ -4121,7 +4167,18 @@
           data2.message = "IPFS link: " + data2.message;
           data2.timelimit = [data2.timelimit];
           data2.rfee = baseFee;
-          data2.referred = counterdata.referred;
+          data2.referred = referral;
+          if(Object.keys(counterdata).length !== 0) {
+            data2.referred = counterdata.referred;
+            if(myaccounts == sender2) {
+              data2.referred = referral;
+              const rfee2 = parseInt(DOMPurify.sanitize(await DDEcontract.methods.customFee(otherparty).call()));
+              if(rfee2 > baseFee) {
+                data2.rfee = rfee2;
+              }
+              style = 4;
+            }
+          }
           //if(Object.keys(counterdata).length !== 0) {
           //  data2.amount *= quantity;
           //  data2.depositSender *= quantity;
@@ -4135,7 +4192,29 @@
             return;
           }
           try {
-              const cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'}));
+              var returnThis2 = false;
+              if(publicoffer) {
+                if(myterms.length == 0) {
+                  await Swal.fire({
+                    title: 'Hashtags',
+                    text: 'You did not include any keywords. Without these it could make your offer hard to find. It is recommended to add some keywords related to your open offer. Would you like to submit your offer without keywords?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
+                  }).then((result) => {
+                    if(result.isConfirmed) {
+                      popupContainer.remove();
+                      returnThis2 = true;
+                      return;
+                    }
+                  });
+                }
+              }
+              if(returnThis2) {
+                return;
+              }
+              var cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'},{value: blockTimestamp, type: 'uint256'}));
               console.log(cHash);
               if(DOMPurify.sanitize(await DDEcontract.methods.initialized(cHash).call()) == "true") {
                 await Swal.fire("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again.");
@@ -4149,7 +4228,7 @@
                 data.token,
                 data.amount,
                 data.depositSender,
-                data.depositRecipient,
+                [data.depositRecipient, data2.referred],
                 data.quantity,
                 [data.timelimit.toString(), expiration.toString()],
                 style,
@@ -4223,6 +4302,11 @@
           font-weight: bold;
           cursor: pointer;
         }
+
+        .vertical-spacer {
+          display: inline-block;
+          height: 2px;
+        }
         `;
         document.head.appendChild(style);
     }
@@ -4233,7 +4317,7 @@
         const addedTerms = [];
 
         // Predefined list of popular key words
-        const popularKeywords = ["goods", "services", "barter", "crypto", "real estate", "electronics", "metals"];
+        const popularKeywords = ["goods", "services", "barter", "crypto", "real-estate", "electronics", "metals"];
 
         dialog.innerHTML = `
           <div>Please enter some key words so users can find your order easier:<br></div>
@@ -4279,7 +4363,7 @@
         // Add a term to the list when Add button is clicked
         addBtn.addEventListener("click", async () => {
           const hashtagInput = dialog.querySelector("#hashtag");
-          const term = hashtagInput.value.trim();
+          const term = hashtagInput.toLowerCase().value.trim();
           if (term.includes(" ") || term.includes(",")) {
             await Swal.fire("Key words should not contain spaces or commas");
             return;
@@ -4389,12 +4473,12 @@
 
                   confirmBtn.addEventListener("click", async () => {
                     quantity = parseInt(document.getElementById('new-quantity').value);
-                    if(quantity > mylisting.quantity) {
+                    if(quantity > mylisting.quantity[0] || quantity > mylisting.quantity[1]) {
                       await Swal.fire("Quantity exceeds what is available!");
                       return;                        
                     }
                     dialog.remove();
-                    mylisting.quantity = quantity;
+                    mylisting.quantity[0] = quantity;
                     var counterparty = mylisting.sender;
                     if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
                         counterparty = mylisting.recipient;
@@ -4472,7 +4556,7 @@
                   });
                 }
               } else {
-                quantity = mylisting.quantity;
+                quantity = mylisting.quantity[0];
                 var counterparty = mylisting.sender;
                 if(mylisting.sender == myaccounts) {
                     counterparty = mylisting.recipient;
@@ -4599,7 +4683,8 @@
           try {
                 if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
                   await DDEcontract.methods.removeMarketOffer(
-                    listing.hash
+                    listing.hash,
+                    myaccounts
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire("Contract removed!");
                   await loadUser();
@@ -4623,7 +4708,10 @@
       const dialog = document.createElement("div");
       dialog.innerHTML = `
         <div>Please enter the updated quantity:<br></div>
+          <label for="new-quantity">Total Supply: </label>
           <input id="new-quantity" type="number"></input><br><br>
+          <label for="new-maximum">Maximum: </label>
+          <input id="new-maximum" type="number"></input><br><br>
         <div>
           <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
           <button id="cancel-btn">Cancel</button>
@@ -4658,9 +4746,15 @@
                 await Swal.fire("Quantity can not be changed to zero!");                
                 return;
               }
+              var quantity1 = parseInt(document.getElementById('new-maximum').value);
+              if(quantity1 == 0) {
+                dialog.remove();
+                await Swal.fire("Quantity can not be changed to zero!");                
+                return;
+              }
               await DDEcontract.methods.updateQuantity(
                 listing.hash,
-                quantity
+                [quantity, quantity1]
               ).send({"from":myaccounts,...gasOptions[gasSetting]});
                 dialog.remove();
                 await Swal.fire("Quantity updated!");

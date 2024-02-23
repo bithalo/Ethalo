@@ -344,11 +344,6 @@ DDEabi=[
 			},
 			{
 				"internalType": "uint256",
-				"name": "quantity",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
 				"name": "rfee",
 				"type": "uint256"
 			},
@@ -388,9 +383,9 @@ DDEabi=[
 				"type": "address"
 			},
 			{
-				"internalType": "address",
+				"internalType": "address[2]",
 				"name": "_recipient",
-				"type": "address"
+				"type": "address[2]"
 			},
 			{
 				"internalType": "address",
@@ -413,9 +408,9 @@ DDEabi=[
 				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
+				"internalType": "uint256[2]",
 				"name": "_quantity",
-				"type": "uint256"
+				"type": "uint256[2]"
 			},
 			{
 				"internalType": "uint256[2]",
@@ -674,9 +669,9 @@ DDEabi=[
 						"type": "uint256"
 					},
 					{
-						"internalType": "uint256",
+						"internalType": "uint256[2]",
 						"name": "quantity",
-						"type": "uint256"
+						"type": "uint256[2]"
 					},
 					{
 						"internalType": "uint256",
@@ -755,9 +750,9 @@ DDEabi=[
 						"type": "uint256"
 					},
 					{
-						"internalType": "uint256",
+						"internalType": "uint256[2]",
 						"name": "quantity",
-						"type": "uint256"
+						"type": "uint256[2]"
 					},
 					{
 						"internalType": "uint256",
@@ -1128,6 +1123,11 @@ DDEabi=[
 				"internalType": "bytes32",
 				"name": "hash",
 				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
 			}
 		],
 		"name": "removeMarketOffer",
@@ -1233,9 +1233,9 @@ DDEabi=[
 				"type": "bytes32"
 			},
 			{
-				"internalType": "uint256",
+				"internalType": "uint256[2]",
 				"name": "quantity",
-				"type": "uint256"
+				"type": "uint256[2]"
 			}
 		],
 		"name": "updateQuantity",
