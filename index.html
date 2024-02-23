@@ -2163,7 +2163,7 @@
             <div>Counter-Party Address: ${counterpartyLabel}</div>
             <div>Token: ${offerData.token}</div>
             <div>Amount: ${displayDecimals(offerData.token, offerData.amount)}</div>
-            <div>Quantity: ${offerData.quantity[0]}(Total) - ${offerData.quantity[1]}(Maximum)</div>
+            <div>Quantity: ${parseInt(offerData.quantity[0])}(Total) - ${parseInt(offerData.quantity[1])}(Maximum)</div>
             <div>Time Limit: ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
             <div>Message: ${offerData.message.slice(0, 20)}...</div><br>
           `;
@@ -2240,7 +2240,7 @@
             <div>Counter-Party Address: ${counterpartyLabel2}</div>
             <div>Token: ${offerData2.token}</div>
             <div>Amount: ${displayDecimals(offerData2.token, offerData2.amount)}</div>
-            <div>Quantity: ${offerData2.quantity[0]}</div>
+            <div>Quantity: ${parseInt(offerData2.quantity[0])}</div>
             <div>Time Limit: ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
             <div>Message: ${offerData2.message.slice(0, 20)}...</div><br>
           `;          
@@ -2376,7 +2376,7 @@
             <div>Counter-Party Address: ${counterpartyLabel3}</div>
             <div>Token: ${offerData3.token}</div>
             <div>Amount: ${displayDecimals(offerData3.token, offerData3.amount)}</div>
-            <div>Quantity: ${offerData3.quantity[0]}</div>
+            <div>Quantity: ${parseInt(offerData3.quantity[0])}</div>
             <div>Time Until Funds Expire: ${timeRemaining} days</div>            
           `;
           offerData3.timeRemaining = timeRemaining;
@@ -3017,9 +3017,9 @@
       depositRecipient.innerHTML = 'Deposit Recipient: ' + displayDecimals(listing.token,listing.depositRecipient);
       
       const quantity = document.createElement('p');
-      quantity.innerHTML = 'Quantity: ' + listing.quantity[0];
+      quantity.innerHTML = 'Quantity: ' + parseInt(listing.quantity[0]);
       if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
-        quantity.innerHTML = 'Quantity: ' + listing.quantity[0] + '(total) - ' + listing.quantity[1] + '(maximum)';
+        quantity.innerHTML = 'Quantity: ' + parseInt(listing.quantity[0]) + '(total) - ' + parseInt(listing.quantity[1]) + '(maximum)';
       }
       
       const timelimit = document.createElement('p');
@@ -4158,7 +4158,7 @@
             amount: amount,
             depositSender: depositSender,
             depositRecipient: depositRecipient,
-            quantity: [quantity, maximum],
+            quantity: [quantity.toString(), maximum.toString()],
             timelimit: parseInt(timeLimit * 7 * 24 * 60 * 60),
             message: message
           };
@@ -4224,11 +4224,11 @@
               // Call solidity function to create contract
               await DDEcontract.methods.createContract(
                 data.sender,
-                data.recipient,
+                [data.recipient, data2.referred],
                 data.token,
                 data.amount,
                 data.depositSender,
-                [data.depositRecipient, data2.referred],
+                data.depositRecipient,
                 data.quantity,
                 [data.timelimit.toString(), expiration.toString()],
                 style,
@@ -4473,12 +4473,12 @@
 
                   confirmBtn.addEventListener("click", async () => {
                     quantity = parseInt(document.getElementById('new-quantity').value);
-                    if(quantity > mylisting.quantity[0] || quantity > mylisting.quantity[1]) {
+                    if(quantity > parseInt(mylisting.quantity[0]) || quantity > parseInt(mylisting.quantity[1])) {
                       await Swal.fire("Quantity exceeds what is available!");
                       return;                        
                     }
                     dialog.remove();
-                    mylisting.quantity[0] = quantity;
+                    mylisting.quantity[0] = quantity.toString();
                     var counterparty = mylisting.sender;
                     if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
                         counterparty = mylisting.recipient;
@@ -4530,7 +4530,7 @@
                     }
                     await DDEcontract.methods.acceptOffer(
                       mylisting.hash,
-                      quantity,
+                      quantity.toString(),
                       accepttimelimit.toString(),
                       referral
                     ).send({"from":myaccounts,...gasOptions[gasSetting]});
@@ -4598,7 +4598,7 @@
                 }
                 await DDEcontract.methods.acceptOffer(
                   mylisting.hash,
-                  quantity,
+                  quantity.toString(),
                   accepttimelimit.toString(),
                   referral
                 ).send({"from":myaccounts,...gasOptions[gasSetting]});
@@ -4754,7 +4754,7 @@
               }
               await DDEcontract.methods.updateQuantity(
                 listing.hash,
-                [quantity, quantity1]
+                [quantity.toString(), quantity1.toString()]
               ).send({"from":myaccounts,...gasOptions[gasSetting]});
                 dialog.remove();
                 await Swal.fire("Quantity updated!");
