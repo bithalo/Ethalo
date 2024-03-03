@@ -60,12 +60,15 @@
         .simple-scrollbar .ss-scroll::-webkit-scrollbar-thumb {
           background-color: #555;
         }
-
         body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
+          margin: 0;
+          padding: 0;
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+        }
+        html, body {
+          direction: ltr;
+          unicode-bidi: embed;
         }
         #languageSelect {
           padding: 10px;
@@ -516,18 +519,44 @@
       languageSelect.selectedIndex = 0;
     }
 
-    document.getElementById("languageSelect").addEventListener('change', function() {
+    document.getElementById("languageSelect").addEventListener('change', async function() {
         const languageSelect = document.getElementById("languageSelect");
         const selectedFlagImg = document.getElementById("selectedFlag");
         selectedFlagImg.src = languageSelect.options[languageSelect.selectedIndex].getElementsByTagName('img')[0].src;
         translateDocument(languageSelect.options[languageSelect.selectedIndex].value);
+        await loadUser();
+        await populateListings();
     });
 
-    function translateThis() {
+    function translateThis(mytext) {
       const selectedLanguageCode = document.getElementById("languageSelect").value;
-      console.log("Selected Language Code:", selectedLanguageCode);
-      translateDocument(selectedLanguageCode);
+      if(selectedLanguageCode in languages) {
+        if(mytext in languages[selectedLanguageCode]) {
+          return languages[selectedLanguageCode][mytext];
+        }
+      }
+      return mytext;
     }
+
+    extractedCalls = {'en':{}};
+    function extractTranslations() {
+      // Get the entire HTML document
+      const entireHTML = document.documentElement.outerHTML;
+
+      // Define the regular expression for finding translateThis function calls
+      const translateRegex = /translateThis\(['"](.*?)(?:"|')\)/gm;
+
+      // Iterate over matches
+      let match;
+      while ((match = translateRegex.exec(entireHTML)) !== null) {
+        const extractedText = match[1]; // Extracted text from the capturing group
+        // Add the extracted text to extractedCalls under 'en'
+        extractedCalls['en'][extractedText] = true;
+      }
+
+      // Now extractedCalls['en'] contains all the extracted texts
+    }
+
     populateLanguageSelect();
 
     function translate(text, lang, x) {
@@ -736,6 +765,7 @@
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
     var isConnected = false;
+    var showOrder = false;
     var notifyFavorites = localStorage.getItem(myaccounts + ":notifyFavorites");
     if(!notifyFavorites) {
       notifyFavorites = "0";
@@ -803,7 +833,7 @@
         balances = {};
         baseBalance = 0;
         gasPrice = "";
-        document.getElementById("account").innerHTML = "Not connected.";
+        document.getElementById("account").innerHTML = translateThis("Not connected.");
         document.getElementById("myContactInfo").value = '';
         document.getElementById("myoffers").innerHTML = ""; // clear the container first
         document.getElementById("mycontracts").innerHTML = ""; // clear the container first
@@ -826,12 +856,12 @@
             web3 = new Web3(window.ethereum);
             console.log("success");
             isConnected = true;
-            document.getElementById("connectionstatus").innerHTML = "Connected."            
+            document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
             await loadUser(1);
-            await populateListings();            
+            await populateListings();
         } else {
             isConnected = false;
-            document.getElementById("connectionstatus").innerHTML = "Not connected."
+            document.getElementById("connectionstatus").innerHTML = translateThis("Not connected.");
         }
     }
 
@@ -841,7 +871,7 @@
         }
         var myaccounts2 = await web3.eth.getAccounts();
         if (myaccounts2.length == 0) {
-            document.getElementById("connectionstatus").innerHTML = "Please unlock Metamask so it can connect.";
+            document.getElementById("connectionstatus").innerHTML = translateThis("Please unlock Metamask so it can connect.");
             return;
         }
         currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
@@ -881,13 +911,13 @@
             tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
         }
         if (netname == "unknown") {
-            document.getElementById("connectionstatus").innerHTML = "Unsupported network";
+            document.getElementById("connectionstatus").innerHTML = translateThis("Unsupported network");
             return;
         }
-        document.getElementById("connectionstatus").innerHTML = "Connected to " + netname;
+        document.getElementById("connectionstatus").innerHTML = translateThis("Connected to") + " " + netname;
         const metabutton = document.querySelector('[t-id="3"]');
         if (metabutton && window.innerWidth <= 800) {
-            metabutton.textContent = 'Connected';
+            metabutton.textContent = translateThis('Connected');
         }
         myaccounts = DOMPurify.sanitize(myaccounts2[0]);
         var cached = await getContactInfo(myaccounts);
@@ -939,13 +969,13 @@
         for (var i = 0; i < tokens.length; i++) {
             await DDEcontract.methods.userBalance(myaccounts,tokens[i].address).call().then(function (liquid1) {            
                     balances[tokens[i].address]=({token:tokens[i].token, decimals: tokens[i].decimals, amount: DOMPurify.sanitize(liquid1)});
-                    btext+="<br>"+balances[tokens[i].address].token+" balance deposited to markets: "+displayDecimals(tokens[i].address, balances[tokens[i].address].amount);
+                    btext+="<br>"+balances[tokens[i].address].token+" <bdo>"+translateThis("balance deposited to markets:")+"</bdo> "+displayDecimals(tokens[i].address, balances[tokens[i].address].amount);
             });
         }
         reputation = [0,0,0];
         reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
         if((parseInt(reputation[0]) + parseInt(reputation[1])) > 0) {
-            btext+="<br>Contracting success rate: " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
+            btext+="<br><bdo>" + translateThis("Contracting success rate:") + "</bdo> " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
         }
         await window.web3.eth.getBalance(myaccounts, function(err, result1) {
             if (err) {
@@ -953,48 +983,48 @@
                 return;
             } else {
                 baseBalance = DOMPurify.sanitize(result1);//window.web3.utils.fromWei(result1, "ether");
-                document.getElementById("account").innerHTML = DOMPurify.sanitize("Current Network: "+ netname + "<br>" + myaccounts + "<br>" + netname2 + " wallet balance:" + window.web3.utils.fromWei(baseBalance, "ether") + btext);
+                document.getElementById("account").innerHTML = "<bdo>" + DOMPurify.sanitize(translateThis("Current Network:") + "</bdo> " + netname + "<br>" + myaccounts + "<br>" + netname2 + " <bdo>" + translateThis("wallet balance:") + "</bdo> " + window.web3.utils.fromWei(baseBalance, "ether") + btext);
             }
         });
         try {
             var afee = DOMPurify.sanitize(await DDEcontract.methods.affiliateFee().call());
             var cfee = DOMPurify.sanitize(await DDEcontract.methods.customFee(myaccounts).call());
-            var atext = "Base referral fee paid to affiliates: " + (afee / 100).toFixed(2) + "%";
+            var atext = "<bdo>" + translateThis("Base referral fee paid to affiliates:") + "</bdo> " + (afee / 100).toFixed(2) + "%";
             baseFee = afee;
             if(cfee != 0) {
-              atext = "Custom referral fee paid to affiliates: " + (cfee / 100).toFixed(2) + "%";
+              atext = "<bdo>" + translateThis("Custom referral fee paid to affiliates:") + "</bdo> " + (cfee / 100).toFixed(2) + "%";
             }            
             if(reputation[2] >= 10) {
-              atext += "<br>You are an affiliate! You may market this system using your affiliate link.";
+              atext += "<br><bdo>" + translateThis("You are an affiliate! You may market this system using your affiliate link.") + "</bdo>";
             } else {
               var cooldown = DOMPurify.sanitize(await DDEcontract.methods.cooldown(myaccounts).call());
               if(cooldown != 0 && (cooldown - CurrentTimeStamp) > 0) {
-                atext += "<br>Cooldown between next deal to qualify as an affiliate: " + ((parseFloat(cooldown) - parseFloat(CurrentTimeStamp)) / 60 / 60 / 24).toFixed(2) + "(days)";
+                atext += "<br><bdo>" + translateThis("Cooldown between next deal to qualify as an affiliate:") + "</bdo> " + ((parseFloat(cooldown) - parseFloat(CurrentTimeStamp)) / 60 / 60 / 24).toFixed(2) + translateThis("(days)");
               } else {
                 var threshold = DOMPurify.sanitize(await DDEcontract.methods.minimumFeeThreshold(tokens[0].address).call());
-                atext += "<br>Minimum qualifying fee on next deal to become affiliate: " + displayDecimals(tokens[0].address, threshold);
+                atext += "<br><bdo>" + translateThis("Minimum qualifying fee on next deal to become affiliate:") + "</bdo> " + displayDecimals(tokens[0].address, threshold);
               }
-              atext += "<br>Qualifying contracts remaining until you can become an affiliate: " + (10 - reputation[2]);
+              atext += "<br><bdo>" + translateThis("Qualifying contracts remaining until you can become an affiliate:") + "</bdo> " + (10 - reputation[2]);
             }
             var referral2 = DOMPurify.sanitize(await DDEcontract.methods.referral(myaccounts).call());
             if(referral2 == "0x0000000000000000000000000000000000000000" && referral == "0x0000000000000000000000000000000000000000") {
-              atext += "<br>No affiliate assigned! It's recommended to assign one so the fee is not burned.";
+              atext += "<br><bdo>" + translateThis("No affiliate assigned! It's recommended to assign one so the fee is not burned.") + "</bdo>";
             }
             if(referral2 != "0x0000000000000000000000000000000000000000") {
-              atext += "<br>Current affiliate assigned to account: " + referral2;
+              atext += "<br><bdo>" + translateThis("Current affiliate assigned to account:") + "</bdo> " + referral2;
             }
             if(referral != "0x0000000000000000000000000000000000000000") {
               var arep = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(referral).call())));
               if(arep[2]>=10) {
-                atext += "<br>Future affiliate assigned on next contract: " + referral;
+                atext += "<br><bdo>" + translateThis("Future affiliate assigned on next contract:") + "</bdo> " + referral;
               } else {
-                atext += "<br>Linked affiliate is not valid because they have not completed 10 qualified deals yet: " + referral;
+                atext += "<br><bdo>" + translateThis("Linked affiliate is not valid because they have not completed 10 qualified deals yet:") + "</bdo> " + referral;
               }
             }
             if(parseInt(reputation[0]) + parseInt(reputation[1]) == 0) {
-              atext += "<br><br>You are new to the markets! Welcome to BitBay.";
+              atext +=  "<br><br><bdo>" + translateThis("You are new to the markets! Welcome to BitBay.") + "</bdo>";
             } else {
-              atext += "<br><br>Contracting success rate: " + ((reputation[0] / (reputation[0] + reputation[1])) * 100).toFixed(2) + "%(" + reputation[0] + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
+              atext += "<br><br><bdo>" + translateThis("Contracting success rate:") + "</bdo> " + ((reputation[0] / (reputation[0] + reputation[1])) * 100).toFixed(2) + "%(" + reputation[0] + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
             }
             document.getElementById("affiliateInfo").innerHTML = atext;
         } catch(e) {
@@ -1009,22 +1039,22 @@
             if(datalen > 0) {
                 contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(myaccounts, datalen-1).call()));
                 if("mycontact" in contact2) {
-                  datatext += "Registered contact information: " + contact2['mycontact'];
+                  datatext += "<bdo>" + translateThis("Registered contact information:") + "</bdo> " + contact2['mycontact'];
                 }
                 if("publickey" in contact2) {
                   if(datatext != '') {
                     datatext += '<br>';
                   }
-                  shortPublicKey = contact2['publickey'].substring(0, 10) + '...<span id="showMore" style="color:blue">(show more)</span>';
-                  datatext += "Public key(for encryption): " + shortPublicKey;
+                  shortPublicKey = contact2['publickey'].substring(0, 10) + '...<bdo><span id="showMore" style="color:blue">' + translateThis('(show more)') + '</span></bdo>';
+                  datatext += "<bdo>" + translateThis("Public key(for encryption):") + "</bdo> " + shortPublicKey;
                   document.getElementById('publicemail').innerHTML = datatext;
                   document.getElementById('showMore').addEventListener('click', function() {
                     var datatext2 = '';
                     if("mycontact" in contact2) {
-                      datatext2 += "Registered contact information: " + contact2['mycontact'];
+                      datatext2 += "<bdo>" + translateThis("Registered contact information:") + "</bdo> " + contact2['mycontact'];
                       datatext2 += '<br>';
                     }
-                    document.getElementById('publicemail').innerHTML = datatext2 + "Public key(for encryption): " + contact2['publickey'];
+                    document.getElementById('publicemail').innerHTML = datatext2 + "<bdo>" + translateThis("Public key(for encryption):") + "</bdo> " + contact2['publickey'];
                   });
                 } else {
                   document.getElementById('publicemail').innerHTML = datatext;
@@ -1036,19 +1066,19 @@
             console.log(e);
         }
         if(shortPublicKey == '' && userpubkey != '') {
-          shortPublicKey = userpubkey.substring(0, 10) + '...<span id="showMore" style="color:blue">(show more)</span>';
-          datatext += "Public key(for encryption): " + shortPublicKey;
+          shortPublicKey = userpubkey.substring(0, 10) + '...<bdo><span id="showMore" style="color:blue">' + translateThis('(show more)') + '</span></bdo>';
+          datatext += "<bdo>" + translateThis("Public key(for encryption):") + "</bdo> " + shortPublicKey;
           document.getElementById('publicemail').innerHTML = datatext;
           document.getElementById('showMore').addEventListener('click', function() {
             var datatext2 = '';
             try {
               if("mycontact" in contact2) {
-                datatext2 += "Registered contact information: " + contact2['mycontact'];
+                datatext2 += "<bdo>" + translateThis("Registered contact information:") + "</bdo> " + contact2['mycontact'];
                 datatext2 += '<br>';
               }
             } catch {              
             }
-            document.getElementById('publicemail').innerHTML = datatext2 + "Public key(for encryption): " + userpubkey;
+            document.getElementById('publicemail').innerHTML = datatext2 + "<bdo>" + translateThis("Public key(for encryption):") + "</bdo> " + userpubkey;
           });
         }
         if(login == 1) {
@@ -1062,11 +1092,11 @@
 
     async function showError(error) {
       if (error.message.includes("specified gasPrice but also included maxFeePerGas")) {
-        await Swal.fire("Web3 gas assignment failed. Will change to blockchain recommended gas options.");
+        await Swal.fire(translateThis("Web3 gas assignment failed. Will change to blockchain recommended gas options."));
         gasSetting = 1;
         localStorage.setItem(myaccounts+":gasOption", "1");
       } else {
-        await Swal.fire({title: "Error sending transaction", text: error.message, icon: 'error', confirmButtonText: 'OK'});
+        await Swal.fire({title: translateThis("Error sending transaction"), text: error.message, icon: 'error', confirmButtonText: translateThis('OK')});
       }
     }
 
@@ -1097,7 +1127,7 @@
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = window.prompt('Choose a file name for the backup:', 'localStorageBackup.json');
+      anchor.download = window.prompt(translateThis('Choose a file name for the backup:'), 'localStorageBackup.json');
       anchor.click();
       URL.revokeObjectURL(url);
     }
@@ -1171,14 +1201,14 @@
         mySelectElement.innerHTML = '';
         const option1 = document.createElement('option');
         option1.value = 'a';
-        option1.text = 'Use default IPFS Pinata Gateway';
+        option1.text = translateThis('Use default IPFS Pinata Gateway');
         mySelectElement.add(option1);
 
         // Add additional elements with values based on the size of mylen
         for (let i = 0; i < mylen; i++) {
           const option = document.createElement('option');
           option.value = i.toString();
-          option.text = `Use gateway #${i}`;
+          option.text = translateThis("Use gateway") + `#${i}`;
           mySelectElement.add(option);
         }
 
@@ -1252,16 +1282,17 @@
       const passwordValue = document.getElementById("myPasswordInput").value;
       if(myaccounts != '') {
         if (passwordValue.includes(' ') || passwordValue.length < 10) {
-          await Swal.fire('Password must not contain spaces and must be at least 10 characters long');
+          await Swal.fire(translateThis('Password must not contain spaces and must be at least 10 characters long'));
           document.getElementById("myPasswordInput").value = '';
           return;
         }
         await Swal.fire({
-          title: 'Confirm Password',
+          title: translateThis('Confirm Password'),
           input: 'password',
-          inputPlaceholder: 'Enter your password again',
+          inputPlaceholder: translateThis('Enter your password again'),
           showCancelButton: true,
-          confirmButtonText: 'Set Password',
+          confirmButtonText: translateThis('Set Password'),
+          cancelButtonText: translateThis('Cancel'),
           preConfirm: async (confirmedPassword) => {
             // Compare the entered password with the original password
             if (confirmedPassword === passwordValue || Crypto.SHA256(confirmedPassword) === passwordValue) {
@@ -1278,31 +1309,31 @@
               localStorage.setItem(myaccounts + ':password', Crypto.SHA256(hashedPassword+"1"));
               console.log('Password saved in localStorage:', Crypto.SHA256(hashedPassword+"1"));
               await Swal.fire({
-                title: 'Register Public Key',
-                text: 'Would you like to register this public key to your account now? This is how users will know how to encrypt their offers to you.',
+                title: translateThis('Register Public Key'),
+                text: translateThis('Would you like to register this public key to your account now? This is how users will know how to encrypt their offers to you.'),
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No',
+                confirmButtonText: translateThis('Yes'),
+                cancelButtonText: translateThis('No'),
               }).then(async (result) => {
                 if (result.isConfirmed) {
                   await registerData();
                 }
               });
               await Swal.fire({
-                title: 'Remember Password',
-                text: 'Would you like your device to remember this password? It is convenient to remember it however it is more secure to type it every time you log in.',
+                title: translateThis('Remember Password'),
+                text: translateThis('Would you like your device to remember this password? It is convenient to remember it however it is more secure to type it every time you log in.'),
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No',
+                confirmButtonText: translateThis('Yes'),
+                cancelButtonText: translateThis('No'),
               }).then(async (result) => {
                 if (result.isConfirmed) {
                   localStorage.setItem(myaccounts + ':savedpw', hashedPassword);
                 }
               });      
             } else {
-              await Swal.fire('Passwords do not match');
+              await Swal.fire(translateThis('Passwords do not match'));
               document.getElementById("myPasswordInput").value = '';
             }
           }
@@ -1317,11 +1348,12 @@
       const passwordValue = document.getElementById("myPasswordInput").value;
       if(userPWHash != Crypto.SHA256(passwordValue+"1") && userPWHash != Crypto.SHA256(Crypto.SHA256(passwordValue)+"1")) {
         await Swal.fire({
-          title: 'Confirm Password',
+          title: translateThis('Confirm Password'),
           input: 'password',
-          inputPlaceholder: 'Please enter your password',
+          inputPlaceholder: translateThis('Please enter your password'),
           showCancelButton: true,
-          confirmButtonText: 'Confirm Password',
+          confirmButtonText: translateThis('Confirm Password'),
+          cancelButtonText: translateThis('Cancel'),
           preConfirm: async (confirmedPassword) => {
             // Compare the entered password with the original password
             if (Crypto.SHA256(Crypto.SHA256(confirmedPassword)+"1") === userPWHash) {
@@ -1337,8 +1369,8 @@
               userpubkey = cryptico.publicKeyString(userprivkey);
             } else {
               await Swal.fire({
-                title: 'Passwords do not match',
-                text: 'Please also note that you will not be able to see details on any of your previous encrypted offers until the correct password is entered. Therefore, we do not recommend changing passwords. If you do, the public key registered to your account should also be updated. Please enter the password again on the account page.',
+                title: translateThis('Passwords do not match'),
+                text: translateThis('Please also note that you will not be able to see details on any of your previous encrypted offers until the correct password is entered. Therefore, we do not recommend changing passwords. If you do, the public key registered to your account should also be updated. Please enter the password again on the account page.'),
                 icon: 'error',
                 customClass: {
                   popup: 'custom-font-size'
@@ -1364,9 +1396,9 @@
         title: '',
         html:
           '<input id="checkbox1" type="checkbox" name="registerEmail"> ' +
-          '<label for="checkbox1">Register email/contact information</label><br>' +
+          '<label for="checkbox1">' + translateThis('Register email/contact information') + '</label><br>' +
           '<input id="checkbox2" type="checkbox" name="registerPublicKey"> ' +
-          '<label for="checkbox2">Register public key for privacy/encryption</label>',
+          '<label for="checkbox2">' + translateThis('Register public key for privacy/encryption') + '</label>',
         focusConfirm: false,
         showCancelButton: true,
         preConfirm: () => {
@@ -1385,7 +1417,7 @@
         if(formValues.registerPublicKey) {
           myuserdata.publickey = userpubkey;
           if(myuserdata.publickey == "") {
-              Swal.fire("Public key unknown.");
+              Swal.fire(translateThis("Public key unknown."));
               return;
           }
         }
@@ -1394,12 +1426,12 @@
         return;
       }
       if('mycontact' in myuserdata && myuserdata.mycontact == "") {
-        await Swal.fire("Email is blank, try again");
+        await Swal.fire(translateThis("Email is blank, try again"));
         return;
       }
       try {
           await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions[gasSetting]});
-          await Swal.fire("Data added!");
+          await Swal.fire(translateThis("Data added!"));
         } catch (error) {          
           console.error(error);
           await showError(error);
@@ -1418,18 +1450,19 @@
       });
       var arep = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
       if(arep[2]<10) {
-        Swal.fire("You have not completed 10 deals with the minimum threshold and requirements yet. Only then can you become an affiliate.");
+        Swal.fire(translateThis("You have not completed 10 deals with the minimum threshold and requirements yet. Only then can you become an affiliate."));
         return;
       }
       // Ask the user to select a language
       await Swal.fire({
-        title: 'Select Language',
+        title: translateThis('Select Language'),
         input: 'select',
         inputOptions: swalOptions,
         inputValue: 'English',
-        inputPlaceholder: 'Select a language',
+        inputPlaceholder: translateThis('Select a language'),
         showCancelButton: true,
-        confirmButtonText: 'Copy to Clipboard',
+        confirmButtonText: translateThis('Copy to Clipboard'),
+        cancelButtonText: translateThis('Cancel'),
       }).then((result) => {
         if (result.isConfirmed) {
           const selectedLanguage = result.value.substring(0, 2).toLowerCase();
@@ -1447,15 +1480,15 @@
             // Show a success message
             Swal.fire({
               icon: 'success',
-              title: 'URL Copied',
-              text: 'The modified URL has been copied to the clipboard.',
+              title: translateThis('URL Copied'),
+              text: translateThis('The modified URL has been copied to the clipboard.'),
             });
           } catch (err) {
             console.error('Copy command failed:', err);
             Swal.fire({
               icon: 'info',
-              title: 'Copy Manually',
-              text: 'The modified URL is:\n\n' + newUrl + '\n\nPlease copy it manually.',
+              title: translateThis('Copy Manually'),
+              text: translateThis('The modified URL is:') + '\n\n' + newUrl + '\n\n' + translateThis('Please copy it manually.'),
             });
           } finally {
             // Clean up: remove the temporary text area
@@ -1466,11 +1499,11 @@
     }
     async function changeAffiliate() {
       await Swal.fire({
-        title: 'Please enter preferred affiliate',
+        title: translateThis('Please enter preferred affiliate'),
         input: 'text',
         showCancelButton: true,
-        confirmButtonText: 'Submit',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: translateThis('Submit'),
+        cancelButtonText: translateThis('Cancel'),
         inputValidator: (value) => {
           if (!value) {
             return 'You need to enter something!';
@@ -1480,7 +1513,7 @@
         if (result.isConfirmed) {
           const affiliate = result.value;
           if (!web3.utils.isAddress(referral)) {              
-              Swal.fire("Address was not valid.");
+              Swal.fire(translateThis("Address was not valid."));
               return;
           }
           var reputation = [0,0,0];
@@ -1488,7 +1521,7 @@
           if(reputation[2] >= 10) {
             try {
               await DDEcontract.methods.changeAffiliate(affiliate).send({"from":myaccounts,...gasOptions[gasSetting]});
-              Swal.fire("Success!");
+              Swal.fire(translateThis("Success!"));
               referral = affiliate;
             } catch (e) {
               console.log(e);
@@ -1496,15 +1529,15 @@
               return;
             }
           } else {
-            Swal.fire("This person has not completed enough qualified deals yet.");
+            Swal.fire(translateThis("This person has not completed enough qualified deals yet."));
           }
         }
       });
     }
     async function setCustomFee() {
       await Swal.fire({
-        title: 'Set base affiliate fee',
-        text: 'Please enter the percentage fee that you wish to offer to affiliates who help find customers for you.',
+        title: translateThis('Set base affiliate fee'),
+        text: translateThis('Please enter the percentage fee that you wish to offer to affiliates who help find customers for you.'),
         input: 'range',
         inputAttributes: {
           min: (baseFee / 100).toFixed(1),
@@ -1522,7 +1555,7 @@
           var value = parseInt(result.value) * parseInt(100);
           try {
             await DDEcontract.methods.changeCustomFee(value).send({"from":myaccounts,...gasOptions[gasSetting]});
-            Swal.fire("Success!");
+            Swal.fire(translateThis("Success!"));
           } catch (e) {
             console.log(e);
             await showError(e);
@@ -1762,6 +1795,14 @@
         var jsondata = {};
         var sortHits = 0;
         marketOffers['results'] = [];
+        if(showOrder == false) {
+          var qpar = getQueryParam("o") || "default";
+          if(qpar != "default") {
+            searchText = "offer:" + qpar;
+            document.getElementById('searchText').value = searchText;
+          }
+          showOrder = true;
+        }
         if (searchText !== '') {
           if (Array.isArray(searchText)) {
             var expiredOffers = [];
@@ -1778,6 +1819,10 @@
                   jsondata = await getOrderHash(hash);
                   if(parseInt(jsondata.timelimit[1]) != 0) {
                     if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                      if(!marketOffers.hasOwnProperty(offerID)) {
+                          marketOffers.indices.push(offerID);
+                      }
+                      marketOffers[offerID] = hash;
                       marketOffers[hash] = jsondata;
                       if(!marketOffers['results'].includes(hash)) {
                           marketOffers.results.push(hash);
@@ -1786,6 +1831,10 @@
                       expiredOffers.push(hash);
                     }
                   } else {
+                    if(!marketOffers.hasOwnProperty(offerID)) {
+                        marketOffers.indices.push(offerID);
+                    }
+                    marketOffers[offerID] = hash;
                     marketOffers[hash] = jsondata;
                     if(!marketOffers['results'].includes(hash)) {
                         marketOffers.results.push(hash);
@@ -1823,7 +1872,7 @@
               for (var myinx = 0; myinx < mylen; myinx++) {
                 if(validOffers == high) {
                   break;
-                }                
+                }
                 if(expiredOffers.includes(myinx)) {
                   continue;
                 }
@@ -1838,6 +1887,10 @@
                     jsondata = await getOrderHash(hash);
                     if(parseInt(jsondata.timelimit[1]) != 0) {
                       if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                        if(!marketOffers.hasOwnProperty(offerID)) {
+                            marketOffers.indices.push(offerID);
+                        }
+                        marketOffers[offerID] = hash;
                         marketOffers[hash] = jsondata;
                         if(!marketOffers['results'].includes(hash)) {
                             marketOffers.results.push(hash);
@@ -1847,6 +1900,10 @@
                         added = 1;
                       }
                     } else {
+                        if(!marketOffers.hasOwnProperty(offerID)) {
+                            marketOffers.indices.push(offerID);
+                        }
+                        marketOffers[offerID] = hash;
                         marketOffers[hash] = jsondata;
                         if(!marketOffers['results'].includes(hash)) {
                             marketOffers.results.push(hash);
@@ -1863,6 +1920,40 @@
               }
             } catch (e) {
               console.log("Error loading offer: ",e);
+            }
+            await populateListings("", 2);
+            return;
+          } else if(searchText.includes("offer:")){
+            const hash = searchText.split("offer:")[1].trim();
+            try {
+              const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
+              if (offerID == 0) {
+              } else {
+                jsondata = await getOrderHash(hash);
+                if(parseInt(jsondata.timelimit[1]) != 0) {
+                  if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                    if(!marketOffers.hasOwnProperty(offerID)) {
+                        marketOffers.indices.push(offerID);
+                    }
+                    marketOffers[offerID] = hash;
+                    marketOffers[hash] = jsondata;
+                    if(!marketOffers['results'].includes(hash)) {
+                        marketOffers.results.push(hash);
+                    }
+                  }
+                } else {
+                  if(!marketOffers.hasOwnProperty(offerID)) {
+                      marketOffers.indices.push(offerID);
+                  }
+                  marketOffers[offerID] = hash;
+                  marketOffers[hash] = jsondata;
+                  if(!marketOffers['results'].includes(hash)) {
+                      marketOffers.results.push(hash);
+                  }
+                }
+              }
+            } catch (e) {
+                console.log("Error loading offer: ",e);
             }
             await populateListings("", 2);
             return;
@@ -1890,22 +1981,39 @@
                                 if(hash == "0x0000000000000000000000000000000000000000000000000000000000000000") {
                                     return;
                                 }
+                                const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
+                                if (offerID == 0) {
+                                  return;
+                                } 
                                 if(hash in marketOffers) {
-                                    if (!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
-                                        marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
-                                    }
-                                    jsondata = marketOffers[hash];
+                                  if(!('searchTerms' in marketOffers[hash])) {
+                                    marketOffers[hash]['searchTerms'] = [];
+                                  }
+                                  if(!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
+                                      marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
+                                  }
+                                  jsondata = marketOffers[hash];
                                 } else {
-                                    jsondata = await getOrderHash(hash);
-                                    if(parseInt(jsondata.timelimit[1]) != 0) {
-                                        if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
-                                            marketOffers[hash] = jsondata;
-                                        } else {
-                                          return;
-                                        }
-                                    } else {
-                                        marketOffers[hash] = jsondata;
-                                    }
+                                  if(!marketOffers.hasOwnProperty(offerID)) {
+                                      marketOffers.indices.push(offerID);
+                                  }
+                                  marketOffers[offerID] = hash;
+                                  jsondata = await getOrderHash(hash);
+                                  if(parseInt(jsondata.timelimit[1]) != 0) {
+                                      if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                                          marketOffers[hash] = jsondata;
+                                      } else {
+                                        return;
+                                      }
+                                  } else {
+                                      marketOffers[hash] = jsondata;
+                                  }
+                                  if(!('searchTerms' in marketOffers[hash])) {
+                                    marketOffers[hash]['searchTerms'] = [];
+                                  }
+                                  if(!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
+                                      marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
+                                  }
                                 }
                                 if(!marketOffers['results'].includes(hash)) {
                                     marketOffers.results.push(hash);
@@ -2150,7 +2258,7 @@
           }
           const li = document.createElement("listElement");
           const counterpartyAddress = offerData.sender === myaccounts ? offerData.recipient : offerData.sender;
-          const counterpartyLabel = counterpartyAddress === "0x0000000000000000000000000000000000000000" ? "Market Offer" : counterpartyAddress;
+          const counterpartyLabel = counterpartyAddress === "0x0000000000000000000000000000000000000000" ? translateThis("Market Offer") : counterpartyAddress;
           const svgString = jdenticon.toSvg(offerHash, 25);
           const base64String = btoa(svgString);
           const dataUrl = `data:image/svg+xml;base64,${base64String}`;
@@ -2159,13 +2267,13 @@
             offerHashDisp = offerHashDisp.substring(0, 32) + '...';
           }
           li.innerHTML = `
-            <div>Order hash: <img src="${dataUrl}" width="25" height="25"></img> ${offerHashDisp}</div>
-            <div>Counter-Party Address: ${counterpartyLabel}</div>
-            <div>Token: ${offerData.token}</div>
-            <div>Amount: ${displayDecimals(offerData.token, offerData.amount)}</div>
-            <div>Quantity: ${parseInt(offerData.quantity[0])}(Total) - ${parseInt(offerData.quantity[1])}(Maximum)</div>
-            <div>Time Limit: ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
-            <div>Message: ${offerData.message.slice(0, 20)}...</div><br>
+            <div><bdo>` + translateThis('Order hash:') + `</bdo> <img src="${dataUrl}" width="25" height="25"></img> ${offerHashDisp}</div>
+            <div><bdo>` + translateThis('Counter-Party Address:') + `</bdo> ${counterpartyLabel}</div>
+            <div><bdo>` + translateThis('Token:') + `</bdo> ${offerData.token}</div>
+            <div><bdo>` + translateThis('Amount:') + `</bdo> ${displayDecimals(offerData.token, offerData.amount)}</div>
+            <div><bdo>` + translateThis('Quantity:') + `</bdo> ${parseInt(offerData.quantity[0])}` + translateThis('(Total)') + ` - ${parseInt(offerData.quantity[1])}` + translateThis('(Maximum)') + `</div>
+            <div><bdo>` + translateThis('Time Limit:') + `</bdo> ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} ` + translateThis('weeks') + `</div>
+            <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData.message.slice(0, 20)}...</div><br>
           `;
           myhash = web3.utils.keccak256(li.innerHTML);
           if(offerHash in notifications) {
@@ -2210,7 +2318,7 @@
             const testThis = JSON.parse(offerData2.message)
             if('recipient' in testThis && 'cipher' in testThis.recipient && parseInt(new Date().getTime()/1000) > lastNotified + 300) {
               lastNotified = parseInt(new Date().getTime()/1000);
-              await Swal.fire("Decryption error! Please attempt to decrypt your order manually with the correct password.");
+              await Swal.fire(translateThis("Decryption error! Please attempt to decrypt your order manually with the correct password."));
             }
           }
           if (offerData2.status[0] > 0 && offerData2.status[1] > 0) {
@@ -2236,13 +2344,13 @@
             offerHashDisp2 = offerHashDisp2.substring(0, 32) + '...';
           }
           li2.innerHTML = `
-            <div>Order hash: <img src="${dataUrl2}" width="25" height="25"></img> ${offerHashDisp2}</div>
-            <div>Counter-Party Address: ${counterpartyLabel2}</div>
-            <div>Token: ${offerData2.token}</div>
-            <div>Amount: ${displayDecimals(offerData2.token, offerData2.amount)}</div>
-            <div>Quantity: ${parseInt(offerData2.quantity[0])}</div>
-            <div>Time Limit: ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} weeks</div>
-            <div>Message: ${offerData2.message.slice(0, 20)}...</div><br>
+            <div><bdo>` + translateThis('Order hash:') + `</bdo> <img src="${dataUrl2}" width="25" height="25"></img> ${offerHashDisp2}</div>
+            <div><bdo>` + translateThis('Counter-Party Address:') + `</bdo> ${counterpartyLabel2}</div>
+            <div><bdo>` + translateThis('Token:') + `</bdo> ${offerData2.token}</div>
+            <div><bdo>` + translateThis('Amount:') + `</bdo> ${displayDecimals(offerData2.token, offerData2.amount)}</div>
+            <div><bdo>` + translateThis('Quantity:') + `</bdo> ${parseInt(offerData2.quantity[0])}</div>
+            <div><bdo>` + translateThis('Time Limit:') + `</bdo> ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} ` + translateThis('weeks') + `</div>
+            <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData2.message.slice(0, 20)}...</div><br>
           `;          
           myhash = web3.utils.keccak256(li2.innerHTML);
           if(offerHash2 in notifications) {
@@ -2299,14 +2407,14 @@
 
       const sentOffersHeader = document.createElement("div");
       sentOffersHeader.classList.add("offers-header");
-      sentOffersHeader.textContent = "Sent Offers";
+      sentOffersHeader.textContent = translateThis("Sent Offers");
       //offersContainer.appendChild(sentOffersHeader);
       list.setAttribute("style", "border: 1px solid black; padding: 1rem; margin-bottom: 1rem; cursor: pointer; background-color: #f8f8f8;");
       //offersContainer.appendChild(list);
 
       const receivedOffersHeader = document.createElement("div");
       receivedOffersHeader.classList.add("offers-header");
-      receivedOffersHeader.textContent = "Received Offers";
+      receivedOffersHeader.textContent = translateThis("Received Offers");
       //offersContainer.appendChild(receivedOffersHeader);
       list2.setAttribute("style", "border: 1px solid black; padding: 1rem; margin-bottom: 1rem; cursor: pointer; background-color: #f8f8f8;");
       //offersContainer.appendChild(list2);
@@ -2326,8 +2434,8 @@
       const tabContainer = document.createElement("div");
       tabContainer.innerHTML = `
         <div class="offers-tab-container">
-          <button class="tablinks" onclick="openTab(event, 'senttab')">Sent Offers</button>
-          <button class="tablinks" onclick="openTab(event, 'receivedtab')">Received Offers</button>
+          <button class="tablinks" onclick="openTab(event, 'senttab')">` + translateThis('Sent Offers') + `</button>
+          <button class="tablinks" onclick="openTab(event, 'receivedtab')">` + translateThis('Received Offers') + `</button>
           <br><br>
         </div>
       `;
@@ -2372,21 +2480,21 @@
             offerHashDisp3 = offerHashDisp3.substring(0, 32) + '...';
           }
           li3.innerHTML = `
-            <div>Order hash: <img src="${dataUrl3}" width="25" height="25"></img> ${offerHashDisp3}</div>
-            <div>Counter-Party Address: ${counterpartyLabel3}</div>
-            <div>Token: ${offerData3.token}</div>
-            <div>Amount: ${displayDecimals(offerData3.token, offerData3.amount)}</div>
-            <div>Quantity: ${parseInt(offerData3.quantity[0])}</div>
-            <div>Time Until Funds Expire: ${timeRemaining} days</div>            
+            <div><bdo>` + translateThis('Order hash:') + `</bdo> <img src="${dataUrl3}" width="25" height="25"></img> ${offerHashDisp3}</div>
+            <div><bdo>` + translateThis('Counter-Party Address:') + `</bdo> ${counterpartyLabel3}</div>
+            <div><bdo>` + translateThis('Token:') + `</bdo> ${offerData3.token}</div>
+            <div><bdo>` + translateThis('Amount:') + `</bdo> ${displayDecimals(offerData3.token, offerData3.amount)}</div>
+            <div><bdo>` + translateThis('Quantity:') + `</bdo> ${parseInt(offerData3.quantity[0])}</div>
+            <div><bdo>` + translateThis('Time Until Funds Expire:') + `</bdo> ${timeRemaining} ` + translateThis('days') + `</div>
           `;
           offerData3.timeRemaining = timeRemaining;
           var escrowInfo = '';
           if (offerData3.status[0] != 4 && offerData3.status[1] != 4) {
               if(parseFloat(timeRemaining) < parseFloat(2)) {
-                escrowInfo += `<div>WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.</div>`
+                escrowInfo += "<div>" + translateThis('WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.') + "</div>";
               }
               if(parseFloat(timeRemaining) <= parseFloat(0)) {
-                escrowInfo += `<div>The time limit has expired and the funds have been burned. This contract is no longer available.</div>`
+                escrowInfo += "<div>" + translateThis("The time limit has expired and the funds have been burned. This contract is no longer available.") + "</div>";
                 offerData3.expired = 2;
               }
           }
@@ -2396,56 +2504,56 @@
           }
           if(offerData3.timelimit[1] != 0 && skipthis != 1) {            
             const timeExtension = Math.abs(parseFloat(parseInt(offerData3.timelimit[1]) - parseInt(offerData3.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
-            escrowInfo += `<div>Sender has requested a time extention for: ${timeExtension} days</div>`;
+            escrowInfo += "<div>" + translateThis("Sender has requested a time extension for: ") + timeExtension + translateThis("days") + "</div>";
           }
           if(offerData3.timelimit[2] != 0 && skipthis != 1) {            
             const timeExtension2 = Math.abs(parseFloat(parseInt(offerData3.timelimit[2]) - parseInt(offerData3.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
-            escrowInfo += `<div>Recipient has requested a time extention for: ${timeExtension2} days</div>`;
+            escrowInfo += "<div>" + translateThis("Recipient has requested a time extension for: ") + timeExtension2 + translateThis("days") + "</div>";
           }
           if (skipthis == 1) {
-            escrowInfo += `<div>Time extension granted.</div>`;
+            escrowInfo += "<div>" + translateThis("Time extension granted.") + "</div>";
           }
           if (offerData3.status[0] == 2) {
             if(myaccounts == offerData3.sender) {
-                escrowInfo += `<div>Completion request sent!</div>`;
+                escrowInfo += "<div>" + translateThis("Completion request sent!") + "</div>";
             } else {
-                escrowInfo += `<div>Completion request received!</div>`;
+                escrowInfo += "<div>" + translateThis("Completion request received!") + "</div>";
             }
           }
           if (offerData3.status[0] == 3) {
             if(myaccounts == offerData3.sender) {
-                escrowInfo += `<div>Completion request received!</div>`;
+                escrowInfo += "<div>" + translateThis("Completion request received!") + "</div>";
             } else {
-                escrowInfo += `<div>Completion request sent!</div>`;
+                escrowInfo += "<div>" + translateThis("Completion request sent!") + "</div>";
             }
           }
           if (offerData3.status[1] == 2) {
             if(myaccounts == offerData3.sender) {
-                escrowInfo += `<div>Cancellation request sent!</div>`;
+                escrowInfo += "<div>" + translateThis("Cancellation request sent!") + "</div>";
             } else {
-                escrowInfo += `<div>Cancellation request received!</div>`;
+                escrowInfo += "<div>" + translateThis("Cancellation request received!") + "</div>";
             }
           }
           if (offerData3.status[1] == 3) {
             if(myaccounts == offerData3.sender) {
-                escrowInfo += `<div>Cancellation request received!</div>`;
+                escrowInfo += "<div>" + translateThis("Cancellation request received!") + "</div>";
             } else {
-                escrowInfo += `<div>Cancellation request sent!</div>`;
+                escrowInfo += "<div>" + translateThis("Cancellation request sent!") + "</div>";
             }
           }
           if (offerData3.status[0] == 4 || offerData3.status[1] == 4) {
             if(offerData3.status[0] == 4) {
-                escrowInfo += `<div>Contract completed!</div>`;
+                escrowInfo += "<div>" + translateThis("Contract completed!") + "</div>";;
             }
             if(offerData3.status[1] == 4) {
-                escrowInfo += `<div>Contract cancelled!</div>`;
+                escrowInfo += "<div>" + translateThis("Contract cancelled!") + "</div>";;
             }
             offerData3.expired = 1;
           }
           offerData3.escrowInfo = escrowInfo;
           li3.innerHTML += escrowInfo;
-          li3.innerHTML += `<div>Message: ${offerData3.message.slice(0, 20)}...</div><br>`
-          const lineToExcludeRegex = /<div>Time Until Funds Expire: .* days<\/div>/;
+          li3.innerHTML += `<div>` + translateThis("Message:") + `${offerData3.message.slice(0, 20)}...</div><br>`
+          const lineToExcludeRegex = new RegExp("<div>" + translateThis("Time Until Funds Expire:") + ".*" + translateThis("days") + "</div>");
           const inputString = li3.innerHTML.replace(lineToExcludeRegex, '');
           myhash = web3.utils.keccak256(inputString);
           if(offerHash3 in notifications) {
@@ -2477,7 +2585,7 @@
 
       const escrowOffersHeader = document.createElement("div");
       escrowOffersHeader.classList.add("escrow-header");
-      escrowOffersHeader.textContent = "Active contracts";
+      escrowOffersHeader.textContent = translateThis("Active contracts");
       escrowContainer.appendChild(escrowOffersHeader);
       list3.setAttribute("style", "border: 1px solid black; padding: 1rem; margin-bottom: 1rem; cursor: pointer; background-color: #f8f8f8;");
       escrowContainer.appendChild(list3);
@@ -2617,9 +2725,9 @@
             gridItem.innerHTML = `
                 <div class="listing-image">${tempimg}</div>
                 <div class="listing-details">
-                    <div class="token">Currency: ${tokennames[offer.token]}</div>
-                    <div class="amount">Amount: ${displayDecimals(offer.token, offer.amount)}</div>
-                    <div class="message">Details: ${offer.message.slice(0, 20) + (offer.message.length > 20 ? "..." : "")}</div>
+                    <div class="token">` + '<bdo class="theText">' + translateThis("Currency:") + '</bdo>'  + ` ${tokennames[offer.token]}</div>
+                    <div class="amount">` + '<bdo class="theText">' + translateThis("Amount:") + '</bdo>'  + ` ${displayDecimals(offer.token, offer.amount)}</div>
+                    <div class="message">` + '<bdo class="theText">' + translateThis("Details:") + '</bdo>' + ` ${offer.message.slice(0, 20) + (offer.message.length > 20 ? "..." : "")}</div>
                 </div>
             `;
 
@@ -2691,7 +2799,7 @@
         // and update the currentPage to 1
         currentPage = 1;
         if(deep == 1) {
-            document.getElementById("loadingStatus").innerHTML = "Loading..."
+            document.getElementById("loadingStatus").innerHTML = translateThis("Loading...");
             await loadMarkets(0, 50, searchText);
             document.getElementById("loadingStatus").innerHTML = "";
         } else {
@@ -2700,7 +2808,7 @@
     }
 
     async function searchFavorites() {
-      document.getElementById("loadingStatus").innerHTML = "Loading..."
+      document.getElementById("loadingStatus").innerHTML = translateThis("Loading...");
       await loadMarkets(0, 50, myFavorites);
       document.getElementById("loadingStatus").innerHTML = "";
     }
@@ -2711,7 +2819,7 @@
             currentPage++;
             await populateListings();
         } else {
-            document.getElementById("loadingStatus").innerHTML = "Loading..."
+            document.getElementById("loadingStatus").innerHTML = translateThis("Loading...");
             await loadMarkets(marketOffers.indices.length, marketOffers.indices.length + 50);
             document.getElementById("loadingStatus").innerHTML = ""
             currentPage++;
@@ -2733,19 +2841,19 @@
       if(notifyFavorites == "0" && mode == 0) {
         await Swal.fire({
           icon: 'info',
-          title: 'Welcome',
-          text: 'Welcome to the markets. As you browse you may choose to add orders to your favorites list by clicking the star. This may function as a useful cart or history for deals you wish to revisit. Please review the amount, currency, deposits, time limit and deal structure carefully before accepting. Always attempt to remain in close contact with your counter-party to ensure success. With that said enjoy using one of the safest escrows in the world!',
+          title: translateThis('Welcome'),
+          text: translateThis('Welcome to the markets. As you browse you may choose to add orders to your favorites list by clicking the star. This may function as a useful cart or history for deals you wish to revisit. Please review the amount, currency, deposits, time limit and deal structure carefully before accepting. Always attempt to remain in close contact with your counter-party to ensure success. With that said enjoy using one of the safest escrows in the world!'),
         });
         notifyFavorites = "1";
         localStorage.setItem(myaccounts+":notifyFavorites", notifyFavorites);
       }
       if(listing.message.includes('"recipient":') && listing.message.includes('"cipher":') && listing.message.includes('"status":')) {
         await Swal.fire({
-          title: 'Encrypted listing',
-          text: 'It seems like you did not have the decryption key for this order. Would you like to enter the password to decrypt it now?',
+          title: translateThis('Encrypted listing'),
+          text: translateThis('It seems like you did not have the decryption key for this order. Would you like to enter the password to decrypt it now?'),
           showCancelButton: true,
-          confirmButtonText: 'Yes',
-          cancelButtonText: 'No',
+          confirmButtonText: translateThis('Yes'),
+          cancelButtonText: translateThis('No'),
           icon: 'question',
         }).then(async (result) => {
           if (result.isConfirmed) {
@@ -2753,11 +2861,12 @@
             try {
               userprivkey2='';
               await Swal.fire({
-                title: 'Confirm Password',
+                title: translateThis('Confirm Password'),
                 input: 'password',
-                inputPlaceholder: 'Please enter decryption password',
+                inputPlaceholder: translateThis('Please enter decryption password'),
                 showCancelButton: true,
-                confirmButtonText: 'Confirm Password',
+                confirmButtonText: translateThis('Confirm Password'),
+                cancelButtonText: translateThis('Cancel'),
                 preConfirm: async (confirmedPassword) => {
                   var hashedPassword = confirmedPassword;
                   hashedPassword = Crypto.SHA256(hashedPassword);
@@ -2802,7 +2911,7 @@
             } catch (e) {
               console.log(e);
               console.log("Decryption failed");
-              await Swal.fire("Decryption failed");
+              await Swal.fire(translateThis("Decryption failed"));
             }
           }
         });
@@ -2891,16 +3000,16 @@
         tempInput.select();
         document.execCommand('copy');
         document.body.removeChild(tempInput);
-        Swal.fire('Address copied to clipboard!');
+        Swal.fire(translateThis('Address copied to clipboard!'));
       }
 
       const sender = document.createElement('p');
-      var text = "Sender: ";
+      var text = "<bdo>" + translateThis("Sender:") + "</bdo> ";
       if(listing.sender == "0x0000000000000000000000000000000000000000") {
         if(myaccounts != listing.recipient) {
-            text = "You are the one paying/sending the funds.";
+            text = translateThis("You are the one paying/sending the funds.");
         } else {
-            text = "You are the one receiving the funds.";
+            text = translateThis("You are the one receiving the funds.");
         }
         sender.innerHTML = "<br>" + text;
       } else {        
@@ -2920,11 +3029,11 @@
 
         senderTextSpan.onclick = function() {
           Swal.fire({
-            title: 'Show listings',
-            text: 'Would you like to see more listings from this user?',
+            title: translateThis('Show listings'),
+            text: translateThis('Would you like to see more listings from this user?'),
             showCancelButton: true,
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'No',
+            confirmButtonText: translateThis('Yes'),
+            cancelButtonText: translateThis('No'),
             icon: 'question',
           }).then(async (result) => {
             if (result.isConfirmed) {
@@ -2943,12 +3052,12 @@
       }
 
       const recipient = document.createElement('p');
-      var text2 = "Recipient: ";
+      var text2 = "<bdo>" + translateThis("Recipient:") + "</bdo> ";
       if(listing.recipient == "0x0000000000000000000000000000000000000000") {
         if(myaccounts != listing.sender) {
-            text2 = "You are the one receiving the funds.";            
+            text2 = translateThis("You are the one receiving the funds.");            
         } else {
-            text2 = "You are the one paying/sending the funds.";
+            text2 = translateThis("You are the one paying/sending the funds.");
         }
         recipient.innerHTML = text2;
       } else {
@@ -2966,11 +3075,11 @@
           };
           recipientTextSpan.onclick = function() {
             Swal.fire({
-              title: 'Show listings',
-              text: 'Would you like to see more listings from this user?',
+              title: translateThis('Show listings'),
+              text: translateThis('Would you like to see more listings from this user?'),
               showCancelButton: true,
-              confirmButtonText: 'Yes',
-              cancelButtonText: 'No',
+              confirmButtonText: translateThis('Yes'),
+              cancelButtonText: translateThis('No'),
               icon: 'question',
             }).then(async (result) => {
               if (result.isConfirmed) {
@@ -2988,47 +3097,47 @@
       }
 
       const token = document.createElement('p');
-      token.innerHTML = 'Token: ' + tokennames[listing.token];
+      token.innerHTML = "<bdo>" + translateThis('Token:') + '</bdo> ' + tokennames[listing.token];
 
       const amount = document.createElement('p');
-      amount.innerHTML = 'Amount: ' + displayDecimals(listing.token,listing.amount);      
+      amount.innerHTML = "<bdo>" + translateThis('Amount:') + '</bdo> ' + displayDecimals(listing.token,listing.amount);      
 
       if(listing.rfee != 0) {
         var theFee = document.createElement('p');
-        theFee.innerHTML = 'Referral fee(estimated): ' + (listing.rfee / 100).toFixed(2) + "%";
+        theFee.innerHTML = "<bdo>" + translateThis('Referral fee(estimated):') + '</bdo> ' + (listing.rfee / 100).toFixed(2) + "%";
       }
       if(listing.referred != "0x0000000000000000000000000000000000000000") {
         var theReferred = document.createElement('p');
         const theReferredTextSpan = document.createElement('span');
         theReferredTextSpan.style.fontSize = '12px';
         theReferredTextSpan.textContent = listing.referred;
-        theReferred.innerHTML = 'Referral address: ';
+        theReferred.innerHTML = "<bdo>" + translateThis('Referral address:') + '</bdo> ';
         theReferred.appendChild(theReferredTextSpan);
       }
       if(listing.tags && listing.tags.length != 0) {
         var theTags = document.createElement('p');
-        theTags.innerHTML = 'Tags: ' + listing.tags.join(', ');
+        theTags.innerHTML = translateThis('Tags:') + ' ' + listing.tags.join(', ');
       }
 
       const depositSender = document.createElement('p');
-      depositSender.innerHTML = 'Deposit Sender: ' + displayDecimals(listing.token,listing.depositSender);
+      depositSender.innerHTML = "<bdo>" + translateThis('Deposit Sender:') + '</bdo> ' + displayDecimals(listing.token,listing.depositSender);
       
       const depositRecipient = document.createElement('p');
-      depositRecipient.innerHTML = 'Deposit Recipient: ' + displayDecimals(listing.token,listing.depositRecipient);
+      depositRecipient.innerHTML = "<bdo>" + translateThis('Deposit Recipient:') + '</bdo> ' + displayDecimals(listing.token,listing.depositRecipient);
       
       const quantity = document.createElement('p');
-      quantity.innerHTML = 'Quantity: ' + parseInt(listing.quantity[0]);
+      quantity.innerHTML = "<bdo>" + translateThis('Quantity:') + '</bdo> ' + parseInt(listing.quantity[0]);
       if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
-        quantity.innerHTML = 'Quantity: ' + parseInt(listing.quantity[0]) + '(total) - ' + parseInt(listing.quantity[1]) + '(maximum)';
+        quantity.innerHTML = "<bdo>" + translateThis('Quantity:') + '</bdo> ' + parseInt(listing.quantity[0]) + "<bdo>" + translateThis('(Total)') + '</bdo> - ' + parseInt(listing.quantity[1]) + "<bdo>" + translateThis('(Maximum)') + "</bdo>";
       }
       
       const timelimit = document.createElement('p');
-      timelimit.innerHTML = 'Time limit: ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' weeks';
+      timelimit.innerHTML = "<bdo>" + translateThis('Time limit:') + '</bdo> ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' ' + "<bdo>" + translateThis('weeks') + "</bdo>";
 
       const message = document.createElement('p');
-      message.innerHTML = '<br>Details: <br>' + listing.message;
+      message.innerHTML = '<br><bdo>' + translateThis('Details:') + '</bdo><br>' + listing.message;
       if (typeof listing.contact !== 'undefined') {
-          message.innerHTML += '<br><br>Contact information: <br>' + listing.contact;
+          message.innerHTML += '<br><br><bdo>' + translateThis('Contact information:') + '</bdo><br>' + listing.contact;
       }
       var contact2 = '';
       var datalen = 0;
@@ -3040,15 +3149,15 @@
               contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(listing.recipient, datalen-1).call()));
               if('mycontact' in contact2) {
                 if(listing.contact != contact2['mycontact']) {
-                    message.innerHTML += '<br><br>Recipients contact information: <br>' + contact2['mycontact'];
+                    message.innerHTML += '<br><br><bdo>' + translateThis('Recipients contact information:') + '</bdo><br>' + contact2['mycontact'];
                 }
               }
             }
             reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(listing.recipient).call())));
             if(reputation[0] == 0 && reputation[1] == 0) {
-              message.innerHTML += '<br><br>Recipient is a new user of the markets. <br>';
+              message.innerHTML += '<br><br>' + translateThis('Recipient is a new user of the markets.') + '<br>';
             } else {
-              message.innerHTML += '<br><br>Recipients success rate: <br>' + 'Completed: ' + reputation[0] + '<br>' + 'Failed:' + reputation[1];
+              message.innerHTML += '<br><br>' + translateThis('Recipients success rate:') + '<br><bdo>' + translateThis('Completed:') + '</bdo> ' + reputation[0] + '<br><bdo>' + translateThis('Failed:') + '</bdo> ' + reputation[1];
             }
         } catch(e) {
             console.log(e);
@@ -3061,15 +3170,15 @@
               contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(listing.sender, datalen-1).call()));
               if('mycontact' in contact2) {
                 if(listing.contact != contact2['mycontact']) {
-                    message.innerHTML += '<br><br>Senders contact information: <br>' + contact2['mycontact'];
+                    message.innerHTML += '<br><br><bdo>' + translateThis('Senders contact information:') + '</bdo><br>' + contact2['mycontact'];
                 }
               }
             }
             reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(listing.sender).call())));
             if(reputation[0] == 0 && reputation[1] == 0) {
-              message.innerHTML += '<br><br>Sender is a new user of the markets. <br>';
+              message.innerHTML += '<br><br>' + translateThis('Sender is a new user of the markets.') + '<br>';
             } else {
-              message.innerHTML += '<br><br>Senders success rate: <br>' + 'Completed: ' + reputation[0] + '<br>' + 'Failed:' + reputation[1];
+              message.innerHTML += '<br><br>' + translateThis('Senders success rate:') + '<br><bdo>' + translateThis('Completed:') + '</bdo> ' + reputation[0] + '<br><bdo>' + translateThis('Failed:') + '</bdo> ' + reputation[1];
             }
         } catch(e) {
             console.log(e);
@@ -3081,11 +3190,11 @@
 
       if(mode == 0 || mode == 2) {
           const acceptButton = document.createElement('button');
-          acceptButton.innerHTML = 'Accept offer';
+          acceptButton.innerHTML = translateThis('Accept offer');
           acceptButton.onclick = () => {acceptOffer(listing); popupContainer.remove();};
 
           const counterButton = document.createElement('button');
-          counterButton.innerHTML = 'Counter-offer';
+          counterButton.innerHTML = translateThis('Counter-offer');
           counterButton.onclick = () => {counterOffer(listing); popupContainer.remove();};
 
           buttonContainer.appendChild(acceptButton);
@@ -3096,22 +3205,22 @@
       if(mode == 1) {
           if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
             const quantityButton = document.createElement('button');
-            quantityButton.innerHTML = 'Update Quantity';
+            quantityButton.innerHTML = translateThis('Update Quantity');
             quantityButton.onclick = async () => {await updateQuantity(listing); popupContainer.remove();};
             buttonContainer.appendChild(quantityButton);
             const feeButton = document.createElement('button');
-            feeButton.innerHTML = 'Edit referral fee';
+            feeButton.innerHTML = translateThis('Edit referral fee');
             feeButton.onclick = async () => {await updateFee(listing); popupContainer.remove();};
             buttonContainer.appendChild(feeButton);
           }
           const cancelButton = document.createElement('button');
-          cancelButton.innerHTML = 'Cancel offer';
+          cancelButton.innerHTML = translateThis('Cancel offer');
           cancelButton.onclick = async () => {await cancelOffer(listing); popupContainer.remove();};
           buttonContainer.appendChild(cancelButton);
       }
       if(mode == 2) {
           const cancelButton = document.createElement('button');
-          cancelButton.innerHTML = 'Cancel offer';
+          cancelButton.innerHTML = translateThis('Cancel offer');
           cancelButton.onclick = async () => {await cancelOffer(listing, 1); popupContainer.remove();};
           buttonContainer.appendChild(cancelButton);
       }
@@ -3119,35 +3228,35 @@
           imageContainer.style.display = 'none';
           arrowsContainer.style.display = 'none';
           const confirmButton = document.createElement('button');
-          confirmButton.innerHTML = 'Confirm';
+          confirmButton.innerHTML = translateThis('Confirm');
           confirmButton.id = 'confirmButton';
           buttonContainer.appendChild(confirmButton);
           const cancelButton = document.createElement('button');
-          cancelButton.innerHTML = 'Cancel';
+          cancelButton.innerHTML = translateThis('Cancel');
           cancelButton.id = 'cancelButton';
           buttonContainer.appendChild(cancelButton);
       }
       if(mode == 4) {
           if(listing.expired == 1 || listing.expired == 2) {
               const clearButton = document.createElement('button');
-              clearButton.innerHTML = 'Clear Contract';
+              clearButton.innerHTML = translateThis('Clear Contract');
               clearButton.id = 'clearButton';
               buttonContainer.appendChild(clearButton);
               clearButton.onclick = async function() {
                 var returnThis = 0;
                 if(listing.expired == 2 && listing.status[0] < 5) {
                     Swal.fire({
-                      title: 'Contract destroyed',
-                      text: 'It seems like this deal timed out. If this was due to any disagreement then before you clear the order would you like to report the result to the blockchain for reputation tracking?',
+                      title: translateThis('Contract destroyed'),
+                      text: translateThis('It seems like this deal timed out. If this was due to any disagreement then before you clear the order would you like to report the result to the blockchain for reputation tracking?'),
                       showCancelButton: true,
-                      confirmButtonText: 'Yes',
-                      cancelButtonText: 'No',
+                      confirmButtonText: translateThis('Yes'),
+                      cancelButtonText: translateThis('No'),
                       icon: 'question',
                     }).then(async (result) => {
                       if (result.isConfirmed) {
                         try {
                           await DDEcontract.methods.expireEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
-                          await Swal.fire("Transaction result registered!");
+                          await Swal.fire(translateThis("Transaction result registered!"));
                           popupContainer.remove();
                           returnThis=1;
                         } catch (error) {
@@ -3174,12 +3283,12 @@
               if(listing.timelimit[1] != 0 && skipthis != 1) {
                 if(myaccounts != listing.sender) {
                   const acceptTime = document.createElement('button');
-                  acceptTime.innerHTML = 'Accept Time Extension Request';
+                  acceptTime.innerHTML = translateThis('Accept Time Extension Request');
                   acceptTime.id = 'acceptTime';                  
                   acceptTime.onclick = async function() {
                     try {
                       await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[1]).send({"from":myaccounts,...gasOptions[gasSetting]});
-                      await Swal.fire("Time extended!");
+                      await Swal.fire(translateThis("Time extended!"));
                       await loadUser();
                       popupContainer.remove();
                     } catch (error) {
@@ -3193,12 +3302,12 @@
               if(listing.timelimit[2] != 0 && skipthis != 1) {
                 if(myaccounts == listing.sender) {
                   const acceptTime = document.createElement('button');
-                  acceptTime.innerHTML = 'Accept Time Extension Request';
+                  acceptTime.innerHTML = translateThis('Accept Time Extension Request');
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
                       await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[2]).send({"from":myaccounts,...gasOptions[gasSetting]});
-                      await Swal.fire("Time extended!");
+                      await Swal.fire(translateThis("Time extended!"));
                       await loadUser();
                       popupContainer.remove();
                     } catch (error) {
@@ -3210,17 +3319,17 @@
                 }
               }
               const extendTime = document.createElement('button');
-              extendTime.innerHTML = 'Request Time Extension';
-              extendTime.id = 'extendTime';                  
+              extendTime.innerHTML = translateThis('Request Time Extension');
+              extendTime.id = 'extendTime';
               extendTime.onclick = async function() {
                   try {
                       const dialog = document.createElement("div");
                       dialog.innerHTML = `
-                        <div>Please enter the number of days you wish to extend:<br></div>
+                        <div>` + translateThis('Please enter the number of days you wish to extend:') + `<br></div>
                           <input id="new-time" type="number"></input><br><br>
                         <div>
-                          <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
-                          <button id="cancel-btn">Cancel</button>
+                          <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
+                          <button id="cancel-btn">` + translateThis('Cancel') + `</button>
                         </div>
                       `;
                       dialog.style.display = "block";
@@ -3246,7 +3355,7 @@
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                         dialog.remove();
                         await DDEcontract.methods.requestExtension(listing.hash, myaccounts, newtime).send({"from":myaccounts,...gasOptions[gasSetting]});
-                        await Swal.fire("Time extension requested!");
+                        await Swal.fire(translateThis("Time extension requested!"));
                         await loadUser();
                         popupContainer.remove();
                       });
@@ -3257,26 +3366,26 @@
               }
               buttonContainer.appendChild(extendTime);
               const cancelButton = document.createElement('button');
-              cancelButton.innerHTML = 'Cancel Contract';
+              cancelButton.innerHTML = translateThis('Cancel Contract');
               cancelButton.id = 'cancelButton';
               cancelButton.onclick = async function() {
                 try {
                   if(myaccounts == listing.sender) {
                     if(listing.status[1] == 2) {
-                      await Swal.fire("Contract cancellation request was already sent!");
+                      await Swal.fire(translateThis("Contract cancellation request was already sent!"));
                       return;
                     }
                   } else {
                     if(listing.status[1] == 3) {
-                      await Swal.fire("Contract cancellation request was already sent!");
+                      await Swal.fire(translateThis("Contract cancellation request was already sent!"));
                       return;
                     }
                   }
                   await DDEcontract.methods.cancelEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
                   if(listing.status[1] == 1) {
-                    await Swal.fire("Contract cancellation request sent!");
+                    await Swal.fire(translateThis("Contract cancellation request sent!"));
                   } else {
-                    await Swal.fire("Contract cancelled!");
+                    await Swal.fire(translateThis("Contract cancelled!"));
                   }
                   await loadUser();
                   popupContainer.remove();
@@ -3287,26 +3396,26 @@
               }
               buttonContainer.appendChild(cancelButton);
               const confirmButton = document.createElement('button');
-              confirmButton.innerHTML = 'Complete Contract';
+              confirmButton.innerHTML = translateThis('Complete Contract');
               confirmButton.id = 'confirmButton';
               confirmButton.onclick = async function() {
                 try {
                   if(myaccounts == listing.sender) {
                     if(listing.status[0] == 2) {
-                      await Swal.fire("Contract completion request was already sent!");
+                      await Swal.fire(translateThis("Contract completion request was already sent!"));
                       return;
                     }
                   } else {
                     if(listing.status[0] == 3) {
-                      await Swal.fire("Contract completion request was already sent!");
+                      await Swal.fire(translateThis("Contract completion request was already sent!"));
                       return;
                     }
                   }
                   await DDEcontract.methods.completeEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
                   if(listing.status[1] == 1) {
-                    await Swal.fire("Contract completion request sent!");
+                    await Swal.fire(translateThis("Contract completion request sent!"));
                   } else {
-                    await Swal.fire("Contract completed!");
+                    await Swal.fire(translateThis("Contract completed!"));
                   }
                   await loadUser();
                   popupContainer.remove();
@@ -3338,9 +3447,9 @@
       }
 
       if(mode == 4) {
-        timelimit.innerHTML = 'Time Until Funds Expire: ' + listing.timeRemaining + ' days';
+        timelimit.innerHTML = "<bdo>" + translateThis('Time Until Funds Expire:') + '</bdo> ' + listing.timeRemaining + ' <bdo>' + translateThis('days') + "</bdo>";
         const extra = document.createElement('p');
-        extra.innerHTML = '<br>Notifications: <br>' + listing.escrowInfo;
+        extra.innerHTML = '<br><bdo>' + translateThis('Notifications:') + '</bdo><br>' + listing.escrowInfo;
         details.appendChild(extra)
       }
       message.style.whiteSpace = 'normal';
@@ -3371,7 +3480,71 @@
           checkFavorites();
           localStorage.setItem(myaccounts + ':myFavorites', JSON.stringify(myFavorites));
         };
+        starButton.addEventListener('mouseover', function() {
+          this.style.cursor = 'pointer';
+        });
+        starButton.addEventListener('mouseout', function() {
+          this.style.cursor = 'auto';
+        });
         topBar.appendChild(starButton);
+
+        const linkButton = document.createElement('span');
+        linkButton.style.fontSize = "20px";
+        linkButton.innerHTML = '&nbsp&nbsp&#128279;';
+        linkButton.classList.add('favorites-button3');
+        linkButton.style.left = 50;
+        linkButton.style.color = "#000000";
+        linkButton.addEventListener('mouseover', function() {
+          this.style.cursor = 'pointer';
+        });
+        linkButton.addEventListener('mouseout', function() {
+          this.style.cursor = 'auto';
+        });
+        linkButton.onclick = function() {
+          var currentURL = new URL(window.location.href);
+          var newUrl = window.location.href;
+          // Check if the current URL already has queries
+          if (newUrl.indexOf('?') !== -1) {
+            if (currentURL.searchParams.has('o')) {
+              currentURL.searchParams.set('o', encodeURIComponent(listing.hash));
+              newUrl = currentURL.href;
+            } else {
+              newUrl += '&o=' + encodeURIComponent(listing.hash);
+            }
+          } else {
+            // If there are no queries, add the first query
+            newUrl = newUrl.endsWith('/') ? newUrl : newUrl + '/';            
+            newUrl += '?o=' + encodeURIComponent(listing.hash);
+          }
+          // Create a text area for manual copying
+          const textArea = document.createElement('textarea');
+          textArea.value = newUrl;
+          textArea.style.position = 'fixed'; // Make it invisible and fixed to avoid interference
+          document.body.appendChild(textArea);
+          textArea.select();
+          try {
+            // Attempt to execute the copy command
+            document.execCommand('copy');
+
+            // Show a success message
+            Swal.fire({
+              icon: 'success',
+              title: translateThis('URL Copied'),
+              text: translateThis('The modified URL has been copied to the clipboard.'),
+            });
+          } catch (err) {
+            console.error('Copy command failed:', err);
+            Swal.fire({
+              icon: 'info',
+              title: translateThis('Copy Manually'),
+              text: translateThis('The modified URL is:') + '\n\n' + newUrl + '\n\n' + translateThis('Please copy it manually.'),
+            });
+          } finally {
+            // Clean up: remove the temporary text area
+            document.body.removeChild(textArea);
+          }
+        };
+        topBar.appendChild(linkButton);
       }
       topBar.appendChild(closeButton);
       popup.appendChild(topBar);
@@ -3493,17 +3666,17 @@
       var form = document.createElement('form');
       form.classList.add('popup-form');
       form.innerHTML = `
-        <h2>Deposit tokens to your balance</h2>
+        <h2>` + translateThis('Deposit tokens to your balance') + `</h2>
         <div class="form-group">
-          <label for="token-select">Select token:</label>
+          <label for="token-select">` + translateThis('Select token:') + `</label>
           <select id="token-select" name="token-select"></select>
         </div>
         <div class="form-group">
-          <label for="amount-input">Amount:</label>
-          <input type="number" step="0.000000000000000001" id="amount-input" name="amount-input" required>
+          <label for="amount-input">` + translateThis('Amount:') + `</label>
+          <input type="number" step="0.00000001" id="amount-input" name="amount-input" required>
         </div>
         <div class="form-group">
-          <button type="submit" class="btn">Deposit</button>
+          <button type="submit" class="btn">` + translateThis('Deposit') + `</button>
         </div>
       `;
 
@@ -3531,7 +3704,7 @@
           try {
             var value = web3.utils.toWei(amount.toString(), 'ether');
             await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,...gasOptions[gasSetting]});
-            await Swal.fire("Deposit success!");
+            await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
             popupContainer.remove();
           } catch (error) {
@@ -3546,12 +3719,12 @@
             var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toString()
 
             if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
-              await Swal.fire("Waiting for approval...");
+              await Swal.fire(translateThis("Waiting for approval..."));
               await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions[gasSetting]});
             }
 
             await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,...gasOptions[gasSetting]});
-            await Swal.fire("Deposit success!");
+            await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
             popupContainer.remove();
           } catch (error) {
@@ -3624,17 +3797,17 @@
       var form = document.createElement('form');
       form.classList.add('popup-form');
       form.innerHTML = `
-        <h2>Withdraw tokens from your balance</h2>
+        <h2>` + translateThis('Withdraw tokens from your balance') + `</h2>
         <div class="form-group">
-          <label for="token-select">Select token:</label>
+          <label for="token-select">` + translateThis('Select token:') + `</label>
           <select id="token-select" name="token-select"></select>
         </div>
         <div class="form-group">
-          <label for="amount-input">Amount:</label>
-          <input type="number" step="0.000000000000000001" id="amount-input" name="amount-input" required>
+          <label for="amount-input">` + translateThis('Amount:') + `</label>
+          <input type="number" step="0.0.00000001" id="amount-input" name="amount-input" required>
         </div>
         <div class="form-group">
-          <button type="submit" class="btn">Withdraw</button>
+          <button type="submit" class="btn">` + translateThis('Withdraw') + `</button>
         </div>
       `;
 
@@ -3657,7 +3830,7 @@
           var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
           try {
             await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,...gasOptions[gasSetting]});
-            await Swal.fire("Withdraw success!");
+            await Swal.fire(translateThis("Withdraw success!"));
             await loadUser();
             popupContainer.remove();
           } catch (error) {
@@ -3771,62 +3944,63 @@
         form.classList.add('popup-form');
         form.innerHTML = `<div id="createContractModal" class="modal">
           <div class="modal-content">
-            <h2>Create Contract</h2>
+            <h2>` + translateThis('Create Contract') + `</h2>
             <form id="createContractForm">
-              <label for="contractType">Contract Type:</label>
+              <label for="contractType">` + translateThis('Contract Type') + `:</label>
               <select id="contractType">
-                <option value="public">Public Offer</option>
-                <option value="private">Private Offer</option>
+                <option value="public">` + translateThis('Public Offer') + `</option>
+                <option value="private">` + translateThis('Private Offer') + `</option>
               </select><br><span class="vertical-spacer"></span>
               <div id="counterPartyAddressField" style="display:none;">
-                <label for="counterPartyAddress">Counter-Party Address:</label>
+                <label for="counterPartyAddress">` + translateThis('Counter-Party Address:') + `</label>
                 <input type="text" id="counterPartyInput">
               </div><br><span class="vertical-spacer"></span>
-              <label for="senderReceiver">Sender or Receiver:</label>
+              <label for="senderReceiver">` + translateThis('Sender or Receiver:') + `</label>
               <select id="senderReceiver">
-                <option value="receiver">I'm the one receiving the funds</option>
-                <option value="sender">I'm the one sending the funds</option>                
+                <option value="receiver">` + translateThis("I'm the one receiving the funds") + `</option>
+                <option value="sender">` + translateThis("I'm the one sending the funds") + `</option>                
               </select><br><span class="vertical-spacer"></span>
-              <label for="token">Token:</label>
+              <label for="order-quantity">` + translateThis('Quantity:') + `</label>
+              <input type="number" id="order-quantity" value="1" style="width: 75px;">
+              <label for="order-maximum">` + translateThis('Maximum:') + `</label>
+              <input type="number" id="order-maximum" value="1" style="width: 75px;"><br><span class="vertical-spacer"></span>
+              </select><br><span class="vertical-spacer"></span>
+              <label for="token">` + translateThis('Token:') + `</label>
               <select id="token-select">
                 <!-- options added dynamically through javascript -->
               </select><br><span class="vertical-spacer"></span>
-              <label for="order-quantity">Quantity:</label>
-              <input type="number" id="order-quantity" value="1" style="width: 75px;">
-              <label for="order-maximum">Maximum:</label>
-              <input type="number" id="order-maximum" value="1" style="width: 75px;"><br><span class="vertical-spacer"></span>
-              <label for="amount">Amount:</label>
-              <input type="number" id="amount-input" step="0.000000000000000001"><br><span class="vertical-spacer"></span>
-              <label for="depositSettings">Deposit Settings:</label>
+              <label for="amount">` + translateThis('Amount:') + `</label>
+              <input type="number" id="amount-input" step="0.0.00000001"><br><span class="vertical-spacer"></span>
+              <label for="depositSettings">` + translateThis('Deposit Settings:') + `</label>
               <select id="depositSettings">
-                <option value="recommended">Use recommended deposit settings</option>
-                <option value="custom">Custom deposits</option>
+                <option value="recommended">` + translateThis('Use recommended deposit settings') + `</option>
+                <option value="custom">` + translateThis('Custom deposits') + `</option>
               </select><br><span class="vertical-spacer"></span>
               <div id="senderDepositField" style="display:none;">
-                <label for="senderDeposit">Sender Deposit:</label>
-                <input type="number" id="sender-deposit-input" step="0.000000000000000001">
+                <label for="senderDeposit">` + translateThis('Sender Deposit:') + `</label>
+                <input type="number" id="sender-deposit-input" step="0.0.00000001">
               </div><br><span class="vertical-spacer"></span>
               <div id="receiverDepositField" style="display:none;">
-                <label for="receiverDeposit">Receiver Deposit:</label>
-                <input type="number" id="recipient-deposit-input" step="0.000000000000000001">
+                <label for="receiverDeposit">` + translateThis('Receiver Deposit:') + `</label>
+                <input type="number" id="recipient-deposit-input" step="0.0.00000001">
               </div><br><span class="vertical-spacer"></span>
-              <label for="timeLimit">Time Limit (in weeks):</label>
+              <label for="timeLimit">` + translateThis('Time Limit (in weeks):') + `</label>
               <input type="number" id="timeLimit" value="4"><br><span class="vertical-spacer"></span>
-              <p id="timeLimitWarning" style="display:none;">Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.</p><br><span class="vertical-spacer"></span>
-              <label for="contractDetails">Contract Details:</label><br><span class="vertical-spacer"></span>
+              <p id="timeLimitWarning" style="display:none;">` + translateThis('Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.') + `</p><br><span class="vertical-spacer"></span>
+              <label for="contractDetails">` + translateThis('Contract Details:') + `</label><br><span class="vertical-spacer"></span>
               <textarea id="contractDetails"></textarea><br><span class="vertical-spacer"></span>
-              <label for="contractImage">Contract Images:</label>
+              <label for="contractImage">` + translateThis('Contract Images:') + `</label>
               <input type="file" id="contractImage" multiple><br><br><span class="vertical-spacer"></span>
-              <button type="button" id="changefile" style="display:none;">Change Images</button>
-              <label for="contactInfo">Contact Information(email/signal/telegram):</label><br><span class="vertical-spacer"></span>
+              <button type="button" id="changefile" style="display:none;">` + translateThis('Change Images') + `</button>
+              <label for="contactInfo">` + translateThis('Contact Information(email/chat):') + `</label><br><span class="vertical-spacer"></span>
               <input id="contactInfo"></textarea><br><span class="vertical-spacer"></span>
-              <label for="key-words" id="key-label">Search key words(optional):</label>
-              <button type="button" id="key-words">Add search terms</button><br><span class="vertical-spacer"></span>
-              <label for="allowcounters">Allow counter offers  </label>
+              <label for="key-words" id="key-label">` + translateThis('Search key words(optional):') + `</label>
+              <button type="button" id="key-words">` + translateThis('Add search terms') + `</button><br><span class="vertical-spacer"></span>
+              <label for="allowcounters">` + translateThis('Allow counter offers') + `  </label>
               <input type="checkbox" id="allowcounters"><br><span class="vertical-spacer"></span>
-              <label for="autoaccept">Automatically accept matching offers  </label>
+              <label for="autoaccept">` + translateThis('Automatically accept matching offers') + `  </label>
               <input type="checkbox" id="autoaccept"><br><br><span class="vertical-spacer"></span>
-              <button type="submit">Submit</button>
+              <button type="submit">` + translateThis('Submit') + `</button>
             </form>
           </div>
         </div>
@@ -3867,8 +4041,8 @@
           if (auto.checked) {
             await Swal.fire({
               icon: 'info',
-              title: 'Autoaccept',
-              text: 'Please be aware when you automatically accept deals you must occassionally check the software to make sure you are aware of when deals enter escrow just in case the counter-party does not alert you. This way losses do not occur and deals will not expire.',
+              title: translateThis('Autoaccept'),
+              text: translateThis('Please be aware when you automatically accept deals you must occassionally check the software to make sure you are aware of when deals enter escrow just in case the counter-party does not alert you. This way losses do not occur and deals will not expire.'),
             });
           }
         });
@@ -3913,7 +4087,7 @@
         // Event listener for image input
         imageInput.addEventListener('change', async () => {
           if(imageInput.files.length > 10) {
-            await Swal.fire("Please add less than the maximum of 10 images");
+            await Swal.fire(translateThis("Please add less than the maximum of 10 images"));
             return false;
           }
           for (let i = 0; i < imageInput.files.length; i++) {
@@ -3964,7 +4138,7 @@
           if (selectedIndex !== -1) {
             tokenSelect.selectedIndex = selectedIndex;
           } else {
-            await Swal.fire('Token not found in default coin list!');
+            await Swal.fire(translateThis('Token not found in default coin list!'));
             popupContainer.remove();
             return;
           }
@@ -4024,29 +4198,29 @@
             await saveContactInfo(contactinfo);
           }          
           if(message == "error") {
-            await Swal.fire("Error posting IPFS data, please try again later");
+            await Swal.fire(translateThis("Error posting IPFS data, please try again later"));
             return false;
           }
           if (amount === "") {
-            await Swal.fire("Please enter the amount");
+            await Swal.fire(translateThis("Please enter the amount"));
             return false;
           }
           if (depositType === "custom") {
             if (depositSender === "" || depositRecipient === "") {
-              await Swal.fire("Please enter the custom deposits");
+              await Swal.fire(translateThis("Please enter the custom deposits"));
               return false;
             }
           }
           if (timeLimit === "") {
-            await Swal.fire("Please enter the time limit");
+            await Swal.fire(translateThis("Please enter the time limit"));
             return false;
           }
           timeLimit = parseInt(timeLimit);
           if (timeLimit === 0) {
-            await Swal.fire("Time limit must be greater than zero")
+            await Swal.fire(translateThis("Time limit must be greater than zero"));
           }
           if (document.getElementById("contractDetails").value === "") {
-            await Swal.fire("Please enter the description");
+            await Swal.fire(translateThis("Please enter the description"));
             return false;
           }
           var sender2 = (senderReceiver === "receiver" ? sender : recipient);
@@ -4078,13 +4252,13 @@
           }
           if(myaccounts == sender2) {
             if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(amount).add(web3.utils.toBN(depositSender)).mul(web3.utils.toBN(multiplier)))) {
-                await Swal.fire("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
+                await Swal.fire(translateThis("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding."));
                 return false;
             }
           }
           if(myaccounts == recipient2) {
             if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(depositRecipient).mul(web3.utils.toBN(multiplier)))) {
-                await Swal.fire("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding.");
+                await Swal.fire(translateThis("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding."));
                 return false;
             }
           }
@@ -4113,12 +4287,12 @@
                     console.log(message)
                   } else if ('publickey' in contact2 && userprivkey == '') {
                     await Swal.fire({
-                      title: 'Encrypt offer',
-                      text: 'Your counterparty has listed a key for encryption. If you would like your order be encrypted you should set a password for your account. Would you like to do that before proceeding?',
+                      title: translateThis('Encrypt offer'),
+                      text: translateThis('Your counterparty has listed a key for encryption. If you would like your order be encrypted you should set a password for your account. Would you like to do that before proceeding?'),
                       icon: 'question',
                       showCancelButton: true,
-                      confirmButtonText: 'Yes',
-                      cancelButtonText: 'No',
+                      confirmButtonText: translateThis('Yes'),
+                      cancelButtonText: translateThis('No'),
                     }).then((result) => {
                       if (result.isConfirmed) {
                         popupContainer.remove();
@@ -4137,16 +4311,16 @@
           }
           const byteLength = new TextEncoder().encode(message).length;
           if (byteLength > parseInt(maxFileSize * .97)) {
-            await Swal.fire("Message exceeds maximum byte size: " + maxFileSize);
+            await Swal.fire(translateThis("Message exceeds maximum byte size:") + " " + maxFileSize);
             return false;
           }
           var result = await postOfferData(message);
           if(result == "error") {
-            await Swal.fire("Error posting message data to IPFS.");
+            await Swal.fire(translateThis("Error posting message data to IPFS."));
             return false;
           }
           if(result.length > 100) {
-            await Swal.fire("Error message length was unusually long. Please check IPFS hash result.");
+            await Swal.fire(translateThis("Error message length was unusually long. Please check IPFS hash result."));
             return false;
           }
           message = result;
@@ -4196,12 +4370,12 @@
               if(publicoffer) {
                 if(myterms.length == 0) {
                   await Swal.fire({
-                    title: 'Hashtags',
-                    text: 'You did not include any keywords. Without these it could make your offer hard to find. It is recommended to add some keywords related to your open offer. Would you like to submit your offer without keywords?',
+                    title: translateThis('Hashtags'),
+                    text: translateThis('You did not include any keywords. Without these it could make your offer hard to find. It is recommended to add some keywords related to your open offer. Would you like to submit your offer without keywords?'),
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'No',
+                    confirmButtonText: translateThis('Yes'),
+                    cancelButtonText: translateThis('No'),
                   }).then((result) => {
                     if(result.isConfirmed) {
                       popupContainer.remove();
@@ -4217,7 +4391,7 @@
               var cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'},{value: blockTimestamp, type: 'uint256'}));
               console.log(cHash);
               if(DOMPurify.sanitize(await DDEcontract.methods.initialized(cHash).call()) == "true") {
-                await Swal.fire("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again.");
+                await Swal.fire(translateThis("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again."));
                 popupContainer.remove();
                 return;
               }
@@ -4235,20 +4409,20 @@
                 data.message,
                 myterms
               ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                await Swal.fire("Contract creation success!");
+                await Swal.fire(translateThis("Contract creation success!"));
                 await loadUser();
                 if(emailClient.checked && sender2 != "0x0000000000000000000000000000000000000000" && recipient2 != "0x0000000000000000000000000000000000000000" && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
                   Swal.fire({
-                    title: 'Notify Counterparty',
-                    text: 'Would you like to email the counterparty to notify them of your offer?',
+                    title: translateThis('Notify Counterparty'),
+                    text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Yes',
-                    cancelButtonText: 'No',
+                    confirmButtonText: translateThis('Yes'),
+                    cancelButtonText: translateThis('No'),
                   }).then((result) => {
                     if (result.isConfirmed) {
                       var emailSubject = encodeURIComponent('You have received an offer on the BitBay marketplace');
-                      var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have sent you an offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about my offer please let me know. Thank you and have a nice day.');
+                      var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have sent you an offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about my offer please let me know. Thank you and have a nice day.'));
                       const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
                       window.location.href = mailtoLink;
                     }
@@ -4320,15 +4494,15 @@
         const popularKeywords = ["goods", "services", "barter", "crypto", "real-estate", "electronics", "metals"];
 
         dialog.innerHTML = `
-          <div>Please enter some key words so users can find your order easier:<br></div>
-            <input id="hashtag" type="text"></input><button id="add-btn">Add</button><br><br>
+          <div>` + translateThis('Please enter some key words so users can find your order easier:') + `<br></div>
+            <input id="hashtag" type="text"></input><button id="add-btn">` + translateThis('Add') + `</button><br><br>
           <div id="term-list"></div>
           <div>
-            <div>Popular key words:</div>
+            <div>` + translateThis('Popular key words:') + `</div>
             <div id="popular-keywords"></div>
             <br>
-            <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
-            <button id="cancel-btn">Cancel</button>
+            <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
+            <button id="cancel-btn">` + translateThis('Cancel') + `</button>
           </div>
         `;
         dialog.style.display = "block";
@@ -4365,14 +4539,14 @@
           const hashtagInput = dialog.querySelector("#hashtag");
           const term = hashtagInput.toLowerCase().value.trim();
           if (term.includes(" ") || term.includes(",")) {
-            await Swal.fire("Key words should not contain spaces or commas");
+            await Swal.fire(translateThis("Key words should not contain spaces or commas"));
             return;
           }
           const encoder = new TextEncoder();
           const utf8Bytes = encoder.encode(term);
           const byteLength = utf8Bytes.length;
           if (byteLength > 32) {
-            await Swal.fire("String exceeds limit of 32 bytes");
+            await Swal.fire(translateThis("String exceeds limit of 32 bytes"));
             return;
           }
           if (term !== "") {
@@ -4391,7 +4565,7 @@
               addedTerms.push(keyword.toLowerCase());
               displayAddedTerms();
             } else {
-              await Swal.fire('The maximum number of keywords is 10');
+              await Swal.fire(translateThis('The maximum number of keywords is 10'));
             }
           });
           popularKeywordsContainer.appendChild(keywordButton);
@@ -4439,17 +4613,17 @@
               if(mylisting.sender == "0x0000000000000000000000000000000000000000" || mylisting.recipient == "0x0000000000000000000000000000000000000000" ) {
                 const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(mylisting.hash).call());
                 if(offerID == 0) {
-                  await Swal.fire("Offer no longer available!");
+                  await Swal.fire(translateThis("Offer no longer available!"));
                   return;
                 }
                 if(listing.status[0]==0 || listing.status[1]==0) {
                   const dialog = document.createElement("div");
                   dialog.innerHTML = `
-                    <div>Please enter the quantity you wish to purchase:<br></div>
+                    <div>` + translateThis('Please enter the quantity you wish to purchase:') + `<br></div>
                       <input id="new-quantity" type="number"></input><br><br>
                     <div>
-                      <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
-                      <button id="cancel-btn">Cancel</button>
+                      <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
+                      <button id="cancel-btn">` + translateThis('Cancel') + `</button>
                     </div>
                   `;
                   dialog.style.display = "block";
@@ -4474,7 +4648,7 @@
                   confirmBtn.addEventListener("click", async () => {
                     quantity = parseInt(document.getElementById('new-quantity').value);
                     if(quantity > parseInt(mylisting.quantity[0]) || quantity > parseInt(mylisting.quantity[1])) {
-                      await Swal.fire("Quantity exceeds what is available!");
+                      await Swal.fire(translateThis("Quantity exceeds what is available!"));
                       return;                        
                     }
                     dialog.remove();
@@ -4489,21 +4663,21 @@
                     });
                     if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
                       if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                          await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
+                          await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                           return false;
                       }
                       if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                          await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                          await Swal.fire(translateThis("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party."));
                           return false;
                       }
                     }
                     if(mylisting.recipient == "0x0000000000000000000000000000000000000000") {
                       if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                          await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
+                          await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                           return false;
                       }
                       if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                          await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                          await Swal.fire(translateThis("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party."));
                           return false;
                       }
                     }
@@ -4534,20 +4708,20 @@
                       accepttimelimit.toString(),
                       referral
                     ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                      await Swal.fire("Contract accepted!");
+                      await Swal.fire(translateThis("Contract accepted!"));
                       await loadUser();
                       if(emailClient.checked && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
                         Swal.fire({
-                          title: 'Notify Counterparty',
-                          text: 'Would you like to email the counterparty to notify them of your offer?',
+                          title: translateThis('Notify Counterparty'),
+                          text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
                           icon: 'question',
                           showCancelButton: true,
-                          confirmButtonText: 'Yes',
-                          cancelButtonText: 'No',
+                          confirmButtonText: translateThis('Yes'),
+                          cancelButtonText: translateThis('No'),
                         }).then((result) => {
                           if (result.isConfirmed) {
-                            var emailSubject = encodeURIComponent('Your offer on BitBay markets was accepted');
-                            var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.');
+                            var emailSubject = encodeURIComponent(translateThis('Your offer on BitBay markets was accepted'));
+                            var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.'));
                             const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
                             window.location.href = mailtoLink;
                           }
@@ -4567,21 +4741,21 @@
                 });
                 if(mylisting.sender == myaccounts) {
                   if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                      await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
+                      await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                       return false;
                   }
                   if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                      await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                      await Swal.fire(translateThis("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party."));
                       return false;
                   }
                 }
                 if(mylisting.recipient == myaccounts) {
                   if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
-                      await Swal.fire("You don't have enough funds. Please deposit funds first before proceeding.");
+                      await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                       return false;
                   }
                   if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                      await Swal.fire("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party.");
+                      await Swal.firetranslateThis(("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party."));
                       return false;
                   }
                 }
@@ -4602,20 +4776,20 @@
                   accepttimelimit.toString(),
                   referral
                 ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                  await Swal.fire("Contract accepted!");
+                  await Swal.fire(translateThis("Contract accepted!"));
                   await loadUser();
                   if(emailClient.checked && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
                     Swal.fire({
-                      title: 'Notify Counterparty',
-                      text: 'Would you like to email the counterparty to notify them of your offer?',
+                      title: translateThis('Notify Counterparty'),
+                      text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
                       icon: 'question',
                       showCancelButton: true,
-                      confirmButtonText: 'Yes',
-                      cancelButtonText: 'No',
+                      confirmButtonText: translateThis('Yes'),
+                      cancelButtonText: translateThis('No'),
                     }).then((result) => {
                       if (result.isConfirmed) {
-                        var emailSubject = encodeURIComponent('Your offer on BitBay markets was accepted');
-                        var emailBody = encodeURIComponent('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.');
+                        var emailSubject = encodeURIComponent(translateThis('Your offer on BitBay markets was accepted'));
+                        var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.'));
                         const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
                         window.location.href = mailtoLink;
                       }
@@ -4634,10 +4808,10 @@
       if(hide == 1) {
           const dialog = document.createElement("div");
           dialog.innerHTML = `
-            <div>Would you like to hide this offer or cancel it?<br>Hiding just removes it from the list.<br>Cancelling will also notify the other party.<br><br></div>
+            <div>` + translateThis('Would you like to hide this offer or cancel it?') + '<br>' + translateThis('Hiding just removes it from the list.') + '<br>' + translateThis('Cancelling will also notify the other party.') + `<br><br></div>
             <div>
-              <button id="hide-btn">Hide</button>&nbsp;&nbsp;
-              <button id="cancel-btn">Cancel</button>
+              <button id="hide-btn">` + translateThis('Hide') + `</button>&nbsp;&nbsp;
+              <button id="cancel-btn">` + translateThis('Cancel') + `</button>
             </div>
           `;
           dialog.style.display = "block";
@@ -4671,7 +4845,7 @@
                     listing.hash,
                     myaccounts
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                  await Swal.fire("Contract removed!");
+                  await Swal.fire(translateThis("Contract removed!"));
                   await loadUser();
                   dialog.remove();
             } catch (error) {
@@ -4686,7 +4860,7 @@
                     listing.hash,
                     myaccounts
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                  await Swal.fire("Contract removed!");
+                  await Swal.fire(translateThis("Contract removed!"));
                   await loadUser();
                   dialog.remove();
                 } else {
@@ -4694,7 +4868,7 @@
                     listing.hash,
                     myaccounts
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                  await Swal.fire("Contract removed!");
+                  await Swal.fire(translateThis("Contract removed!"));
                   await loadUser();
                   dialog.remove();
                 }
@@ -4707,14 +4881,14 @@
     async function updateQuantity(listing) {
       const dialog = document.createElement("div");
       dialog.innerHTML = `
-        <div>Please enter the updated quantity:<br></div>
-          <label for="new-quantity">Total Supply: </label>
+        <div>` + translateThis('Please enter the updated quantity:') + `<br></div>
+          <label for="new-quantity">` + translateThis('Total Supply:') + ` </label>
           <input id="new-quantity" type="number"></input><br><br>
-          <label for="new-maximum">Maximum: </label>
+          <label for="new-maximum">` + translateThis('Maximum:') + ` </label>
           <input id="new-maximum" type="number"></input><br><br>
         <div>
-          <button id="confirm-btn">Confirm</button>&nbsp;&nbsp;
-          <button id="cancel-btn">Cancel</button>
+          <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
+          <button id="cancel-btn">` + translateThis('Cancel') + `</button>
         </div>
       `;
       dialog.style.display = "block";
@@ -4743,13 +4917,13 @@
               var quantity = parseInt(document.getElementById('new-quantity').value);
               if(quantity == 0) {
                 dialog.remove();
-                await Swal.fire("Quantity can not be changed to zero!");                
+                await Swal.fire(translateThis("Quantity can not be changed to zero!"));
                 return;
               }
               var quantity1 = parseInt(document.getElementById('new-maximum').value);
               if(quantity1 == 0) {
                 dialog.remove();
-                await Swal.fire("Quantity can not be changed to zero!");                
+                await Swal.fire(translateThis("Quantity can not be changed to zero!"));  
                 return;
               }
               await DDEcontract.methods.updateQuantity(
@@ -4757,7 +4931,7 @@
                 [quantity.toString(), quantity1.toString()]
               ).send({"from":myaccounts,...gasOptions[gasSetting]});
                 dialog.remove();
-                await Swal.fire("Quantity updated!");
+                await Swal.fire(translateThis("Quantity updated!"));
                 await loadUser();
                 return;
         } catch (error) {
@@ -4770,8 +4944,8 @@
 
     async function updateFee(listing) {
       await Swal.fire({
-        title: 'Set order fee',
-        text: 'Please enter the percentage fee that you wish to offer to affiliates for this order.',
+        title: translateThis('Set order fee'),
+        text: translateThis('Please enter the percentage fee that you wish to offer to affiliates for this order.'),
         input: 'range',
         inputAttributes: {
           min: (baseFee / 100).toFixed(1),
@@ -4789,7 +4963,7 @@
           var value = parseInt(result.value) * parseInt(100);
           try {
             await DDEcontract.methods.changeReferralFee(listing.hash,value).send({"from":myaccounts,...gasOptions[gasSetting]});
-            Swal.fire("Success!");
+            Swal.fire(translateThis("Success!"));
             await loadUser();
           } catch (error) {
             console.log(error);
@@ -4804,7 +4978,7 @@
         console.log(data)
         try {
             await DDEcontract.methods.adddata(data).send({"from":myaccounts,...gasOptions[gasSetting]});
-            await Swal.fire("Data added!");
+            await Swal.fire(translateThis("Data added!"));
           } catch (error) {
             console.error(error);
             await showError(error);
