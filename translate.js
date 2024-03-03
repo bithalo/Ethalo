@@ -277,6 +277,7 @@ languages['ar']={
   "Quantity updated!": "تم تحديث الكمية!",
   "Set order fee": "تعيين رسوم الطلب",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "الرجاء إدخال نسبة الرسوم التي ترغب في تقديمها للشركاء التابعين لهذا الطلب.",
+  "Favorites": "المفضله "
 };
 
 
@@ -556,7 +557,8 @@ languages['ch']={
   "Quantity cannot be changed to zero!": "数量不能更改为零！",
   "Quantity updated!": "数量已更新！",
   "Set order fee": "设置订单费用",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "请输入您希望为此订单提供给联盟方的百分比费用。"
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "请输入您希望为此订单提供给联盟方的百分比费用。",
+  "Favorites": "收藏 夹"
 };
 
 languages['en']={
@@ -888,7 +890,8 @@ languages['fr']={
   "Quantity cannot be changed to zero!": "La quantité ne peut pas être changée à zéro !",
   "Quantity updated!": "Quantité mise à jour !",
   "Set order fee": "Définir les frais de commande",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Veuillez entrer le pourcentage de frais que vous souhaitez offrir aux affiliés pour cette commande."
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Veuillez entrer le pourcentage de frais que vous souhaitez offrir aux affiliés pour cette commande.",
+  "Favorites": "Favoris"
 };
 
 languages['ge']={
@@ -1167,7 +1170,8 @@ languages['ge']={
   "Quantity cannot be changed to zero!": "Die Menge kann nicht auf null geändert werden!",
   "Quantity updated!": "Menge aktualisiert!",
   "Set order fee": "Gebühr festlegen",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Bitte geben Sie den Prozentsatz der Gebühr ein, den Sie Affiliates für diesen Auftrag anbieten möchten."
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Bitte geben Sie den Prozentsatz der Gebühr ein, den Sie Affiliates für diesen Auftrag anbieten möchten.",
+  "Favorites": "Favoriten"
 };
 
 languages['it']={
@@ -1446,7 +1450,8 @@ languages['it']={
   "Quantity can not be changed to zero!": "La quantità non può essere cambiata a zero!",
   "Quantity updated!": "Quantità aggiornata!",
   "Set order fee": "Imposta la commissione d'ordine",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Si prega di inserire la percentuale di commissione che desideri offrire agli affiliati per questo ordine."
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Si prega di inserire la percentuale di commissione che desideri offrire agli affiliati per questo ordine.",
+  "Favorites": "Preferiti"
 };
 
 languages['ja']={
@@ -1725,7 +1730,8 @@ languages['ja']={
   "Quantity can not be changed to zero!": "数量はゼロに変更できません！",
   "Quantity updated!": "数量が更新されました！",
   "Set order fee": "オーダーフィーを設定",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "このオーダーに対してアフィリエイトに提供するパーセンテージの手数料を入力してください。"
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "このオーダーに対してアフィリエイトに提供するパーセンテージの手数料を入力してください。",
+  "Favorites": "お気に入り"
 };
 
 languages['ko']={
@@ -2004,7 +2010,8 @@ languages['ko']={
   "Quantity cannot be changed to zero!": "수량을 0으로 변경할 수 없습니다!",
   "Quantity updated!": "수량이 업데이트되었습니다!",
   "Set order fee": "주문 수수료 설정",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "이 주문에 대해 제휴사에 제공하려는 수수료의 백분율을 입력하세요."
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "이 주문에 대해 제휴사에 제공하려는 수수료의 백분율을 입력하세요.",
+  "Favorites": "즐겨찾기"
 }
 
 languages['po']={
@@ -2283,7 +2290,8 @@ languages['po']={
   "Quantity cannot be changed to zero!": "A quantidade não pode ser alterada para zero!",
   "Quantity updated!": "Quantidade atualizada!",
   "Set order fee": "Definir taxa do pedido",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Por favor, insira a taxa percentual que deseja oferecer aos afiliados para este pedido."
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Por favor, insira a taxa percentual que deseja oferecer aos afiliados para este pedido.",
+  "Favorites": "Favoritos"
 };
 
 languages['ru'] = {
@@ -2563,6 +2571,7 @@ languages['ru'] = {
   "Quantity updated!": "Количество обновлено!",
   "Set order fee": "Установить комиссию за заказ",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Пожалуйста, введите процентную комиссию, которую вы хотели бы предложить аффилиатам за этот заказ.",
+  "Favorites": "Избранное"
 }
 
 languages['sp'] = {
@@ -2841,5 +2850,6 @@ languages['sp'] = {
   "Quantity cannot be changed to zero!": "¡La cantidad no puede cambiarse a cero!",
   "Quantity updated!": "¡Cantidad actualizada!",
   "Set order fee": "Establecer tarifa del pedido",
-  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Por favor, ingresa la tarifa en porcentaje que deseas ofrecer a los afiliados por este pedido."
+  "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Por favor, ingresa la tarifa en porcentaje que deseas ofrecer a los afiliados por este pedido.",
+  "Favorites": "Favoritas"
 };
