@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: Jelurida Public License
 pragma solidity ^0.8.0;
 
 interface ERC20 {
