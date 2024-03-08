@@ -2513,11 +2513,11 @@
           }
           if(offerData3.timelimit[1] != 0 && skipthis != 1) {            
             const timeExtension = Math.abs(parseFloat(parseInt(offerData3.timelimit[1]) - parseInt(offerData3.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
-            escrowInfo += "<div>" + translateThis("Sender has requested a time extension for: ") + timeExtension + translateThis("days") + "</div>";
+            escrowInfo += "<div>" + translateThis("Sender has requested a time extension for: ") + timeExtension + " " + translateThis("days") + "</div>";
           }
           if(offerData3.timelimit[2] != 0 && skipthis != 1) {            
             const timeExtension2 = Math.abs(parseFloat(parseInt(offerData3.timelimit[2]) - parseInt(offerData3.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
-            escrowInfo += "<div>" + translateThis("Recipient has requested a time extension for: ") + timeExtension2 + translateThis("days") + "</div>";
+            escrowInfo += "<div>" + translateThis("Recipient has requested a time extension for: ") + timeExtension2 + " " + translateThis("days") + "</div>";
           }
           if (skipthis == 1) {
             escrowInfo += "<div>" + translateThis("Time extension granted.") + "</div>";
@@ -3335,7 +3335,7 @@
                       const dialog = document.createElement("div");
                       dialog.innerHTML = `
                         <div>` + translateThis('Please enter the number of days you wish to extend:') + `<br></div>
-                          <input id="new-time" type="number"></input><br><br>
+                          <input id="new-time" type="number" min="1"></input><br><br>
                         <div>
                           <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
                           <button id="cancel-btn">` + translateThis('Cancel') + `</button>
@@ -3682,7 +3682,7 @@
         </div>
         <div class="form-group">
           <label for="amount-input">` + translateThis('Amount:') + `</label>
-          <input type="number" step="0.00000001" id="amount-input" name="amount-input" required>
+          <input type="number" step="0.00000001" min="0.00000001" id="amount-input" name="amount-input" required>
         </div>
         <div class="form-group">
           <button type="submit" class="btn">` + translateThis('Deposit') + `</button>
@@ -3813,7 +3813,7 @@
         </div>
         <div class="form-group">
           <label for="amount-input">` + translateThis('Amount:') + `</label>
-          <input type="number" step="0.00000001" id="amount-input" name="amount-input" required>
+          <input type="number" step="0.00000001" min="0.00000001" id="amount-input" name="amount-input" required>
         </div>
         <div class="form-group">
           <button type="submit" class="btn">` + translateThis('Withdraw') + `</button>
@@ -3970,16 +3970,16 @@
                 <option value="sender">` + translateThis("I'm the one sending the funds") + `</option>                
               </select><br><span class="vertical-spacer"></span>
               <label for="order-quantity">` + translateThis('Quantity:') + `</label>
-              <input type="number" id="order-quantity" value="1" style="width: 75px;">
+              <input type="number" id="order-quantity" min="1" value="1" style="width: 75px;">
               <label for="order-maximum">` + translateThis('Maximum:') + `</label>
-              <input type="number" id="order-maximum" value="1" style="width: 75px;"><br><span class="vertical-spacer"></span>
+              <input type="number" id="order-maximum" min="1" value="1" style="width: 75px;"><br><span class="vertical-spacer"></span>
               </select><br><span class="vertical-spacer"></span>
               <label for="token">` + translateThis('Token:') + `</label>
               <select id="token-select">
                 <!-- options added dynamically through javascript -->
               </select><br><span class="vertical-spacer"></span>
               <label for="amount">` + translateThis('Amount:') + `</label>
-              <input type="number" id="amount-input" step="0.00000001"><br><span class="vertical-spacer"></span>
+              <input type="number" id="amount-input" min="0" step="0.00000001"><br><span class="vertical-spacer"></span>
               <label for="depositSettings">` + translateThis('Deposit Settings:') + `</label>
               <select id="depositSettings">
                 <option value="recommended">` + translateThis('Use recommended deposit settings') + `</option>
@@ -3987,14 +3987,14 @@
               </select><br><span class="vertical-spacer"></span>
               <div id="senderDepositField" style="display:none;">
                 <label for="senderDeposit">` + translateThis('Sender Deposit:') + `</label>
-                <input type="number" id="sender-deposit-input" step="0.00000001">
+                <input type="number" id="sender-deposit-input" min="0" step="0.00000001">
               </div><br><span class="vertical-spacer"></span>
               <div id="receiverDepositField" style="display:none;">
                 <label for="receiverDeposit">` + translateThis('Receiver Deposit:') + `</label>
-                <input type="number" id="recipient-deposit-input" step="0.00000001">
+                <input type="number" id="recipient-deposit-input" min="0" step="0.00000001">
               </div><br><span class="vertical-spacer"></span>
               <label for="timeLimit">` + translateThis('Time Limit (in weeks):') + `</label>
-              <input type="number" id="timeLimit" value="4"><br><span class="vertical-spacer"></span>
+              <input type="number" id="timeLimit" min="1" value="4"><br><span class="vertical-spacer"></span>
               <p id="timeLimitWarning" style="display:none;">` + translateThis('Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.') + `</p><br><span class="vertical-spacer"></span>
               <label for="contractDetails">` + translateThis('Contract Details:') + `</label><br><span class="vertical-spacer"></span>
               <textarea id="contractDetails"></textarea><br><span class="vertical-spacer"></span>
@@ -4650,7 +4650,7 @@
                   const dialog = document.createElement("div");
                   dialog.innerHTML = `
                     <div>` + translateThis('Please enter the quantity you wish to purchase:') + `<br></div>
-                      <input id="new-quantity" type="number"></input><br><br>
+                      <input id="new-quantity" type="number" min="1"></input><br><br>
                     <div>
                       <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
                       <button id="cancel-btn">` + translateThis('Cancel') + `</button>
@@ -4920,9 +4920,9 @@
       dialog.innerHTML = `
         <div>` + translateThis('Please enter the updated quantity:') + `<br></div>
           <label for="new-quantity">` + translateThis('Total Supply:') + ` </label>
-          <input id="new-quantity" type="number"></input><br><br>
+          <input id="new-quantity" type="number" min="1"></input><br><br>
           <label for="new-maximum">` + translateThis('Maximum:') + ` </label>
-          <input id="new-maximum" type="number"></input><br><br>
+          <input id="new-maximum" type="number" min="1"></input><br><br>
         <div>
           <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
           <button id="cancel-btn">` + translateThis('Cancel') + `</button>
