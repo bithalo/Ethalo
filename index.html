@@ -3156,7 +3156,7 @@
             datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.recipient, 3).call());
             if(datalen > 0) {
               contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(listing.recipient, datalen-1).call()));
-              if('mycontact' in contact2) {
+              if(typeof contact2 === 'object' && 'mycontact' in contact2) {
                 if(listing.contact != contact2['mycontact']) {
                     message.innerHTML += '<br><br><bdo>' + translateThis('Recipients contact information:') + '</bdo><br>' + contact2['mycontact'];
                 }
@@ -3177,7 +3177,7 @@
             datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.sender, 3).call());
             if(datalen > 0) {
               contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(listing.sender, datalen-1).call()));
-              if('mycontact' in contact2) {
+              if(typeof contact2 === 'object' && 'mycontact' in contact2) {
                 if(listing.contact != contact2['mycontact']) {
                     message.innerHTML += '<br><br><bdo>' + translateThis('Senders contact information:') + '</bdo><br>' + contact2['mycontact'];
                 }
@@ -4420,7 +4420,7 @@
               ).send({"from":myaccounts,...gasOptions[gasSetting]});
                 await Swal.fire(translateThis("Contract creation success!"));
                 await loadUser();
-                if(emailClient.checked && sender2 != "0x0000000000000000000000000000000000000000" && recipient2 != "0x0000000000000000000000000000000000000000" && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
+                if(emailClient.checked && sender2 != "0x0000000000000000000000000000000000000000" && recipient2 != "0x0000000000000000000000000000000000000000" && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
                   Swal.fire({
                     title: translateThis('Notify Counterparty'),
                     text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
@@ -4735,7 +4735,7 @@
                     ).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire(translateThis("Contract accepted!"));
                       await loadUser();
-                      if(emailClient.checked && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
+                      if(emailClient.checked && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
                         Swal.fire({
                           title: translateThis('Notify Counterparty'),
                           text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
@@ -4784,6 +4784,16 @@
                       return false;
                   }
                 }
+                var datalen = 0;
+                var contact2 = '';
+                try {
+                    datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(counterparty, 3).call());
+                    if(datalen > 0) {
+                        contact2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(counterparty, datalen-1).call()));
+                    }
+                } catch(e) {
+                    console.log(e);
+                }
                 //If one wants to show a grand total
                 //mylisting.amount *= quantity;
                 //mylisting.depositSender *= quantity;
@@ -4803,7 +4813,7 @@
                 ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire(translateThis("Contract accepted!"));
                   await loadUser();
-                  if(emailClient.checked && contact2 != '' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
+                  if(emailClient.checked && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
                     Swal.fire({
                       title: translateThis('Notify Counterparty'),
                       text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
