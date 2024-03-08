@@ -4163,7 +4163,7 @@
         }
 
         addWord.onclick = async function() {
-            myterms = await addWords();
+            myterms = await addWords(myterms);
         }
 
         // Add the form submit event listener
@@ -4494,10 +4494,10 @@
         document.head.appendChild(style);
     }
 
-    async function addWords() {
+    async function addWords(theterms = "") {
       return new Promise((resolve) => {
         const dialog = document.createElement("div");
-        const addedTerms = [];
+        var addedTerms = [];
 
         // Predefined list of popular key words
         const popularKeywords = ["goods", "services", "barter", "crypto", "real-estate", "electronics", "metals"];
@@ -4542,6 +4542,11 @@
             termElement.textContent = term;
             termList.appendChild(termElement);
           });
+        }
+
+        if(theterms != "") {
+          addedTerms = theterms;
+          displayAddedTerms();
         }
 
         termList.addEventListener('click', function (event) {
