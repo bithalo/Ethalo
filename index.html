@@ -730,7 +730,7 @@
     var userpubkey = "";
     var userprivkey = "";
     var gasOptions = [{},{}];    
-    var gasSetting = 0;
+    var gasSetting = 1;
     var balances = {};
     var baseBalance = 0;
     var myContactInfo = document.getElementById("myContactInfo");
@@ -844,7 +844,7 @@
         userpubkey = "";
         userprivkey = "";
         gasOptions = [{},{}];
-        gasSetting = 0;
+        gasSetting = 1;
         baseFee = 0;
         myFavorites = [];
     }
@@ -877,8 +877,14 @@
         currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
         var netname = "unknown";
         var netname2 = "ETH";
-        web3.eth.getGasPrice().then(function (theGasPrice) {
-            gasPrice = window.web3.utils.toWei(DOMPurify.sanitize(theGasPrice), 'mwei');
+        await web3.eth.getGasPrice().then(function (theGasPrice) {            
+            gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
+            if(parseInt(gasPrice) > 2500000000) {
+                gasPrice = "2500000000";
+            }
+            if(parseInt(gasPrice) < 500000000) {
+                gasPrice = "500000000";
+            }
         });
         if (currentChainId == 5) {
             netname = "Goerli Testnet";
@@ -957,7 +963,7 @@
           }
         }
         const gasSetting2 = localStorage.getItem(myaccounts+":gasOption");        
-        if(gasSetting2 && gasSetting == "1") {
+        if(gasSetting2 && gasSetting2 == "1") {
           gasSetting = 1;
         }
         const currentBlockNumber = await web3.eth.getBlockNumber();
@@ -1095,7 +1101,10 @@
         await Swal.fire(translateThis("Web3 gas assignment failed. Will change to blockchain recommended gas options."));
         gasSetting = 1;
         localStorage.setItem(myaccounts+":gasOption", "1");
-      } else {
+      } else if (error.message.includes("DDEcontract.methods is undefined")) {
+        await Swal.fire(translateThis("Not connected."));
+      } 
+      else {
         await Swal.fire({title: translateThis("Error sending transaction"), text: error.message, icon: 'error', confirmButtonText: translateThis('OK')});
       }
     }
@@ -4497,8 +4506,9 @@
           <div>` + translateThis('Please enter some key words so users can find your order easier:') + `<br></div>
             <input id="hashtag" type="text"></input><button id="add-btn">` + translateThis('Add') + `</button><br><br>
           <div id="term-list"></div>
-          <div>
-            <div>` + translateThis('Popular key words:') + `</div>
+          <br>
+          <div>          
+            <div>` + translateThis('Popular key words:') + `</div>            
             <div id="popular-keywords"></div>
             <br>
             <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
@@ -4513,7 +4523,7 @@
         dialog.style.borderRadius = "10px";
         dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
         dialog.style.top = "50%";
-        dialog.style.left = "50%";
+        dialog.style.left = "50%";        
         dialog.style.transform = "translate(-50%, -50%)";
 
         document.body.appendChild(dialog);
@@ -4534,10 +4544,21 @@
           });
         }
 
+        termList.addEventListener('click', function (event) {
+            if (event.target.tagName === 'DIV') {
+                const termToRemove = event.target.textContent.trim();
+                const termIndex = addedTerms.indexOf(termToRemove);
+                if (termIndex !== -1) {
+                    addedTerms.splice(termIndex, 1);
+                    displayAddedTerms();
+                }
+            }
+        });
+
         // Add a term to the list when Add button is clicked
         addBtn.addEventListener("click", async () => {
           const hashtagInput = dialog.querySelector("#hashtag");
-          const term = hashtagInput.toLowerCase().value.trim();
+          const term = hashtagInput.value.toLowerCase().trim();
           if (term.includes(" ") || term.includes(",")) {
             await Swal.fire(translateThis("Key words should not contain spaces or commas"));
             return;
@@ -4550,8 +4571,10 @@
             return;
           }
           if (term !== "") {
-            addedTerms.push(term);
-            displayAddedTerms();
+            if (!addedTerms.includes(term)) {
+                addedTerms.push(term);
+                displayAddedTerms();
+            }
             hashtagInput.value = "";
           }
         });
@@ -4562,8 +4585,10 @@
           keywordButton.textContent = keyword;
           keywordButton.addEventListener("click", async () => {
             if (addedTerms.length < 11) {
-              addedTerms.push(keyword.toLowerCase());
-              displayAddedTerms();
+              if (!addedTerms.includes(keyword.toLowerCase())) {
+                addedTerms.push(keyword.toLowerCase());
+                displayAddedTerms();
+              }
             } else {
               await Swal.fire(translateThis('The maximum number of keywords is 10'));
             }
@@ -4840,17 +4865,16 @@
 
           cancelBtn.addEventListener("click", async () => {
             try {
-                  dialog.remove();
-                  await DDEcontract.methods.cancelPrivateOffer(
-                    listing.hash,
-                    myaccounts
-                  ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                  await Swal.fire(translateThis("Contract removed!"));
-                  await loadUser();
-                  dialog.remove();
+              dialog.remove();
+              await DDEcontract.methods.cancelPrivateOffer(
+                listing.hash,
+                myaccounts
+              ).send({"from":myaccounts,...gasOptions[gasSetting]});
+              await Swal.fire(translateThis("Contract removed!"));
+              await loadUser();
             } catch (error) {
-                console.error(error);
-                await showError(error);
+              console.error(error);
+              await showError(error);
             }
           });
       } else {
@@ -4861,8 +4885,7 @@
                     myaccounts
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire(translateThis("Contract removed!"));
-                  await loadUser();
-                  dialog.remove();
+                  await loadUser();                  
                 } else {
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash,
@@ -4870,7 +4893,6 @@
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire(translateThis("Contract removed!"));
                   await loadUser();
-                  dialog.remove();
                 }
             } catch (error) {
                 console.error(error);
