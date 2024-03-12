@@ -2027,7 +2027,7 @@
                                 if(!marketOffers['results'].includes(hash)) {
                                     marketOffers.results.push(hash);
                                 }
-                            });                            
+                            });
                             await populateListings("", 1);
                         } catch (e) {
                             console.log("Error loading offer: ",e);
@@ -2197,13 +2197,13 @@
               console.log("Error loading reputation data");
           }
           try {
-              jsondata.tags = [];              
+              jsondata.tags = [];
               jsondata.tags = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract3.methods.getTags(hash).call())));
           } catch (e) {
               console.log("Error loading tags");
           }
-          if(text != '') {            
-              try {                  
+          if(text != '') {
+              try {
                   var messageData = JSON.parse(jsondata.message);
                   if('recipient' in messageData && 'cipher' in messageData.recipient) {
                     jsondata.image = [''];
@@ -3270,7 +3270,7 @@
                           returnThis=1;
                         } catch (error) {
                           console.error(error);
-                          await showError(error);                          
+                          await showError(error);
                         }
                       }
                     });
@@ -3293,7 +3293,7 @@
                 if(myaccounts != listing.sender) {
                   const acceptTime = document.createElement('button');
                   acceptTime.innerHTML = translateThis('Accept Time Extension Request');
-                  acceptTime.id = 'acceptTime';                  
+                  acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
                       await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[1]).send({"from":myaccounts,...gasOptions[gasSetting]});
@@ -4005,9 +4005,9 @@
               <input id="contactInfo"></textarea><br><span class="vertical-spacer"></span>
               <label for="key-words" id="key-label">` + translateThis('Search key words(optional):') + `</label>
               <button type="button" id="key-words">` + translateThis('Add search terms') + `</button><br><span class="vertical-spacer"></span>
-              <label for="allowcounters">` + translateThis('Allow counter offers') + `  </label>
+              <label for="allowcounters" id="allowcounterslabel">` + translateThis('Allow counter offers') + `  </label>
               <input type="checkbox" id="allowcounters"><br><span class="vertical-spacer"></span>
-              <label for="autoaccept">` + translateThis('Automatically accept matching offers') + `  </label>
+              <label for="autoaccept" id="autoacceptlabel">` + translateThis('Automatically accept matching offers') + `  </label>
               <input type="checkbox" id="autoaccept"><br><br><span class="vertical-spacer"></span>
               <button type="submit">` + translateThis('Submit') + `</button>
             </form>
@@ -4061,14 +4061,18 @@
           if (contractType.value === 'private') {
             counterPartyAddressField.style.display = 'block';
             auto.style.display = 'none';
+            document.getElementById("autoacceptlabel").style.display = 'none';
             allowcounters.style.display = 'none';
+            document.getElementById("allowcounterslabel").style.display = 'none';
             myterms = [];
             addWord.style.display = 'none';
             addWordLabel.style.display = 'none';
           } else {
             counterPartyAddressField.style.display = 'none';
             auto.style.display = 'block';
+            document.getElementById("autoacceptlabel").style.display = 'block';
             allowcounters.style.display = 'block';
+            document.getElementById("allowcounterslabel").style.display = 'block';
             addWord.style.display = 'block';
             addWordLabel.style.display = 'block';
           }
@@ -4386,7 +4390,7 @@
                     confirmButtonText: translateThis('Yes'),
                     cancelButtonText: translateThis('No'),
                   }).then((result) => {
-                    if(result.isConfirmed) {
+                    if(!result.isConfirmed) {
                       popupContainer.remove();
                       returnThis2 = true;
                       return;
@@ -4679,7 +4683,7 @@
                     quantity = parseInt(document.getElementById('new-quantity').value);
                     if(quantity > parseInt(mylisting.quantity[0]) || quantity > parseInt(mylisting.quantity[1])) {
                       await Swal.fire(translateThis("Quantity exceeds what is available!"));
-                      return;                        
+                      return;
                     }
                     dialog.remove();
                     mylisting.quantity[0] = quantity.toString();
@@ -4900,7 +4904,7 @@
                     myaccounts
                   ).send({"from":myaccounts,...gasOptions[gasSetting]});
                   await Swal.fire(translateThis("Contract removed!"));
-                  await loadUser();                  
+                  await loadUser();
                 } else {
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash,
