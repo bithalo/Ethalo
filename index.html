@@ -4789,7 +4789,7 @@
                       return false;
                   }
                   if (web3.utils.toBN(counterbalance).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
-                      await Swal.firetranslateThis(("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party."));
+                      await Swal.fire(translateThis("The counter-party does not have enough funds in their account to proceed. Please notify the counter-party."));
                       return false;
                   }
                 }
