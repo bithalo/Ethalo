@@ -107,7 +107,6 @@ contract TwoPartyEscrow {
         isCustodian[msg.sender][custodian] = status;
     }
     function authorizeContract(address custodian, bytes32 hash, bool status) public {
-        require(contracts[hash].sender == msg.sender || contracts[hash].recipient == msg.sender);
         isAuthorized[msg.sender][custodian][hash] = status;
     }
     function changeCustomFee(uint newfee) public {
