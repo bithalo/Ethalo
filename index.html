@@ -741,21 +741,21 @@
     var CurrentTimeStamp = new Date().getTime();
     var tokens = [
         {
-            address: "0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E",
+            address: "0xA66857Da8d75BE2363968a3B01BfE1f417B28202",
             token: "ETH",
             image: "eth.png",
             decimals: "18"
         },
         {
-            address: "0xb3460166784fd07A022E51547379352De4E98dF5",
+            address: "0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11",
             token: "WALRUS",
             image: "walrus.png",
             decimals: "8"
         }
     ];
-    var tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
-    web3 = new Web3("https://rpc.ankr.com/eth_goerli");
-    DDEaddy = "0xcE36f7754abDc89B2e30bdfa91b151BC9799e342"; //Goerli testnet is default market view
+    var tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
+    web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
+    DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82"; //Sepolia testnet is default market view
     var referral = "0x0000000000000000000000000000000000000000";
     var baseFee = 0;
     var myFavorites = [];
@@ -877,19 +877,19 @@
         currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
         var netname = "unknown";
         var netname2 = "ETH";
-        await web3.eth.getGasPrice().then(function (theGasPrice) {            
+        await web3.eth.getGasPrice().then(function (theGasPrice) {
             gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
-            if(parseInt(gasPrice) > 2500000000) {
+            if(parseInt(gasPrice) > 15000000000) {
+                gasPrice = "15000000000";
+            }
+            if(parseInt(gasPrice) < 2500000000) {
                 gasPrice = "2500000000";
             }
-            if(parseInt(gasPrice) < 500000000) {
-                gasPrice = "500000000";
-            }
         });
-        if (currentChainId == 5) {
-            netname = "Goerli Testnet";
+        if (currentChainId == "11155111") {
+            netname = "Sepolia Testnet";
             netname2 = "ETH";
-            DDEaddy = "0xcE36f7754abDc89B2e30bdfa91b151BC9799e342";     
+            DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82";     
             gasOptions[0] = {
               gasLimit: 4000000,
               gasPrice: null,
@@ -902,19 +902,19 @@
             };
             tokens = [
               {
-                  address: "0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E",
+                  address: "0xA66857Da8d75BE2363968a3B01BfE1f417B28202",
                   token: "ETH",
                   image: "eth.png",
                   decimals: "18"
               },
               {
-                  address: "0xb3460166784fd07A022E51547379352De4E98dF5",
+                  address: "0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11",
                   token: "WALRUS",
                   image: "walrus.png",
                   decimals: "8"
               }
             ];
-            tokennames = {"0xdfFd57fa61eC2ad0fa260Fa8368ff7F2EEF4407E":"ETH","0xb3460166784fd07A022E51547379352De4E98dF5":"WALRUS"}
+            tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
         }
         if (netname == "unknown") {
             document.getElementById("connectionstatus").innerHTML = translateThis("Unsupported network");
