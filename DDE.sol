@@ -58,8 +58,8 @@ contract TwoPartyEscrow {
     uint public affiliateFee;
     address public minter;
     string[] public publicdata;
+    address public WETH;
     uint lock;
-    address WETH;
 
     constructor(address _WETH) {
         WETH = _WETH;
@@ -235,7 +235,7 @@ contract TwoPartyEscrow {
                 if(openslotlength[mytag] > 0) {
                     openslotlength[mytag] -= 1;
                     tagposition[hash].push(openslot[mytag][openslotlength[mytag]]);
-                    hashtag[mytag][openslot[mytag][openslotlength[mytag]]] = hash;                    
+                    hashtag[mytag][openslot[mytag][openslotlength[mytag]]] = hash;
                 } else {
                     tagposition[hash].push(taglength[mytag]);
                     taglength[mytag] += 1;
