@@ -391,7 +391,7 @@
           <option value="default" disabled selected>Default</option>
         </select>
         <div class="connect">
-            <button t-id="3" onclick="login()">Connect Metamask</button>
+            <button t-id="3" onclick="login(1)">Connect Metamask</button>
             <div id="connectionstatus" class="connectionstatus" t-id="4">Not connected</div>
         </div>
     </div>
@@ -725,7 +725,7 @@
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
-    var DDEaddy = "";
+    var DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82"; //Sepolia testnet is default market view
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
@@ -755,7 +755,6 @@
     ];
     var tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
     web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
-    DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82"; //Sepolia testnet is default market view
     var referral = "0x0000000000000000000000000000000000000000";
     var baseFee = 0;
     var myFavorites = [];
@@ -766,7 +765,7 @@
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
     var isConnected = false;
     var showOrder = false;
-    var notifyFavorites = localStorage.getItem(myaccounts + ":notifyFavorites");
+    var notifyFavorites = localStorage.getItem(myaccounts + DDEaddy + ":notifyFavorites");
     if(!notifyFavorites) {
       notifyFavorites = "0";
     }
@@ -829,7 +828,7 @@
     function defaultvars() {
         DDEcontract = "";
         myaccounts = "";
-        DDEaddy = "";
+        DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82";
         balances = {};
         baseBalance = 0;
         gasPrice = "";
@@ -849,12 +848,15 @@
         myFavorites = [];
     }
 
-    async function login() {
+    async function login(clear = 0) {
         if (window.ethereum) { //Note: for mobile this only works if the webpage has <head> tag
             console.log("connecting");
             await window.ethereum.request({method: 'eth_requestAccounts'});
             web3 = new Web3(window.ethereum);
             console.log("success");
+            if(clear == 1) {
+                marketOffers = {'indices':[], 'results':[]};
+            }
             isConnected = true;
             document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
             await loadUser(1);
@@ -942,7 +944,7 @@
         }
         loadAutoClearState();
         loadEmailClientState();
-        const theFavorites =  localStorage.getItem(myaccounts + ":myFavorites");
+        const theFavorites =  localStorage.getItem(myaccounts + DDEaddy + ":myFavorites");
         if(theFavorites) {
           myFavorites = JSON.parse(theFavorites);
         }
@@ -962,7 +964,7 @@
             userpubkey = cryptico.publicKeyString(userprivkey);
           }
         }
-        const gasSetting2 = localStorage.getItem(myaccounts+":gasOption");        
+        const gasSetting2 = localStorage.getItem(myaccounts + DDEaddy + ":gasOption");        
         if(gasSetting2 && gasSetting2 == "1") {
           gasSetting = 1;
         }
@@ -1100,7 +1102,7 @@
       if (error.message.includes("specified gasPrice but also included maxFeePerGas")) {
         await Swal.fire(translateThis("Web3 gas assignment failed. Will change to blockchain recommended gas options."));
         gasSetting = 1;
-        localStorage.setItem(myaccounts+":gasOption", "1");
+        localStorage.setItem(myaccounts + DDEaddy + ":gasOption", "1");
       } else if (error.message.includes("DDEcontract.methods is undefined")) {
         await Swal.fire(translateThis("Not connected."));
       } 
@@ -1171,19 +1173,19 @@
 
     async function RefreshContracts() {
         if(myaccounts != '') {
-            localStorage.setItem(myaccounts+":readmessages3", JSON.stringify({}));
+            localStorage.setItem(myaccounts + DDEaddy + ":readmessages3", JSON.stringify({}));
             await populateOffers();
         }
     }
 
     async function saveContactInfo(text) {
         if(myaccounts != '') {
-            localStorage.setItem(myaccounts+":contact", text);
+            localStorage.setItem(myaccounts + DDEaddy + ":contact", text);
         }
     }
 
     async function getContactInfo(account) {
-        const cached = localStorage.getItem(account+":contact");
+        const cached = localStorage.getItem(account + DDEaddy + ":contact");
         if (cached) {
             return cached;
         } else {
@@ -1199,7 +1201,7 @@
 
     async function saveAPI() {
         const myCurrentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
-        localStorage.setItem(myaccounts+myCurrentChainId+":api", document.getElementById('connectMethod').value);
+        localStorage.setItem(myaccounts + DDEaddy + myCurrentChainId + ":api", document.getElementById('connectMethod').value);
         await getUserAPI(myCurrentChainId);
     }
 
@@ -1222,7 +1224,7 @@
         }
 
         var selectedAPI = "0";
-        const cached = localStorage.getItem(myaccounts+mychainid+":api");        
+        const cached = localStorage.getItem(myaccounts + DDEaddy + mychainid + ":api");        
         if (cached) {
             const index = Array.from(mySelectElement.options).findIndex(option => option.value === cached.toString());
             mySelectElement.selectedIndex = index;
@@ -1240,12 +1242,12 @@
 
     async function saveExpirationInfo(text) {
         if(myaccounts != '') {
-            localStorage.setItem(myaccounts+":expiration", text);
+            localStorage.setItem(myaccounts + DDEaddy + ":expiration", text);
         }
     }
 
     async function getExpirationInfo(account) {
-        const cached = localStorage.getItem(account+":expiration");
+        const cached = localStorage.getItem(account + DDEaddy + ":expiration");
         if (cached) {
             return cached;
         } else {
@@ -1257,12 +1259,12 @@
 
     autoClearCheckbox.addEventListener("change", () => {
       if(myaccounts != '') {
-        localStorage.setItem(myaccounts + ":autoclear", autoClearCheckbox.checked);
+        localStorage.setItem(myaccounts + DDEaddy + ":autoclear", autoClearCheckbox.checked);
       }
     });
 
     function loadAutoClearState() {
-      const autoClearState = localStorage.getItem(myaccounts + ":autoclear");
+      const autoClearState = localStorage.getItem(myaccounts + DDEaddy + ":autoclear");
       if (autoClearState === "true") {
         autoClearCheckbox.checked = true;
       } else {
@@ -1274,12 +1276,12 @@
 
     emailClient.addEventListener("change", () => {
       if(myaccounts != '') {
-        localStorage.setItem(myaccounts + ":emailclient", emailClient.checked);
+        localStorage.setItem(myaccounts + DDEaddy + ":emailclient", emailClient.checked);
       }
     });
 
     function loadEmailClientState() {
-      const emailState = localStorage.getItem(myaccounts + ":emailclient");
+      const emailState = localStorage.getItem(myaccounts + DDEaddy + ":emailclient");
       if (emailState === "true") {
         emailClient.checked = true;
       } else {
@@ -1859,7 +1861,7 @@
               for (var myinx = 0; myinx < expiredOffers.length; myinx++) {
                 myFavorites.splice(myFavorites.indexOf(expiredOffers[myinx]),1);
               }
-              localStorage.setItem(myaccounts + ':myFavorites', JSON.stringify(myFavorites));
+              localStorage.setItem(myaccounts + DDEaddy + ':myFavorites', JSON.stringify(myFavorites));
             }
             await populateListings("", 2);
             return;
@@ -1872,7 +1874,7 @@
               if(!web3.utils.isAddress(userAddress)) {
               } else {
                 mylen = DOMPurify.sanitize(await DDEcontract3.methods.getArrayLength(userAddress, 0).call());
-                var cached = localStorage.getItem(userAddress+":userStoreCache");
+                var cached = localStorage.getItem(userAddress + DDEaddy + ":userStoreCache");
                 if (cached) {
                   expiredOffers = JSON.parse(cached);
                 }
@@ -1925,7 +1927,7 @@
                 }
               }
               if(expiredOffers.length > 0 && added == 1) {
-                localStorage.setItem(userAddress + ':userStoreCache', JSON.stringify(expiredOffers));
+                localStorage.setItem(userAddress + DDEaddy + ':userStoreCache', JSON.stringify(expiredOffers));
               }
             } catch (e) {
               console.log("Error loading offer: ",e);
@@ -2233,8 +2235,8 @@
     lastNotified = 0;
     async function populateOffers() {
       var list = document.createElement("ul");
-      var readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages")) || {};
-      var notifications = JSON.parse(localStorage.getItem(myaccounts+":notifications")) || {};
+      var readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages")) || {};
+      var notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":notifications")) || {};
       var mylen = 0;
       var notify = 0;
       var myhash = '';
@@ -2252,7 +2254,7 @@
           const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(offerHash).call());
           if (offerID == 0) {
             readMessages[i] = true;
-            localStorage.setItem(myaccounts+":readmessages", JSON.stringify(readMessages));
+            localStorage.setItem(myaccounts + DDEaddy + ":readmessages", JSON.stringify(readMessages));
             continue;
           }
           const offerData = await getOrderHash(offerHash);
@@ -2260,7 +2262,7 @@
             if(parseInt(offerData.timelimit[1]) <= parseInt(CurrentTimeStamp)) {
               if(offerData.sender != "0x0000000000000000000000000000000000000000" && offerData.recipient != "0x0000000000000000000000000000000000000000") {
                 readMessages[i] = true;
-                localStorage.setItem(myaccounts+":readmessages", JSON.stringify(readMessages));
+                localStorage.setItem(myaccounts + DDEaddy + ":readmessages", JSON.stringify(readMessages));
                 continue;
               }
             }
@@ -2306,11 +2308,11 @@
       if(notify == 1) {
         document.getElementById("offersButton").style.backgroundColor = "silver";
       }
-      localStorage.setItem(myaccounts+":notifications", JSON.stringify(notifications));
+      localStorage.setItem(myaccounts + DDEaddy + ":notifications", JSON.stringify(notifications));
       notify = 0;
-      notifications = JSON.parse(localStorage.getItem(myaccounts+":notifications2")) || {};
+      notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":notifications2")) || {};
       var list2 = document.createElement("ul");
-      readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages2")) || {};
+      readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages2")) || {};
       try {
         mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 1).call());
       } catch(error) {
@@ -2332,13 +2334,13 @@
           }
           if (offerData2.status[0] > 0 && offerData2.status[1] > 0) {
             readMessages[i] = true;
-            localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));
+            localStorage.setItem(myaccounts + DDEaddy + ":readmessages2", JSON.stringify(readMessages));
             continue;
           }
           if(parseInt(offerData2.timelimit[1]) != 0) {
             if(parseInt(offerData2.timelimit[1]) <= parseInt(CurrentTimeStamp)) {
               readMessages[i] = true;
-              localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));
+              localStorage.setItem(myaccounts + DDEaddy + ":readmessages2", JSON.stringify(readMessages));
               continue;
             }
           }
@@ -2407,9 +2409,9 @@
       if(notify == 1) {
         document.getElementById("offersButton").style.backgroundColor = "silver";
       }
-      localStorage.setItem(myaccounts+":notifications2", JSON.stringify(notifications));
+      localStorage.setItem(myaccounts + DDEaddy + ":notifications2", JSON.stringify(notifications));
       notify = 0;
-      notifications = JSON.parse(localStorage.getItem(myaccounts+":notifications3")) || {};
+      notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":notifications3")) || {};
       const offersContainer = document.getElementById("myoffers");
       offersContainer.innerHTML = ""; // clear the container first
       offersContainer.classList.add("offers-container");
@@ -2453,7 +2455,7 @@
       offersContainer.appendChild(tabContainer);
 
       var list3 = document.createElement("ul");
-      readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages3")) || {};
+      readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages3")) || {};
       try {
         mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 2).call());
       } catch(error) {
@@ -2469,7 +2471,7 @@
           if (offerData3.status[0] == 4 || offerData3.status[1] == 4) {
             if (autoClearCheckbox.checked) {
                 readMessages[i] = true;
-                localStorage.setItem(myaccounts+":readmessages3", JSON.stringify(readMessages));
+                localStorage.setItem(myaccounts + DDEaddy + ":readmessages3", JSON.stringify(readMessages));
                 continue;
             }
           }
@@ -2587,7 +2589,7 @@
       if(notify == 1) {
         document.getElementById("contractsButton").style.backgroundColor = "silver";
       }
-      localStorage.setItem(myaccounts+":notifications3", JSON.stringify(notifications));
+      localStorage.setItem(myaccounts + DDEaddy + ":notifications3", JSON.stringify(notifications));
       const escrowContainer = document.getElementById("mycontracts");
       escrowContainer.innerHTML = ""; // clear the container first
       escrowContainer.classList.add("escrow-container");
@@ -2854,7 +2856,7 @@
           text: translateThis('Welcome to the markets. As you browse you may choose to add orders to your favorites list by clicking the star. This may function as a useful cart or history for deals you wish to revisit. Please review the amount, currency, deposits, time limit and deal structure carefully before accepting. Always attempt to remain in close contact with your counter-party to ensure success. With that said enjoy using one of the safest escrows in the world!'),
         });
         notifyFavorites = "1";
-        localStorage.setItem(myaccounts+":notifyFavorites", notifyFavorites);
+        localStorage.setItem(myaccounts + DDEaddy + ":notifyFavorites", notifyFavorites);
       }
       if(listing.message.includes('"recipient":') && listing.message.includes('"cipher":') && listing.message.includes('"status":')) {
         await Swal.fire({
@@ -3278,9 +3280,9 @@
                 if(returnThis==1) {
                   return;
                 }
-                const readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages3")) || {};
+                const readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages3")) || {};
                 readMessages[listing.index] = true;
-                localStorage.setItem(myaccounts+":readmessages3", JSON.stringify(readMessages));
+                localStorage.setItem(myaccounts + DDEaddy + ":readmessages3", JSON.stringify(readMessages));
                 await loadUser();
                 popupContainer.remove();
               };
@@ -3487,7 +3489,7 @@
             starButton.style.color = "#ed5f00";
           }
           checkFavorites();
-          localStorage.setItem(myaccounts + ':myFavorites', JSON.stringify(myFavorites));
+          localStorage.setItem(myaccounts + DDEaddy + ':myFavorites', JSON.stringify(myFavorites));
         };
         starButton.addEventListener('mouseover', function() {
           this.style.cursor = 'pointer';
@@ -4875,9 +4877,9 @@
           const cancelBtn = dialog.querySelector("#cancel-btn");
 
           hideBtn.addEventListener("click", async () => {
-            var readMessages = JSON.parse(localStorage.getItem(myaccounts+":readmessages2")) || {};
+            var readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages2")) || {};
             readMessages[listing.index] = true;
-            localStorage.setItem(myaccounts+":readmessages2", JSON.stringify(readMessages));            
+            localStorage.setItem(myaccounts + DDEaddy + ":readmessages2", JSON.stringify(readMessages));            
             await loadUser();
             dialog.remove();
           });
