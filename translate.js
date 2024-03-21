@@ -51,6 +51,8 @@ languages['ar']={
   "48":{"#ar":"تغيير رابط الإحالة الخاص بي"},
   "49":{"#ar":"تعيين رسوم الإحالة المخصصة"},
   "50":{"#ar": "محاولة إخطار العملاء المحتملين عبر عميل البريد الإلكتروني الافتراضي (عند الاقتضاء)"},
+  "51":{"#ar": "تعيين الموقع المشارك"},
+  "52":{"#ar": "التوقيع المشترك"},
   "Not connected.": "غير متصل.",
   "Connected.": "متصل.",
   "Please unlock Metamask so it can connect.": "يرجى فتح Metamask لتمكين الاتصال.",
@@ -277,7 +279,13 @@ languages['ar']={
   "Quantity updated!": "تم تحديث الكمية!",
   "Set order fee": "تعيين رسوم الطلب",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "الرجاء إدخال نسبة الرسوم التي ترغب في تقديمها للشركاء التابعين لهذا الطلب.",
-  "Favorites": "المفضله "
+  "Favorites": "المفضله ",
+  "Set Cosigner/Custodian": "تعيين الموقع المشارك / القائم بالتوكيل",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": "يكون وجود شخص مشترك مفيدًا في حالة عدم قدرتك على إتمام صفقاتك. يجب أن يكون هذا الشخص الذي تثق به تمامًا. فقط سيتم منحهم الإذن للتوقيع نيابةً عنك لتأكيد أو إتمام العقود بحيث لا تتوقف العقود في الضمان. يرجى إدخال عنوان الوصي أدناه.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "تم تعيين الموقع المشارك بنجاح. الآن سيُطلب منك تخويل الموقع المشارك لتصريف العقد.",
+  "You are currently not a cosigner for any active user": "أنت حاليًا لست موقع مشترك لأي مستخدم نشط",
+  "Select address to cosign for:": "حدد العنوان للتوقيع المشترك من أجل:",
+  "Select contract:": "اختر العقد:"
 };
 
 
@@ -332,6 +340,8 @@ languages['ch']={
   "48":{"#ch":"更改我的推广链接"},
   "49":{"#ch":"设置自定义推荐费"},
   "50":{"#ch": "尝试通过默认电子邮件客户端通知潜在客户（如果适用）"},
+  "51":{"#ch": "设置共同签署人"},
+  "52":{"#ch": "共同签署"},
   "Not connected.": "未连接。",
   "Connected.": "已连接。",
   "Please unlock Metamask so it can connect.": "请解锁 Metamask 以便连接。",
@@ -558,7 +568,13 @@ languages['ch']={
   "Quantity updated!": "数量已更新！",
   "Set order fee": "设置订单费用",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "请输入您希望为此订单提供给联盟方的百分比费用。",
-  "Favorites": "收藏 夹"
+  "Favorites": "收藏 夹",
+  "Set Cosigner/Custodian": "设置共同签署人/托管人",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": "如果您无法完成交易，则拥有共同签署人非常有用。 这应该是您完全信任的人。 他们只会被授权代表您签署以确认或完成合同，以便合同不会被拖延在托管中。 请在下面输入受托人的地址。",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "共同签署人指定成功。 现在将要求您授权共同签署人进行合同结算。",
+  "You are currently not a cosigner for any active user": "您目前不是任何活跃用户的共同签署人",
+  "Select address to cosign for:": "选择要签署的地址：",
+  "Select contract:": "选择合同："
 };
 
 languages['en']={
@@ -665,6 +681,8 @@ languages['fr']={
   "48": {"#fr": "Changer mon lien d'affiliation"},
   "49": {"#fr": "Définir des frais de parrainage personnalisés"},
   "50": {"#fr": "Tentative de notifier les prospects via le client de messagerie électronique par défaut (si applicable)"},
+  "51": {"#fr": "Définir le co-signataire"},
+  "52": {"#fr": "Cosigner"},
   "Not connected.": "Non connecté.",
   "Connected.": "Connecté.",
   "Please unlock Metamask so it can connect.": "Veuillez déverrouiller Metamask afin qu'il puisse se connecter.",
@@ -891,7 +909,13 @@ languages['fr']={
   "Quantity updated!": "Quantité mise à jour !",
   "Set order fee": "Définir les frais de commande",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Veuillez entrer le pourcentage de frais que vous souhaitez offrir aux affiliés pour cette commande.",
-  "Favorites": "Favoris"
+  "Favorites": "Favoris",
+  "Set Cosigner/Custodian": "Définir le cosignataire / gardien",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": "Avoir un cosignataire est utile au cas où vous ne seriez pas en mesure de finaliser vos transactions. Il devrait s'agir de quelqu'un en qui vous avez une confiance totale. Ils ne seront autorisés à signer en votre nom que pour confirmer ou finaliser les contrats afin que les contrats ne restent pas bloqués dans l'escrow. Veuillez saisir l'adresse du gardien ci-dessous.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "La désignation du cosignataire a réussi. Maintenant, vous serez invité à autoriser le cosignataire pour le dédouanement du contrat.",
+  "You are currently not a cosigner for any active user": "Vous n'êtes actuellement pas un cosignataire pour un utilisateur actif",
+  "Select address to cosign for:": "Sélectionnez l'adresse à cosigner pour :",
+  "Select contract:": "Sélectionner le contrat :"
 };
 
 languages['ge']={
@@ -945,6 +969,8 @@ languages['ge']={
   "48": {"#ge": "Meinen Affiliate-Link ändern"},
   "49": {"#ge": "Benutzerdefinierte Empfehlungsgebühr festlegen"},
   "50": {"#ge": "Versuch, potenzielle Kunden über den Standard-E-Mail-Client zu benachrichtigen (falls zutreffend)"},
+  "51": {"#ge": "Mitsignierenden festlegen"},
+  "52": {"#ge": "Mitunterschreiben"},
   "Not connected.": "Nicht verbunden.",
   "Connected.": "Verbunden.",
   "Please unlock Metamask so it can connect.": "Bitte entsperren Sie Metamask, damit es sich verbinden kann.",
@@ -1171,7 +1197,13 @@ languages['ge']={
   "Quantity updated!": "Menge aktualisiert!",
   "Set order fee": "Gebühr festlegen",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Bitte geben Sie den Prozentsatz der Gebühr ein, den Sie Affiliates für diesen Auftrag anbieten möchten.",
-  "Favorites": "Favoriten"
+  "Favorites": "Favoriten",
+  "Set Cosigner/Custodian": "Kosigner/Vormund festlegen",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": "Ein Kosigner zu haben ist nützlich, falls Sie Ihre Geschäfte nicht abschließen können. Dies sollte jemand sein, dem Sie vollkommen vertrauen. Sie erhalten nur die Berechtigung, in Ihrem Namen zu unterschreiben, um Verträge zu bestätigen oder abzuschließen, damit die Verträge nicht im Treuhandkonto festgehalten werden. Bitte geben Sie die Adresse des Vormunds unten ein.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "Die Benennung des Kosigners war erfolgreich. Sie werden nun gebeten, den Kosigner zur Vertragsfreigabe zu autorisieren.",
+  "You are currently not a cosigner for any active user": "Sie sind derzeit kein Kosigner für einen aktiven Benutzer",
+  "Select address to cosign for:": "Wählen Sie die Adresse aus, die Sie unterzeichnen möchten:",
+  "Select contract:": "Vertrag auswählen:"
 };
 
 languages['it']={
@@ -1225,6 +1257,8 @@ languages['it']={
   "48": {"#it": "Cambia il mio link di affiliazione"},
   "49": {"#it": "Imposta la tariffa di referral personalizzata"},
   "50": {"#it": "Tentativo di notificare i potenziali clienti tramite il client di posta elettronica predefinito (quando applicabile)"},
+  "51": {"#it": "Imposta co-firmatario"},
+  "52": {"#it": "Cosignare"},
   "Not connected.": "Non connesso.",
   "Connected.": "Connesso.",
   "Please unlock Metamask so it can connect.": "Sblocca Metamask in modo che possa connettersi.",
@@ -1451,7 +1485,13 @@ languages['it']={
   "Quantity updated!": "Quantità aggiornata!",
   "Set order fee": "Imposta la commissione d'ordine",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Si prega di inserire la percentuale di commissione che desideri offrire agli affiliati per questo ordine.",
-  "Favorites": "Preferiti"
+  "Favorites": "Preferiti",
+  "Set Cosigner/Custodian": "Imposta cosigner / custode",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": "Avere un cosigner è utile nel caso in cui non si riesca a completare le proprie trattative. Questo dovrebbe essere qualcuno di cui ti fidi completamente. Saranno autorizzati solo a firmare per tuo conto per confermare o completare contratti in modo che i contratti non vengano trattenuti in custodia. Inserisci l'indirizzo dei custodi di seguito.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "La designazione del cosigner è stata eseguita con successo. Ora ti verrà chiesto di autorizzare il cosigner per lo sdoganamento del contratto.",
+  "You are currently not a cosigner for any active user": "Al momento non sei un cosigner per nessun utente attivo",
+  "Select address to cosign for:": "Seleziona l'indirizzo da firmare:",
+  "Select contract:": "Seleziona il contratto:"
 };
 
 languages['ja']={
@@ -1505,6 +1545,8 @@ languages['ja']={
   "48":{"#ja": "私のアフィリエイトを変更"},
   "49":{"#ja": "カスタム紹介手数料を設定"},
   "50":{"#ja": "（該当する場合）デフォルトの電子メールクライアントを介して見込み顧客に通知を試みる"},
+  "51":{"#ja": "共同署名者を設定する"},
+  "52":{"#ja": "共同署名"},
   "Not connected.": "接続されていません。",
   "Connected.": "接続されました。",
   "Please unlock Metamask so it can connect.": "Metamaskをアンロックして接続してください。",
@@ -1731,7 +1773,13 @@ languages['ja']={
   "Quantity updated!": "数量が更新されました！",
   "Set order fee": "オーダーフィーを設定",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "このオーダーに対してアフィリエイトに提供するパーセンテージの手数料を入力してください。",
-  "Favorites": "お気に入り"
+  "Favorites": "お気に入り",
+  "Set Cosigner/Custodian": "共同署名者/管理人の設定",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodian's address below.": "取引を完了できない場合、共同署名者がいると便利です。これは、完全に信頼できる誰かである必要があります。彼らは、契約を確認または完了するためにあなたの代理で署名する権限のみを与えられます。契約が保護されずに保留されることはありません。以下に管理人の住所を入力してください。",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "共同署名者の指定が成功しました。今度は、契約のクリアランスのために共同署名者を承認するように求められます。",
+  "You are currently not a cosigner for any active user": "現在、アクティブなユーザーのいずれの共同署名者もではありません",
+  "Select address to cosign for:": "署名するアドレスを選択してください：",
+  "Select contract:": "契約を選択してください："
 };
 
 languages['ko']={
@@ -1785,6 +1833,8 @@ languages['ko']={
   "48": {"#ko": "내 제휴 변경"},
   "49": {"#ko": "맞춤형 추천 수수료 설정"},
   "50": {"#ko": "기본 이메일 클라이언트를 통해 (해당 경우에) 잠재고객에게 통지 시도"},
+  "51": {"#ko": "공동 서명자 설정"},
+  "52": {"#ko": "공동 서명"},
   "Not connected.": "연결되지 않았습니다.",
   "Connected.": "연결되었습니다.",
   "Please unlock Metamask so it can connect.": "Metamask를 잠금 해제하여 연결하십시오.",
@@ -2011,7 +2061,13 @@ languages['ko']={
   "Quantity updated!": "수량이 업데이트되었습니다!",
   "Set order fee": "주문 수수료 설정",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "이 주문에 대해 제휴사에 제공하려는 수수료의 백분율을 입력하세요.",
-  "Favorites": "즐겨찾기"
+  "Favorites": "즐겨찾기",
+  "Set Cosigner/Custodian": "공동 서명자/관리인 설정",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodian's address below.": "거래를 완료할 수 없는 경우 공동 서명자가 있으면 유용합니다. 이는 완전히 신뢰할 수 있는 사람이어야 합니다. 그들은 당신을 대신하여 계약을 확인하거나 완료하기 위해 서명할 권한을 부여받게 됩니다. 이로 인해 계약이 보관에 걸리지 않습니다. 아래에 관리인의 주소를 입력하세요.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "공동 서명자 지정이 성공했습니다. 이제 계약 클리어런스를 위해 공동 서명자를 승인하라는 요청이 있을 것입니다.",
+  "You are currently not a cosigner for any active user": "현재 활성 사용자의 공동 서명자가 아닙니다.",
+  "Select address to cosign for:": "서명할 주소를 선택하세요:",
+  "Select contract:": "계약을 선택하세요:"
 }
 
 languages['po']={
@@ -2065,6 +2121,8 @@ languages['po']={
   "48": {"#po": "Alterar meu afiliado"},
   "49": {"#po": "Definir taxa de indicação personalizada"},
   "50": {"#po": "Tentativa de notificar prospects através do cliente de e-mail padrão (quando aplicável)"},
+  "51": {"#po": "Definir co-assinante"},
+  "52": {"#po": "Cosignar"},
   "Not connected.": "Não conectado.",
   "Connected.": "Conectado.",
   "Please unlock Metamask so it can connect.": "Desbloqueie o Metamask para que ele possa se conectar.",
@@ -2291,7 +2349,13 @@ languages['po']={
   "Quantity updated!": "Quantidade atualizada!",
   "Set order fee": "Definir taxa do pedido",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Por favor, insira a taxa percentual que deseja oferecer aos afiliados para este pedido.",
-  "Favorites": "Favoritos"
+  "Favorites": "Favoritos",
+  "Set Cosigner/Custodian": "Definir Cosignatário/Guardião",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodian's address below.": "Ter um cosignatário é útil caso você não consiga concluir suas negociações. Este deve ser alguém em quem você confia completamente. Eles só terão autorização para assinar em seu nome para confirmar ou concluir contratos para que os contratos não fiquem retidos em depósito. Por favor, insira o endereço do guardião abaixo.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "A designação do cosignatário foi bem-sucedida. Agora você será solicitado a autorizar o cosignatário para a liberação do contrato.",
+  "You are currently not a cosigner for any active user": "Atualmente você não é um cosignatário para nenhum usuário ativo",
+  "Select address to cosign for:": "Selecione o endereço para assinar:",
+  "Select contract:": "Selecione o contrato:"
 };
 
 languages['ru'] = {
@@ -2345,6 +2409,8 @@ languages['ru'] = {
   "48": {"#ru": "Изменить мой партнер"},
   "49": {"#ru": "Установить свою комиссию за рефералов"},
   "50": {"#ru": "Попытка уведомления потенциальных клиентов через стандартного почтового клиента (по возможности)"},
+  "51": {"#ru": "Установить созависимого подписанта"},
+  "52": {"#ru": "Совместно подписывать"},
   "Not connected.": "Не подключено.",
   "Connected.": "Подключено.",
   "Please unlock Metamask so it can connect.": "Пожалуйста, разблокируйте Metamask, чтобы установить соединение.",
@@ -2571,7 +2637,13 @@ languages['ru'] = {
   "Quantity updated!": "Количество обновлено!",
   "Set order fee": "Установить комиссию за заказ",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Пожалуйста, введите процентную комиссию, которую вы хотели бы предложить аффилиатам за этот заказ.",
-  "Favorites": "Избранное"
+  "Favorites": "Избранное",
+  "Set Cosigner/Custodian": "Установить согласующегося/кустодианта",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodian's address below.": "Наличие согласующегося лица полезно, если вы не можете завершить свои сделки. Это должен быть кто-то, кому вы полностью доверяете. Они будут иметь разрешение только на подписание от вашего имени для подтверждения или завершения контрактов, чтобы контракты не застревали в задатке. Пожалуйста, введите адрес кустодианта ниже.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "Назначение согласующегося лица успешно. Теперь вам будет предложено авторизовать согласующегося лица для разблокировки контракта.",
+  "You are currently not a cosigner for any active user": "В настоящее время вы не являетесь согласующимся лицом для какого-либо активного пользователя",
+  "Select address to cosign for:": "Выберите адрес для подписи:",
+  "Select contract:": "Выберите контракт:"
 }
 
 languages['sp'] = {
@@ -2625,6 +2697,8 @@ languages['sp'] = {
   "48": {"#sp": "Cambiar mi afiliado"},
   "49": {"#sp": "Establecer tarifa de referencia personalizada"},
   "50": {"#sp": "Intento de notificar a los posibles clientes a través del cliente de correo electrónico predeterminado (cuando sea aplicable)"},
+  "51": {"#sp": "Establecer cosignatario"},
+  "52": {"#sp": "Cosignar"},
   "Not connected.": "No conectado.",
   "Connected.": "Conectado.",
   "Please unlock Metamask so it can connect.": "Por favor, desbloquee Metamask para que pueda conectarse.",
@@ -2851,5 +2925,11 @@ languages['sp'] = {
   "Quantity updated!": "¡Cantidad actualizada!",
   "Set order fee": "Establecer tarifa del pedido",
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": "Por favor, ingresa la tarifa en porcentaje que deseas ofrecer a los afiliados por este pedido.",
-  "Favorites": "Favoritas"
+  "Favorites": "Favoritas",
+  "Set Cosigner/Custodian": "Establecer Cosignatario/Custodio",
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodian's address below.": "Contar con un cosignatario es útil en caso de que no pueda completar sus transacciones. Este debería ser alguien en quien confíe completamente. Solo se le otorgará autorización para firmar en su nombre para confirmar o completar contratos, para que los contratos no queden retenidos en custodia. Por favor, ingrese la dirección del custodio a continuación.",
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": "La designación del cosignatario fue exitosa. Ahora se le pedirá que autorice al cosignatario para el despacho del contrato.",
+  "You are currently not a cosigner for any active user": "Actualmente no eres un cosignatario para ningún usuario activo",
+  "Select address to cosign for:": "Seleccione la dirección para firmar:",
+  "Select contract:": "Seleccione el contrato:"
 };

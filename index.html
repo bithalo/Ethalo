@@ -481,6 +481,9 @@
           <option value="0" t-id="39">Use default IPFS Pinata Gateway</option>
         </select>
         <br><br>
+        <button onclick="setCustodian()" t-id="51">Set cosigner</button><br><br>
+        <button onclick="cosign()" t-id="52">Cosign</button><br><br>
+        <br><br>
         <h2 t-id="45" style="font-size: 16px">Earn</h2>
         <p id="affiliateInfo" t-id="46">Not connected</p>
         <button onclick="copyAffiliateLink()" t-id="47">Copy affiliate link</button><br><br>
@@ -879,27 +882,27 @@
         currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
         var netname = "unknown";
         var netname2 = "ETH";
-        await web3.eth.getGasPrice().then(function (theGasPrice) {
-            gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
-            if(parseInt(gasPrice) > 15000000000) {
-                gasPrice = "15000000000";
-            }
-            if(parseInt(gasPrice) < 2500000000) {
-                gasPrice = "2500000000";
-            }
-        });
         if (currentChainId == "11155111") {
+            await web3.eth.getGasPrice().then(function (theGasPrice) {
+                gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
+                if(parseInt(gasPrice) > 15000000000) {
+                    gasPrice = "15000000000";
+                }
+                if(parseInt(gasPrice) < 2500000000) {
+                    gasPrice = "2500000000";
+                }
+            });
             netname = "Sepolia Testnet";
             netname2 = "ETH";
             DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82";     
             gasOptions[0] = {
-              gasLimit: 4000000,
+              gasLimit: 1500000,
               gasPrice: null,
               maxPriorityFeePerGas: window.web3.utils.toWei('1.5', 'gwei'), // Max priority fee of 1.5 Gwei
               maxFeePerGas: window.web3.utils.toWei('1.6', 'gwei'), // Max base fee of 1.5 Gwei
             };
             gasOptions[1] = {
-              gasLimit: 4000000,
+              gasLimit: 1500000,
               gasPrice: gasPrice
             };
             tokens = [
@@ -1401,6 +1404,200 @@
       }
     }
 
+    async function setCustodian() {
+      await Swal.fire({
+        title: translateThis('Set Cosigner/Custodian'),
+        text: translateThis('Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.'),
+        input: 'text',
+        showCancelButton: true,
+        confirmButtonText: translateThis('Submit'),
+        cancelButtonText: translateThis('Cancel'),
+        inputValidator: (value) => {
+          if (!value) {
+            return 'You need to enter something!';
+          }
+        },
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          if (!web3.utils.isAddress(result.value)) {
+              Swal.fire(translateThis("Address was not valid."));
+              return;
+          }
+          try {
+            await DDEcontract.methods.authorizeCustodian(result.value, true).send({"from":myaccounts,...gasOptions[gasSetting]});
+            Swal.fire(translateThis("Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance."));
+          } catch (e) {
+            console.log(e);
+            await showError(e);
+            return;
+          }
+          try {
+            await DDEcontract.methods.authorizeContract(result.value, "0x", true).send({"from":myaccounts,...gasOptions[gasSetting]});
+            Swal.fire(translateThis("Success!"));
+          } catch (e) {
+            console.log(e);
+            await showError(e);
+            return;
+          }
+        }
+      });
+    }
+
+    async function cosign() {
+      var swalOptions = {};
+      var swalOptions2 = {};
+      var y = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 5).call());
+      var tot = 0;
+      for(let x = 0; x < y; x++) {
+        try {
+          var coaddy = DOMPurify.sanitize(await DDEcontract.methods.custodianList2(myaccounts, x).call());
+          var active = DOMPurify.sanitize(await DDEcontract.methods.isCustodian(coaddy, myaccounts).call());
+          if(active) {
+            swalOptions[coaddy] = coaddy;
+            tot+=1;
+          }
+        } catch (e) {
+          console.log(e);
+          await(showError(e));
+          return;
+        }
+      }
+      if(tot == 0) {
+        await Swal.fire("You are currently not a cosigner for any active user");
+        return;
+      }
+      await Swal.fire({
+        title: translateThis('Select address to cosign for:'),
+        input: 'select',
+        inputOptions: swalOptions,
+        showCancelButton: true,
+        confirmButtonText: translateThis('Confirm'),
+        cancelButtonText: translateThis('Cancel'),
+      }).then(async (result) => {
+        if (result.isConfirmed) {          
+          const addy = result.value;
+          var contracts = {};
+          var readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + addy + ":escrows")) || {};
+          try {
+            var y = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(addy, 2).call());
+            var auth = DOMPurify.sanitize(await DDEcontract.methods.isAuthorized(addy, myaccounts, "0x").call());
+          } catch (e) {
+            console.log(e);
+            await(showError(e));
+            return;
+          }
+          for(let x = 0; x < y; x++) {
+            try {
+              if(x in readMessages) {
+                continue;
+              }
+              var hash = DOMPurify.sanitize(await DDEcontract.methods.escrows(addy, x).call());
+              var jsondata = await getOrderHash(hash);
+              if(parseInt(jsondata.status[0]) < 4 && parseInt(jsondata.status[1]) < 4) {
+                if(!auth) {
+                  var auth2 = DOMPurify.sanitize(await DDEcontract.methods.isAuthorized(addy, myaccounts, hash).call());
+                  if(!auth2) {
+                    continue;
+                  }
+                }
+                const currentBlockNumber = await web3.eth.getBlockNumber();
+                const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+                const blockTimestamp = DOMPurify.sanitize(currentBlock.timestamp);
+                const timeRemaining = (parseFloat(parseInt(jsondata.timelimit[0]) - parseInt(blockTimestamp)) / parseFloat(60 * 60 * 24)).toFixed(2);
+                jsondata.timeRemaining = timeRemaining;
+                var escrowInfo = '';
+                if (jsondata.status[0] != 4 && jsondata.status[1] != 4) {
+                    if(parseFloat(timeRemaining) < parseFloat(2)) {
+                      escrowInfo += "<div>" + translateThis('WARNING: Funds are about to expire. Resolve the escrow with your counter-party or all funds risk being burned.') + "</div>";
+                    }
+                    if(parseFloat(timeRemaining) <= parseFloat(0)) {
+                      escrowInfo += "<div>" + translateThis("The time limit has expired and the funds have been burned. This contract is no longer available.") + "</div>";
+                      jsondata.expired = 2;
+                    }
+                }
+                var skipthis = 0;
+                if(jsondata.timelimit[0] == jsondata.timelimit[1] && jsondata.timelimit[1] == jsondata.timelimit[2]) {
+                  skipthis = 1;
+                }
+                if(jsondata.timelimit[1] != 0 && skipthis != 1) {            
+                  const timeExtension = Math.abs(parseFloat(parseInt(jsondata.timelimit[1]) - parseInt(jsondata.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
+                  escrowInfo += "<div>" + translateThis("Sender has requested a time extension for: ") + timeExtension + " " + translateThis("days") + "</div>";
+                }
+                if(jsondata.timelimit[2] != 0 && skipthis != 1) {            
+                  const timeExtension2 = Math.abs(parseFloat(parseInt(jsondata.timelimit[2]) - parseInt(jsondata.timelimit[0])) / parseFloat(60 * 60 * 24)).toFixed(2);
+                  escrowInfo += "<div>" + translateThis("Recipient has requested a time extension for: ") + timeExtension2 + " " + translateThis("days") + "</div>";
+                }
+                if (skipthis == 1) {
+                  escrowInfo += "<div>" + translateThis("Time extension granted.") + "</div>";
+                }
+                if (jsondata.status[0] == 2) {
+                  if(addy == jsondata.sender) {
+                      escrowInfo += "<div>" + translateThis("Completion request sent!") + "</div>";
+                  } else {
+                      escrowInfo += "<div>" + translateThis("Completion request received!") + "</div>";
+                  }
+                }
+                if (jsondata.status[0] == 3) {
+                  if(addy == jsondata.sender) {
+                      escrowInfo += "<div>" + translateThis("Completion request received!") + "</div>";
+                  } else {
+                      escrowInfo += "<div>" + translateThis("Completion request sent!") + "</div>";
+                  }
+                }
+                if (jsondata.status[1] == 2) {
+                  if(addy == jsondata.sender) {
+                      escrowInfo += "<div>" + translateThis("Cancellation request sent!") + "</div>";
+                  } else {
+                      escrowInfo += "<div>" + translateThis("Cancellation request received!") + "</div>";
+                  }
+                }
+                if (jsondata.status[1] == 3) {
+                  if(addy == jsondata.sender) {
+                      escrowInfo += "<div>" + translateThis("Cancellation request received!") + "</div>";
+                  } else {
+                      escrowInfo += "<div>" + translateThis("Cancellation request sent!") + "</div>";
+                  }
+                }
+                if (jsondata.status[0] == 4 || jsondata.status[1] == 4) {
+                  if(jsondata.status[0] == 4) {
+                      escrowInfo += "<div>" + translateThis("Contract completed!") + "</div>";;
+                  }
+                  if(jsondata.status[1] == 4) {
+                      escrowInfo += "<div>" + translateThis("Contract cancelled!") + "</div>";;
+                  }
+                  jsondata.expired = 1;
+                }
+                jsondata.escrowInfo = escrowInfo;
+                jsondata.index = x;
+                jsondata.originalUser = addy;
+                contracts[hash] = JSON.parse(JSON.stringify(jsondata));
+                swalOptions2[hash] = hash;
+              } else {
+                readMessages[x] = true;
+              }
+            } catch (e) {
+              console.log(e);
+              await(showError(e));
+              return;
+            }
+          }
+          localStorage.setItem(myaccounts + DDEaddy + addy + ":escrows", JSON.stringify(readMessages));
+          await Swal.fire({
+            title: translateThis('Select contract:'),
+            input: 'select',
+            inputOptions: swalOptions2,
+            showCancelButton: true,
+            confirmButtonText: translateThis('Confirm'),
+            cancelButtonText: translateThis('Cancel'),
+          }).then((result) => {
+            if (result.isConfirmed) {
+              showListing(contracts[result.value],4);
+            }
+          });
+        }
+      });
+    }
+
     async function registerData() {
       myemail = document.getElementById('myContactInfo').value;
       const { value: formValues } = await Swal.fire({
@@ -1523,7 +1720,7 @@
       }).then(async (result) => {
         if (result.isConfirmed) {
           const affiliate = result.value;
-          if (!web3.utils.isAddress(referral)) {              
+          if (!web3.utils.isAddress(affiliate)) {              
               Swal.fire(translateThis("Address was not valid."));
               return;
           }
@@ -2849,6 +3046,10 @@
 
     // Function to show the details popup for a listing
     async function showListing(listing, mode=0) {
+      var theuser = myaccounts;
+      if(mode == 4 && listing.sender != myaccounts && listing.recipient != myaccounts) {
+        theuser = listing.originalUser;
+      }
       if(notifyFavorites == "0" && mode == 0) {
         await Swal.fire({
           icon: 'info',
@@ -2890,7 +3091,7 @@
               });
               var testdata = JSON.parse(thisText);
               var successful = 0;
-              if(DOMPurify.sanitize(listing.sender) == myaccounts) {
+              if(DOMPurify.sanitize(listing.sender) == theuser) {
                 var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey2).plaintext;
                 var padding = message.split("#*#*#")[1];
                 if(padding.length > 30) {
@@ -2899,7 +3100,7 @@
                 } else {
                   throw new Error("Not enough padding");
                 }
-              } else if(DOMPurify.sanitize(listing.recipient) == myaccounts) {
+              } else if(DOMPurify.sanitize(listing.recipient) == theuser) {
                 var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey2).plaintext;
                 var padding = message.split("#*#*#")[1];
                 if(padding.length > 30) {
@@ -3017,7 +3218,7 @@
       const sender = document.createElement('p');
       var text = "<bdo>" + translateThis("Sender:") + "</bdo> ";
       if(listing.sender == "0x0000000000000000000000000000000000000000") {
-        if(myaccounts != listing.recipient) {
+        if(theuser != listing.recipient) {
             text = translateThis("You are the one paying/sending the funds.");
         } else {
             text = translateThis("You are the one receiving the funds.");
@@ -3065,7 +3266,7 @@
       const recipient = document.createElement('p');
       var text2 = "<bdo>" + translateThis("Recipient:") + "</bdo> ";
       if(listing.recipient == "0x0000000000000000000000000000000000000000") {
-        if(myaccounts != listing.sender) {
+        if(theuser != listing.sender) {
             text2 = translateThis("You are the one receiving the funds.");            
         } else {
             text2 = translateThis("You are the one paying/sending the funds.");
@@ -3153,7 +3354,7 @@
       var contact2 = '';
       var datalen = 0;
       var reputation = [0,0,0];
-      if(myaccounts != listing.recipient && listing.recipient != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
+      if(theuser != listing.recipient && listing.recipient != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
         try {
             datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.recipient, 3).call());
             if(datalen > 0) {
@@ -3174,7 +3375,7 @@
             console.log(e);
         }
       }
-      if(myaccounts != listing.sender && listing.sender != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
+      if(theuser != listing.sender && listing.sender != "0x0000000000000000000000000000000000000000" && DDEcontract != '') {
         try {
             datalen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(listing.sender, 3).call());
             if(datalen > 0) {
@@ -3266,7 +3467,7 @@
                     }).then(async (result) => {
                       if (result.isConfirmed) {
                         try {
-                          await DDEcontract.methods.expireEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
+                          await DDEcontract.methods.expireEscrow(listing.hash, theuser).send({"from":myaccounts,...gasOptions[gasSetting]});
                           await Swal.fire(translateThis("Transaction result registered!"));
                           popupContainer.remove();
                           returnThis=1;
@@ -3279,10 +3480,12 @@
                 }
                 if(returnThis==1) {
                   return;
+                }                
+                if(theuser == myaccounts) {
+                  const readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages3")) || {};
+                  readMessages[listing.index] = true;
+                  localStorage.setItem(myaccounts + DDEaddy + ":readmessages3", JSON.stringify(readMessages));
                 }
-                const readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages3")) || {};
-                readMessages[listing.index] = true;
-                localStorage.setItem(myaccounts + DDEaddy + ":readmessages3", JSON.stringify(readMessages));
                 await loadUser();
                 popupContainer.remove();
               };
@@ -3292,13 +3495,13 @@
                 skipthis = 1
               }
               if(listing.timelimit[1] != 0 && skipthis != 1) {
-                if(myaccounts != listing.sender) {
+                if(theuser != listing.sender) {
                   const acceptTime = document.createElement('button');
                   acceptTime.innerHTML = translateThis('Accept Time Extension Request');
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
-                      await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[1]).send({"from":myaccounts,...gasOptions[gasSetting]});
+                      await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[1]).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire(translateThis("Time extended!"));
                       await loadUser();
                       popupContainer.remove();
@@ -3311,13 +3514,13 @@
                 }
               }
               if(listing.timelimit[2] != 0 && skipthis != 1) {
-                if(myaccounts == listing.sender) {
+                if(theuser == listing.sender) {
                   const acceptTime = document.createElement('button');
                   acceptTime.innerHTML = translateThis('Accept Time Extension Request');
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
-                      await DDEcontract.methods.requestExtension(listing.hash, myaccounts, listing.timelimit[2]).send({"from":myaccounts,...gasOptions[gasSetting]});
+                      await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[2]).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire(translateThis("Time extended!"));
                       await loadUser();
                       popupContainer.remove();
@@ -3365,7 +3568,7 @@
                       confirmBtn.addEventListener("click", async () => {                        
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                         dialog.remove();
-                        await DDEcontract.methods.requestExtension(listing.hash, myaccounts, newtime).send({"from":myaccounts,...gasOptions[gasSetting]});
+                        await DDEcontract.methods.requestExtension(listing.hash, theuser, newtime).send({"from":myaccounts,...gasOptions[gasSetting]});
                         await Swal.fire(translateThis("Time extension requested!"));
                         await loadUser();
                         popupContainer.remove();
@@ -3381,7 +3584,7 @@
               cancelButton.id = 'cancelButton';
               cancelButton.onclick = async function() {
                 try {
-                  if(myaccounts == listing.sender) {
+                  if(theuser == listing.sender) {
                     if(listing.status[1] == 2) {
                       await Swal.fire(translateThis("Contract cancellation request was already sent!"));
                       return;
@@ -3392,7 +3595,7 @@
                       return;
                     }
                   }
-                  await DDEcontract.methods.cancelEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
+                  await DDEcontract.methods.cancelEscrow(listing.hash, theuser).send({"from":myaccounts,...gasOptions[gasSetting]});
                   if(listing.status[1] == 1) {
                     await Swal.fire(translateThis("Contract cancellation request sent!"));
                   } else {
@@ -3411,7 +3614,7 @@
               confirmButton.id = 'confirmButton';
               confirmButton.onclick = async function() {
                 try {
-                  if(myaccounts == listing.sender) {
+                  if(theuser == listing.sender) {
                     if(listing.status[0] == 2) {
                       await Swal.fire(translateThis("Contract completion request was already sent!"));
                       return;
@@ -3422,7 +3625,7 @@
                       return;
                     }
                   }
-                  await DDEcontract.methods.completeEscrow(listing.hash, myaccounts).send({"from":myaccounts,...gasOptions[gasSetting]});
+                  await DDEcontract.methods.completeEscrow(listing.hash, theuser).send({"from":myaccounts,...gasOptions[gasSetting]});
                   if(listing.status[1] == 1) {
                     await Swal.fire(translateThis("Contract completion request sent!"));
                   } else {

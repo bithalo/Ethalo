@@ -234,3 +234,11 @@
   "Set order fee": true,
   "Please enter the percentage fee that you wish to offer to affiliates for this order.": true
 }
+{
+  "Set Cosigner/Custodian": true,
+  "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": true,
+  "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": true,
+  "You are currently not a cosigner for any active user": true,
+  "Select address to cosign for:": true,
+  "Select contract:": true
+}
