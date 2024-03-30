@@ -1035,7 +1035,7 @@
             if(parseInt(reputation[0]) + parseInt(reputation[1]) == 0) {
               atext +=  "<br><br><bdo>" + translateThis("You are new to the markets! Welcome to BitBay.") + "</bdo>";
             } else {
-              atext += "<br><br><bdo>" + translateThis("Contracting success rate:") + "</bdo> " + ((reputation[0] / (reputation[0] + reputation[1])) * 100).toFixed(2) + "%(" + reputation[0] + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
+              atext += "<br><br><bdo>" + translateThis("Contracting success rate:") + "</bdo> " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "%(" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
             }
             document.getElementById("affiliateInfo").innerHTML = atext;
         } catch(e) {
