@@ -11,6 +11,19 @@ DDEabi=[
 		"type": "constructor"
 	},
 	{
+		"inputs": [],
+		"name": "WETH",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "bytes32",
@@ -378,54 +391,76 @@ DDEabi=[
 	{
 		"inputs": [
 			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "referred",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "depositSender",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "depositRecipient",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "quantity",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rfee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[3]",
+						"name": "timelimit",
+						"type": "uint256[3]"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "status",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					}
+				],
+				"internalType": "struct TwoPartyEscrow.Contract",
+				"name": "data",
+				"type": "tuple"
+			},
+			{
 				"internalType": "address",
-				"name": "_sender",
+				"name": "affiliate",
 				"type": "address"
-			},
-			{
-				"internalType": "address[2]",
-				"name": "_recipient",
-				"type": "address[2]"
-			},
-			{
-				"internalType": "address",
-				"name": "_token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_depositSender",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_depositRecipient",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256[2]",
-				"name": "_quantity",
-				"type": "uint256[2]"
-			},
-			{
-				"internalType": "uint256[2]",
-				"name": "_timelimit",
-				"type": "uint256[2]"
-			},
-			{
-				"internalType": "uint256",
-				"name": "style",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "_message",
-				"type": "string"
 			},
 			{
 				"internalType": "string[]",
@@ -527,6 +562,178 @@ DDEabi=[
 		"name": "deposit",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "dtoken",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "damount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "quantity",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "offerlimit",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "affiliate",
+				"type": "address"
+			}
+		],
+		"name": "depositAndAcceptOffer",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "dtoken",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "damount",
+				"type": "uint256"
+			},
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "token",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "referred",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "depositSender",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "depositRecipient",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "quantity",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "rfee",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[3]",
+						"name": "timelimit",
+						"type": "uint256[3]"
+					},
+					{
+						"internalType": "uint256[2]",
+						"name": "status",
+						"type": "uint256[2]"
+					},
+					{
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					}
+				],
+				"internalType": "struct TwoPartyEscrow.Contract",
+				"name": "data",
+				"type": "tuple"
+			},
+			{
+				"internalType": "address",
+				"name": "affiliate",
+				"type": "address"
+			},
+			{
+				"internalType": "string[]",
+				"name": "_hashtags",
+				"type": "string[]"
+			}
+		],
+		"name": "depositAndCreateContract",
+		"outputs": [
+			{
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "dtoken",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "damount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "destination",
+				"type": "address"
+			}
+		],
+		"name": "depositAndWithdrawal",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -1321,6 +1528,11 @@ DDEabi=[
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "destination",
+				"type": "address"
 			}
 		],
 		"name": "withdraw",

@@ -242,3 +242,33 @@
   "Select address to cosign for:": true,
   "Select contract:": true
 }
+{
+  "Login/connect": true,
+  "Please choose which way you want to log into this website.": true,
+  "Connect Using Metamask": true,
+  "Create/access account using password": true,
+  "Login using unique password": true,  
+  "Enter Password": true,  
+  "Password must be 16 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character. Some useful methods to remember a long password is to choose an uncommon phrase from a specific page of a book and replace some of the letters with numbers.": true,
+  "Select a token": true,
+  "You need to choose a token": true,
+  "Please deposit to the following address:": true,
+  "Please enter a valid destination and a positive amount.": true,
+  "Confirm Transaction": true,
+  "Estimated gas cost:": true, 
+  "Gas limit:": true,
+  "Please deposit funds to cover the minimum gas limit. This amount is needed to process all types of transactions. However, transactions will usually cost less than this limit.": true,
+  "Not enough funds": true,
+  "Minimum cost:": true,
+  "Gas price:": true,
+  "Estimated fee:": true,
+  "Total(in coins):": true,
+  "Maximum fee:": true,
+  "Please be aware that to transact in alternative coins you should also deposit the base currency to be able to process gas fees.": true,
+  "Base currency:": true,
+  "You have funds in your wallet. The wallet funds are not able to be used for contracts until they are moved directly to the markets/trading account. For the base currency some funds are needed for gas(paid from the wallet) and some are used for contracts(paid from the markets/trading account). For altcoins it's recommended to move all of the funds to the trading account.": true,
+  "Move funds from wallet to trading/markets account.": true,
+  "Show wallet address for receiving more funds": true,
+  "You have funds in your wallet but you should move some to your markets/trading account in order to interact with offers like this. Would you like to do that now?": true,
+  "You do not have enough funds to cover some of your pending offers if they were to be accepted. Please review your offers and deposit more funds or modify the offers. This can be true for autoaccept enabled offers, offers with high quantities and private offers.": true
+}

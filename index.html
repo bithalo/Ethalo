@@ -391,7 +391,7 @@
           <option value="default" disabled selected>Default</option>
         </select>
         <div class="connect">
-            <button t-id="3" onclick="login(1)">Connect Metamask</button>
+            <button t-id="3" onclick="login(1)">Connect</button>
             <div id="connectionstatus" class="connectionstatus" t-id="4">Not connected</div>
         </div>
     </div>
@@ -728,10 +728,11 @@
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
-    var DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82"; //Sepolia testnet is default market view
+    var DDEaddy = "0x221e4385b0F3ac0bD4d64553c92B81E0D322315B"; //Sepolia testnet is default market view
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
+    var accountprivkey = "";
     var gasOptions = [{},{}];    
     var gasSetting = 1;
     var balances = {};
@@ -816,14 +817,14 @@
         window.ethereum.on('accountsChanged', async function (newaccounts) {
           console.log('accountsChanges',newaccounts);
           defaultvars();
-          await login();
+          await login2();
         });
          // detect Network account change
         window.ethereum.on('chainChanged', async function(thenetworkId){
           console.log('chainChanged',thenetworkId);
           marketOffers = {'indices':[], 'results':[]};
           defaultvars();
-          await login();
+          await login2();
         });
       }
     });    
@@ -831,7 +832,7 @@
     function defaultvars() {
         DDEcontract = "";
         myaccounts = "";
-        DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82";
+        DDEaddy = "0x221e4385b0F3ac0bD4d64553c92B81E0D322315B";
         balances = {};
         baseBalance = 0;
         gasPrice = "";
@@ -840,11 +841,13 @@
         document.getElementById("myoffers").innerHTML = ""; // clear the container first
         document.getElementById("mycontracts").innerHTML = ""; // clear the container first
         document.getElementById('publicemail').innerHTML = "";
-        document.getElementById('myPasswordInput').innerHTML = "";
+        document.getElementById('myPasswordInput').value = "";
+        document.getElementById("myPasswordInput").disabled = false;
         offerExpiration.selectedIndex = 0;
         currentMarketsLength = 0;
         userpubkey = "";
         userprivkey = "";
+        accountprivkey = "";
         gasOptions = [{},{}];
         gasSetting = 1;
         baseFee = 0;
@@ -852,22 +855,114 @@
     }
 
     async function login(clear = 0) {
-        if (window.ethereum) { //Note: for mobile this only works if the webpage has <head> tag
-            console.log("connecting");
-            await window.ethereum.request({method: 'eth_requestAccounts'});
-            web3 = new Web3(window.ethereum);
-            console.log("success");
-            if(clear == 1) {
-                marketOffers = {'indices':[], 'results':[]};
+      await Swal.fire({
+        title: translateThis('Login/connect'),
+        text: translateThis('Please choose which way you want to log into this website.'),
+        showCancelButton: true,
+        confirmButtonText: translateThis('Connect Using Metamask'),
+        cancelButtonText: translateThis('Create/access account using password'),
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+            if (window.ethereum) { //Note: for mobile this only works if the webpage has <head> tag
+                defaultvars();
+                console.log("connecting");
+                await window.ethereum.request({method: 'eth_requestAccounts'});
+                web3 = new Web3(window.ethereum);
+                console.log("success");
+                if(clear == 1) {
+                    marketOffers = {'indices':[], 'results':[]};
+                }
+                isConnected = true;
+                document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
+                await loadUser(1);
+                await populateListings();
+            } else {
+                isConnected = false;
+                document.getElementById("connectionstatus").innerHTML = translateThis("Not connected.");
             }
-            isConnected = true;
-            document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
-            await loadUser(1);
-            await populateListings();
         } else {
-            isConnected = false;
-            document.getElementById("connectionstatus").innerHTML = translateThis("Not connected.");
+          Swal.fire({
+            title: translateThis('Login using unique password'),
+            html:
+              '<select id="network" class="swal2-select">' +
+                '<option value="0">Ethereum</option>' +
+                '<option value="1" selected>Sepolia Testnet</option>' +
+              '</select>' +
+              '<input type="password" id="password" class="swal2-input" placeholder="'+translateThis('Enter Password')+'">' +
+              '<input type="password" id="confirmPassword" class="swal2-input" placeholder="'+translateThis('Confirm Password')+'">',
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: translateThis('Confirm'),
+            cancelButtonText: translateThis('Cancel'),
+            preConfirm: () => {
+              const network = document.getElementById('network').value;
+              const password = document.getElementById('password').value;
+              const confirmPassword = document.getElementById('confirmPassword').value;
+              
+              if (password !== confirmPassword) {
+                Swal.showValidationMessage(translateThis('Passwords do not match'));
+                return false;
+              }
+
+              const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{16,}$/;
+
+              if (!password.match(passwordRegex)) {
+                Swal.showValidationMessage(translateThis('Password must be 16 characters long and contain at least one lowercase letter, one uppercase letter, one number, and one special character. Some useful methods to remember a long password is to choose an uncommon phrase from a specific page of a book and replace some of the letters with numbers.'));
+                return false;
+              }
+
+              return { network: network, confirmedPassword: password };
+            }
+          }).then(async (result) => {
+            if (result.isConfirmed) {
+              const { network, confirmedPassword } = result.value;
+              // Passwords match, proceed to set in localStorage
+              var hashedPassword = confirmedPassword;
+              hashedPassword = Crypto.SHA256(hashedPassword);
+              userprivkey=hashedPassword;
+              for(var i=1; i<50000; i++) {
+                userprivkey=Crypto.SHA256(userprivkey);
+              }
+              accountprivkey = '0x' + userprivkey;
+              userprivkey = cryptico.generateRSAKey(Crypto.SHA256(userprivkey), 1024);
+              userpubkey = cryptico.publicKeyString(userprivkey);
+              document.getElementById("myPasswordInput").value = Crypto.SHA256("default");
+              document.getElementById("myPasswordInput").disabled = true;
+              if(parseInt(network) == 0) {
+                web3 = new Web3("https://rpc.ankr.com/eth");
+              } else {
+                web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
+              }
+              const account = await web3.eth.accounts.privateKeyToAccount(accountprivkey);
+              const wallet = web3.eth.accounts.wallet;
+              wallet.add(account);
+              isConnected = true;
+              document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
+              await loadUser(1);
+              await populateListings();
+            }
+          });
         }
+      });
+    }
+
+    async function login2(clear = 0) {
+      if (window.ethereum) { //Note: for mobile this only works if the webpage has <head> tag
+          console.log("connecting");
+          await window.ethereum.request({method: 'eth_requestAccounts'});
+          web3 = new Web3(window.ethereum);
+          console.log("success");
+          if(clear == 1) {
+              marketOffers = {'indices':[], 'results':[]};
+          }
+          isConnected = true;
+          document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
+          await loadUser(1);
+          await populateListings();
+      } else {
+          isConnected = false;
+          document.getElementById("connectionstatus").innerHTML = translateThis("Not connected.");
+      }
     }
 
     async function loadUser(login=0) {
@@ -875,7 +970,7 @@
             return;
         }
         var myaccounts2 = await web3.eth.getAccounts();
-        if (myaccounts2.length == 0) {
+        if (myaccounts2.length == 0 && accountprivkey == "") {
             document.getElementById("connectionstatus").innerHTML = translateThis("Please unlock Metamask so it can connect.");
             return;
         }
@@ -885,8 +980,8 @@
         if (currentChainId == "11155111") {
             await web3.eth.getGasPrice().then(function (theGasPrice) {
                 gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
-                if(parseInt(gasPrice) > 15000000000) {
-                    gasPrice = "15000000000";
+                if(parseInt(gasPrice) > 900000000000) {
+                    gasPrice = "900000000000";
                 }
                 if(parseInt(gasPrice) < 2500000000) {
                     gasPrice = "2500000000";
@@ -894,7 +989,7 @@
             });
             netname = "Sepolia Testnet";
             netname2 = "ETH";
-            DDEaddy = "0xe491CC5b00e24fE53cCA89adaC79f5D7FdA80a82";     
+            DDEaddy = "0x221e4385b0F3ac0bD4d64553c92B81E0D322315B";     
             gasOptions[0] = {
               gasLimit: 1500000,
               gasPrice: null,
@@ -930,7 +1025,11 @@
         if (metabutton && window.innerWidth <= 800) {
             metabutton.textContent = translateThis('Connected');
         }
-        myaccounts = DOMPurify.sanitize(myaccounts2[0]);
+        if(accountprivkey != "") {
+          myaccounts = await web3.eth.accounts.privateKeyToAccount(accountprivkey).address;
+        } else {
+          myaccounts = DOMPurify.sanitize(myaccounts2[0]);
+        }
         var cached = await getContactInfo(myaccounts);
         document.getElementById("myContactInfo").value = cached;
         cached = await getExpirationInfo(myaccounts);
@@ -953,7 +1052,7 @@
         }
         checkFavorites();
         const userPWHash = localStorage.getItem(myaccounts + ":password");
-        if(userPWHash) {
+        if(userPWHash && document.getElementById("myPasswordInput").value != Crypto.SHA256("default")) {
           const userPWHash2 = localStorage.getItem(myaccounts + ":savedpw");
           if(!userPWHash2) {
             await getUserPassword();
@@ -977,26 +1076,38 @@
         DDEcontract = new web3.eth.Contract(DDEabi, DDEaddy);
         balances = {};
         var btext = [];
-        for (var i = 0; i < tokens.length; i++) {
-            await DDEcontract.methods.userBalance(myaccounts,tokens[i].address).call().then(function (liquid1) {            
-                    balances[tokens[i].address]=({token:tokens[i].token, decimals: tokens[i].decimals, amount: DOMPurify.sanitize(liquid1)});
-                    btext+="<br>"+balances[tokens[i].address].token+" <bdo>"+translateThis("balance deposited to markets:")+"</bdo> "+displayDecimals(tokens[i].address, balances[tokens[i].address].amount);
-            });
-        }
-        reputation = [0,0,0];
-        reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
-        if((parseInt(reputation[0]) + parseInt(reputation[1])) > 0) {
-            btext+="<br><bdo>" + translateThis("Contracting success rate:") + "</bdo> " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
-        }
         await window.web3.eth.getBalance(myaccounts, function(err, result1) {
             if (err) {
                 console.log(err);
                 return;
             } else {
                 baseBalance = DOMPurify.sanitize(result1);//window.web3.utils.fromWei(result1, "ether");
-                document.getElementById("account").innerHTML = "<bdo>" + DOMPurify.sanitize(translateThis("Current Network:") + "</bdo> " + netname + "<br>" + myaccounts + "<br>" + netname2 + " <bdo>" + translateThis("wallet balance:") + "</bdo> " + window.web3.utils.fromWei(baseBalance, "ether") + btext);
+                balances['base'] = {token: "base", decimals: 18, amount: baseBalance};
             }
         });
+        for (var i = 0; i < tokens.length; i++) {
+            await DDEcontract.methods.userBalance(myaccounts,tokens[i].address).call().then(function (liquid1) {
+              balances[tokens[i].address]=({token:tokens[i].token, decimals: tokens[i].decimals, amount: DOMPurify.sanitize(liquid1), amount2: "0", total: web3.utils.toBN(DOMPurify.sanitize(liquid1))});
+            });
+            if(accountprivkey != "") {
+              if(tokens[i].token == tokens[0].token) {
+                //balances[tokens[i].address].total=balances[tokens[i].address].total.add(web3.utils.toBN(baseBalance));
+              } else {
+                var tokenContract = new web3.eth.Contract(ERC20abi, tokens[i].address);
+                var base2 = DOMPurify.sanitize(await tokenContract.methods.balanceOf(myaccounts).call());
+                //balances[tokens[i].address].total=balances[tokens[i].address].total.add(web3.utils.toBN(base2));                
+                balances[tokens[i].address].amount2 = base2;
+                btext+="<br>"+balances[tokens[i].address].token+" <bdo>"+translateThis("wallet balance:")+"</bdo> "+displayDecimals(tokens[i].address, balances[tokens[i].address].amount2.toString());
+              }
+            }
+            btext+="<br>"+balances[tokens[i].address].token+" <bdo>"+translateThis("balance deposited to markets:")+"</bdo> "+displayDecimals(tokens[i].address, balances[tokens[i].address].total.toString());
+        }
+        reputation = [0,0,0];
+        reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(myaccounts).call())));
+        if((parseInt(reputation[0]) + parseInt(reputation[1])) > 0) {
+            btext+="<br><bdo>" + translateThis("Contracting success rate:") + "</bdo> " + (parseFloat(parseFloat(reputation[0]) / (parseFloat(reputation[0]) + parseFloat(reputation[1]))) * parseFloat(100)).toFixed(2) + "% (" + parseInt(reputation[0]) + "/" + (parseInt(reputation[0]) + parseInt(reputation[1])) + ")";
+        }
+        document.getElementById("account").innerHTML = "<bdo>" + DOMPurify.sanitize(translateThis("Current Network:") + "</bdo> " + netname + "<br>" + myaccounts + "<br>" + netname2 + " <bdo>" + translateThis("wallet balance:") + "</bdo> " + window.web3.utils.fromWei(baseBalance, "ether") + btext);
         try {
             var afee = DOMPurify.sanitize(await DDEcontract.methods.affiliateFee().call());
             var cfee = DOMPurify.sanitize(await DDEcontract.methods.customFee(myaccounts).call());
@@ -1424,6 +1535,13 @@
               return;
           }
           try {
+            if(accountprivkey != "") {
+              const gasEstimate = 130000;
+              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              if(!res) {
+                return;
+              }
+            }
             await DDEcontract.methods.authorizeCustodian(result.value, true).send({"from":myaccounts,...gasOptions[gasSetting]});
             Swal.fire(translateThis("Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance."));
           } catch (e) {
@@ -1432,6 +1550,13 @@
             return;
           }
           try {
+            if(accountprivkey != "") {
+              const gasEstimate = 50000;
+              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              if(!res) {
+                return;
+              }
+            }
             await DDEcontract.methods.authorizeContract(result.value, "0x", true).send({"from":myaccounts,...gasOptions[gasSetting]});
             Swal.fire(translateThis("Success!"));
           } catch (e) {
@@ -1638,6 +1763,13 @@
         return;
       }
       try {
+          if(accountprivkey != "") {
+            const gasEstimate = 150000;
+            var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+            if(!res) {
+              return;
+            }
+          }
           await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions[gasSetting]});
           await Swal.fire(translateThis("Data added!"));
         } catch (error) {          
@@ -1728,6 +1860,13 @@
           reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(affiliate).call())));
           if(reputation[2] >= 10) {
             try {
+              if(accountprivkey != "") {
+                const gasEstimate = 50000;
+                var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                if(!res) {
+                  return;
+                }
+              }
               await DDEcontract.methods.changeAffiliate(affiliate).send({"from":myaccounts,...gasOptions[gasSetting]});
               Swal.fire(translateThis("Success!"));
               referral = affiliate;
@@ -1762,6 +1901,13 @@
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
           try {
+            if(accountprivkey != "") {
+              const gasEstimate = 50000;
+              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              if(!res) {
+                return;
+              }
+            }
             await DDEcontract.methods.changeCustomFee(value).send({"from":myaccounts,...gasOptions[gasSetting]});
             Swal.fire(translateThis("Success!"));
           } catch (e) {
@@ -2430,6 +2576,7 @@
         return jsondata;
     }
     lastNotified = 0;
+    lastNotified2 = 0;
     async function populateOffers() {
       var list = document.createElement("ul");
       var readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages")) || {};
@@ -2467,6 +2614,19 @@
           const li = document.createElement("listElement");
           const counterpartyAddress = offerData.sender === myaccounts ? offerData.recipient : offerData.sender;
           const counterpartyLabel = counterpartyAddress === "0x0000000000000000000000000000000000000000" ? translateThis("Market Offer") : counterpartyAddress;
+          if(offerData.status[0] == 0 || offerData.status[0] == 2) {
+            notenough = 0;
+            if(myaccounts==offerData.sender && ((web3.utils.toBN(offerData.amount).add(web3.utils.toBN(offerData.depositSender))).mul(web3.utils.toBN(offerData.quantity[1]))).gt(web3.utils.toBN(balances[offerData.token].amount))) {
+              notenough = 1;
+            }
+            if(myaccounts==offerData.recipient && (web3.utils.toBN(offerData.depositRecipient).mul(web3.utils.toBN(offerData.quantity[1]))).gt(web3.utils.toBN(balances[offerData.token].amount))) {
+              notenough = 1;
+            }
+            if(parseInt(new Date().getTime()/1000) > lastNotified2 + 300 && notenough == 1) {
+              lastNotified2 = parseInt(new Date().getTime()/1000);
+              await Swal.fire({text:translateThis("You do not have enough funds to cover some of your pending offers if they were to be accepted. Please review your offers and deposit more funds or modify the offers. This can be true for autoaccept enabled offers, offers with high quantities and private offers.")});
+            }
+          }
           const svgString = jdenticon.toSvg(offerHash, 25);
           const base64String = btoa(svgString);
           const dataUrl = `data:image/svg+xml;base64,${base64String}`;
@@ -2539,6 +2699,23 @@
               readMessages[i] = true;
               localStorage.setItem(myaccounts + DDEaddy + ":readmessages2", JSON.stringify(readMessages));
               continue;
+            }
+          }
+          if(parseInt(new Date().getTime()/1000) > lastNotified2 + 300) {
+            notenough = 0;
+            if(myaccounts==offerData.sender && (web3.utils.toBN(offerData.amount).add(web3.utils.toBN(offerData.depositSender))).gt(web3.utils.toBN(balances[offerData.token].amount))) {
+              if(offerData.status[0] == 1) {
+                notenough = 1;
+              }
+            }
+            if(myaccounts==offerData.recipient && (web3.utils.toBN(offerData.depositRecipient)).gt(web3.utils.toBN(balances[offerData.token].amount))) {
+              if(offerData.status[1] == 1) {
+                notenough = 1;
+              }
+            }
+            if(notenough == 1) {
+              lastNotified2 = parseInt(new Date().getTime()/1000);
+              await Swal.fire({text:translateThis("You do not have enough funds to cover some of your pending offers if they were to be accepted. Please review your offers and deposit more funds or modify the offers. This can be true for autoaccept enabled offers, offers with high quantities and private offers.")});
             }
           }
           const li2 = document.createElement("listElement");
@@ -3467,6 +3644,13 @@
                     }).then(async (result) => {
                       if (result.isConfirmed) {
                         try {
+                          if(accountprivkey != "") {
+                            const gasEstimate = 100000;
+                            var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                            if(!res) {
+                              return;
+                            }
+                          }
                           await DDEcontract.methods.expireEscrow(listing.hash, theuser).send({"from":myaccounts,...gasOptions[gasSetting]});
                           await Swal.fire(translateThis("Transaction result registered!"));
                           popupContainer.remove();
@@ -3501,6 +3685,13 @@
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
+                      if(accountprivkey != "") {
+                        const gasEstimate = 70000;
+                        var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                        if(!res) {
+                          return;
+                        }
+                      }
                       await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[1]).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire(translateThis("Time extended!"));
                       await loadUser();
@@ -3520,6 +3711,13 @@
                   acceptTime.id = 'acceptTime';
                   acceptTime.onclick = async function() {
                     try {
+                      if(accountprivkey != "") {
+                        const gasEstimate = 70000;
+                        var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                        if(!res) {
+                          return;
+                        }
+                      }
                       await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[2]).send({"from":myaccounts,...gasOptions[gasSetting]});
                       await Swal.fire(translateThis("Time extended!"));
                       await loadUser();
@@ -3568,6 +3766,13 @@
                       confirmBtn.addEventListener("click", async () => {                        
                         const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                         dialog.remove();
+                        if(accountprivkey != "") {
+                          const gasEstimate = 70000;
+                          var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                          if(!res) {
+                            return;
+                          }
+                        }
                         await DDEcontract.methods.requestExtension(listing.hash, theuser, newtime).send({"from":myaccounts,...gasOptions[gasSetting]});
                         await Swal.fire(translateThis("Time extension requested!"));
                         await loadUser();
@@ -3592,6 +3797,13 @@
                   } else {
                     if(listing.status[1] == 3) {
                       await Swal.fire(translateThis("Contract cancellation request was already sent!"));
+                      return;
+                    }
+                  }
+                  if(accountprivkey != "") {
+                    const gasEstimate = 70000;
+                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    if(!res) {
                       return;
                     }
                   }
@@ -3622,6 +3834,13 @@
                   } else {
                     if(listing.status[0] == 3) {
                       await Swal.fire(translateThis("Contract completion request was already sent!"));
+                      return;
+                    }
+                  }
+                  if(accountprivkey != "") {
+                    const gasEstimate = 150000;
+                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    if(!res) {
                       return;
                     }
                   }
@@ -3862,7 +4081,90 @@
       }
     }
 
-    async function deposit() {
+    async function deposit(skipthis = 0) {
+      if(accountprivkey != "" && skipthis == 0) {
+        var depOptions = 0;
+        const tokenNames = tokens.map(token => token.token);
+        await Swal.fire({
+          title: translateThis('Select Token:'),
+          input: 'select',
+          inputOptions: tokenNames.reduce((acc, tokenName) => {
+            acc[tokenName] = tokenName;
+            return acc;
+          }, {}),
+          inputPlaceholder: 'Select a token',
+          showCancelButton: true,
+          inputValidator: (value) => {
+            if (!value) {
+              return 'You need to choose a token';
+            }
+          }
+        }).then(async (result) => {
+          console.log(result.value);
+          var baseBal = 0;
+          for(let i=0; i<tokens.length; i++) {
+            if(tokens[i].token == result.value) {
+              if(i != 0) {
+                if(parseInt(balances[tokens[i].address].amount2) != 0) {
+                  baseBal = 1;
+                }
+                if(parseInt(balances['base'].amount) == 0) {
+                  await Swal.fire({
+                    title: translateThis('Deposit'),
+                    html: translateThis('Please be aware that to transact in alternative coins you should also deposit the base currency to be able to process gas fees.') + "<br><br>" + translateThis('Base currency:') + " " + tokens[0].token
+                  });
+                }
+              } else {
+                if(parseInt(balances['base'].amount) != 0) {
+                  baseBal = 1;
+                }
+              }
+              break;
+            }
+          }
+          if (result.isConfirmed) {            
+            if(baseBal != 0) {
+              result2 = await Swal.fire({
+                title: translateThis('Deposit'),
+                text: translateThis("You have funds in your wallet. The wallet funds are not able to be used for contracts until they are moved directly to the markets/trading account. For the base currency some funds are needed for gas(paid from the wallet) and some are used for contracts(paid from the markets/trading account). For altcoins it's recommended to move all of the funds to the trading account."),                
+                confirmButtonText: translateThis("Move funds from wallet to trading/markets account."),
+                cancelButtonText: translateThis("Show wallet address for receiving more funds"),
+                showCancelButton: true
+              });
+            }
+            if(result2.isConfirmed) {
+              depOptions = 1;
+            }
+            if(depOptions == 0) {
+              await Swal.fire({
+                title: translateThis('Deposit'),
+                html: `
+                  <div>
+                    ${translateThis('Please deposit to the following address:')}<br>
+                    <span style="font-size: 11px;">${myaccounts}</span><br>
+                  </div>
+                `,
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonText: translateThis("Copy to Clipboard"),
+                cancelButtonText: translateThis("Cancel"),
+                preConfirm: () => {
+                  // Copy address to clipboard logic here
+                  const textarea = document.createElement('textarea');
+                  textarea.value = myaccounts;
+                  document.body.appendChild(textarea);
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                }
+              });
+            }
+          }
+        });
+        if(depOptions == 0) {
+          return;
+        }
+      }
       // Create the popup container
       const popupContainer = document.createElement('div');
       popupContainer.classList.add('popup-container');
@@ -3913,10 +4215,15 @@
         var decimals = parseInt(tokens[selectedIndex].decimals);
         var amount = parseFloat(document.getElementById('amount-input').value);
 
-        if (token === "ETH") {
-          // If the selected token is ETH, deposit WETH instead
+        if (token === tokens[0].token) {
+          // If the selected token is ETH/BASE, deposit WETH instead
           try {
             var value = web3.utils.toWei(amount.toString(), 'ether');
+            const gasEstimate = 90000;
+            var res = await confirmTransaction(gasEstimate, value, tokenAddress);
+            if(!res) {
+              return;
+            }
             await DDEcontract.methods.depositWETH().send({"from":myaccounts,"value":value,...gasOptions[gasSetting]});
             await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
@@ -3928,15 +4235,13 @@
         } else {
           // If the selected token is not ETH, deposit the selected token
           try {
-            var tokenContract = new web3.eth.Contract(ERC20abi, tokenAddress);
-            var allowance = DOMPurify.sanitize(await tokenContract.methods.allowance(myaccounts, DDEaddy).call());
             var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toString()
-
-            if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
-              await Swal.fire(translateThis("Waiting for approval..."));
-              await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions[gasSetting]});
+            await getApproval(tokenAddress, value);
+            const gasEstimate = 90000;
+            var res = await confirmTransaction(gasEstimate, value, tokenAddress);
+            if(!res) {
+              return;
             }
-
             await DDEcontract.methods.deposit(tokenAddress, value).send({"from":myaccounts,...gasOptions[gasSetting]});
             await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
@@ -3992,110 +4297,113 @@
       `;
       document.head.appendChild(style);
     }
+    async function getApproval(tokenAddress, value) {
+      if(tokennames[tokenAddress] != tokens[0].token) {
+        var tokenContract = new web3.eth.Contract(ERC20abi, tokenAddress);
+        var allowance = DOMPurify.sanitize(await tokenContract.methods.allowance(myaccounts, DDEaddy).call());
+        if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
+          await Swal.fire(translateThis("Waiting for approval..."));
+          await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions[gasSetting]});
+        }
+      }
+    }
+    async function confirmTransaction(gasEstimate, value, tokenAddress) {
+      var mybase = web3.utils.toBN(balances['base'].amount);
+      var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
+      if(mybase.lt(glimit)) {
+        await Swal.fire({title: translateThis("Not enough funds"), html: translateThis("Please deposit funds to cover the minimum gas limit. This amount is needed to process all types of transactions. However, transactions will usually cost less than this limit.") + "<br><br>" + "Gas limit:" + " " + gasOptions[gasSetting].gasLimit + "<br>" + "Gas price:" + " " + gasPrice + "<br>" + "Minimum cost:" + " " + displayDecimals(tokens[0].address,glimit.toString()) + " " + tokens[0].token});
+        return false;
+      }
+      const confirmation = await Swal.fire({
+        title:  translateThis('Confirm Transaction'),
+        html:  translateThis('Estimated gas cost:') + " " + gasEstimate + '<br>' + translateThis('Gas limit:') + " " + gasOptions[gasSetting].gasLimit + '<br>' + translateThis('Gas price:') + " " + gasPrice + '<br>' + translateThis('Estimated fee:') + " " + displayDecimals(tokens[0].address,web3.utils.toBN(gasEstimate).mul(web3.utils.toBN(gasPrice)).toString()) + " " +  tokens[0].token + '<br>' + translateThis('Maximum fee:') + " " + displayDecimals(tokens[0].address,glimit.toString()) + " " +  tokens[0].token + '<br>' + translateThis('Total(in coins):') + " " + displayDecimals(tokenAddress, value.toString()) + " " + tokennames[tokenAddress],
+        showCancelButton: true,
+        confirmButtonText: translateThis('Submit'),
+        cancelButtonText: translateThis('Cancel'),
+      });
+      if (confirmation.isConfirmed) {
+        return true;
+      }
+      return false;
+    }
 
     async function withdraw() {
-      // Create the popup container
-      const popupContainer = document.createElement('div');
-      popupContainer.classList.add('popup-container');
-      //popupContainer.onclick = function() { popupContainer.remove(); };
+      // Populate the token select dropdown for Swal
+      const tokenOptions = tokens.map((token, index) => ({
+        value: index,
+        text: token.token,
+      }));
 
-      const popup = document.createElement('div');
-      popup.classList.add('popup');
-
-      const closeButton = document.createElement('span');
-      closeButton.innerHTML = '&times;';
-      closeButton.classList.add('close-button');
-      closeButton.onclick = function() { popupContainer.remove(); };
-
-      // Create the form element
-      var form = document.createElement('form');
-      form.classList.add('popup-form');
-      form.innerHTML = `
-        <h2>` + translateThis('Withdraw tokens from your balance') + `</h2>
-        <div class="form-group">
-          <label for="token-select">` + translateThis('Select token:') + `</label>
-          <select id="token-select" name="token-select"></select>
-        </div>
-        <div class="form-group">
-          <label for="amount-input">` + translateThis('Amount:') + `</label>
-          <input type="number" step="0.00000001" min="0.00000001" id="amount-input" name="amount-input" required>
-        </div>
-        <div class="form-group">
-          <button type="submit" class="btn">` + translateThis('Withdraw') + `</button>
-        </div>
-      `;
-
-      // Populate the token select dropdown
-      var tokenSelect = form.querySelector('#token-select');
-      for (var i = 0; i < tokens.length; i++) {
-        var option = document.createElement('option');
-        option.value = i;
-        option.text = tokens[i].token;
-        tokenSelect.appendChild(option);
-      }
-
-      // Add the form submit event listener
-      form.addEventListener('submit', async function(event) {
-          event.preventDefault();
-          var selectedIndex = parseInt(tokenSelect.value);
-          var tokenAddress = tokens[selectedIndex].address;
-          var decimals = parseInt(tokens[selectedIndex].decimals);
-          var amount = parseFloat(document.getElementById('amount-input').value);          
-          var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
-          try {
-            await DDEcontract.methods.withdraw(tokenAddress, value).send({"from":myaccounts,...gasOptions[gasSetting]});
-            await Swal.fire(translateThis("Withdraw success!"));
-            await loadUser();
-            popupContainer.remove();
-          } catch (error) {
-            console.error(error);
-            await showError(error);
+      // Show Swal modal
+      const { value: formValues, isConfirmed } = await Swal.fire({
+        title: translateThis('Withdraw tokens from your balance'),
+        html:
+          `<select id="token-select" class="swal2-input">
+             ${tokenOptions.map(option => `<option value="${option.value}">${option.text}</option>`).join('')}
+           </select>
+           <input id="amount-input" class="swal2-input" placeholder=${translateThis('Amount:')}>
+           <input id="destination-input" class="swal2-input" placeholder=${translateThis('Recipient:')}>`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: translateThis('Withdraw'),
+        cancelButtonText: translateThis('Cancel'),
+        preConfirm: () => {
+          const selectedIndex = document.getElementById('token-select').value;
+          const amount = parseFloat(document.getElementById('amount-input').value);
+          const destination = document.getElementById('destination-input').value;
+          // Validate destination is not blank, amount is a valid number, and amount is greater than zero
+          if (destination.trim() === '' || isNaN(amount) || amount <= 0 || !(/^(0x)?[0-9a-fA-F]{40}$/.test(destination))) {
+            Swal.showValidationMessage(translateThis('Please enter a valid destination and a positive amount.'));
+            return false;
           }
+          return { selectedIndex, amount, destination };
+        }
       });
 
-      // Append the form to the popup container
-      popupContainer.appendChild(popup);
-      popup.appendChild(form);
-      popup.appendChild(closeButton);
-
-      // Append the popup container to the page body
-      document.body.appendChild(popupContainer);
-
-      // Add CSS rules
-      const style = document.createElement('style');
-      style.type = 'text/css';
-      style.innerHTML = `
-        .popup-container {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.4);
-          display: flex;
-          justify-content: center;
-          align-items: center;
+      if (isConfirmed && formValues) {
+        const { selectedIndex, amount, destination } = formValues;
+        const tokenAddress = tokens[selectedIndex].address;
+        const decimals = parseInt(tokens[selectedIndex].decimals);
+        const value = (new BigNumber(amount).times(new BigNumber(10).pow(decimals))).toFixed(0);
+        try {
+          if(accountprivkey == "") {
+            await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
+          } else {
+            if(web3.utils.toBN(value).lte(web3.utils.toBN(balances[tokenAddress].amount))) {
+              const gasEstimate = 70000;
+              var res = await confirmTransaction(gasEstimate, value, tokenAddress);
+              if(!res) {
+                return;
+              }              
+              await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
+            } else {
+              const gasEstimate = 120000;
+              var res = await confirmTransaction(gasEstimate, value, tokenAddress);
+              if(!res) {
+                return;
+              }
+              await getApproval(tokenAddress, value);
+              var myval = "0";
+              var difference = web3.utils.toBN(value).sub(web3.utils.toBN(balances[tokenAddress].amount));
+              if(tokennames[tokenAddress] == tokens[0].token) {
+                var mybase = web3.utils.toBN(balances['base'].amount);
+                var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
+                if(mybase.lt(difference.add(glimit))) {
+                  await Swal.fire(translateThis("Not enough funds"));
+                  return;
+                }
+                myval = difference.toString();
+              }
+              await DDEcontract.methods.depositAndWithdrawal(tokenAddress, difference.toString(), tokenAddress, value, destination).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
+            }
+          }
+          await Swal.fire(translateThis("Withdraw success!"));
+          await loadUser();
+        } catch (error) {
+          console.error(error);
+          await showError(error);
         }
-
-        .popup {
-          position: relative;
-          background-color: white;
-          padding: 20px;
-          max-width: 600px;
-          max-height: 80%;
-          overflow-y: auto;
-        }
-
-        .close-button {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          font-size: 28px;
-          font-weight: bold;
-          cursor: pointer;
-        }
-      `;
-      document.head.appendChild(style);
+      }
     }
 
     async function resizeImage(file) {
@@ -4318,7 +4626,6 @@
             }
           }
         });
-
         if(Object.keys(counterdata).length !== 0) {
           form.querySelector('#contractType').selectedIndex = 1;
           counterPartyAddressField.style.display = 'block';
@@ -4377,7 +4684,40 @@
 
         // Add the form submit event listener
         form.addEventListener('submit', async function(event) {
-          event.preventDefault();
+          event.preventDefault();          
+          var selectedIndex = parseInt(tokenSelect.value);
+          var tokenAddress = tokens[selectedIndex].address;
+          var decimals = parseInt(tokens[selectedIndex].decimals);
+          var returnMe = 0;
+          var depnotice = 0;
+          if(tokennames[tokenAddress] == tokens[0].token) {
+            if(parseInt(balances['base'].amount) != 0 && parseInt(balances[tokenAddress].amount) == 0) {
+              depnotice = 1;
+            }
+          } else {
+            if(parseInt(balances[tokenAddress].amount2) != 0 && parseInt(balances[tokenAddress].amount) == 0) {
+              depnotice = 1;
+            }
+          }          
+          if(depnotice == 1) {
+            await Swal.fire({
+              title: translateThis('Deposit'),
+              text: translateThis("You have funds in your wallet but you should move some to your markets/trading account in order to interact with offers like this. Would you like to do that now?"),
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonText: translateThis('Yes'),
+              cancelButtonText: translateThis('No'),
+            }).then(async (result) => {
+              if (result.isConfirmed) {
+                returnMe = 1;
+                await deposit(1);
+                return;
+              }
+            });
+          }
+          if(returnMe == 1) {
+            return false;
+          }
           // Get form values
           var counterPartyInput = document.getElementById("counterPartyInput").value;
           var sender = "0x0000000000000000000000000000000000000000";
@@ -4443,9 +4783,6 @@
           }
           var sender2 = (senderReceiver === "receiver" ? sender : recipient);
           var recipient2 = (senderReceiver === "receiver" ? recipient : sender);
-          var selectedIndex = parseInt(tokenSelect.value);
-          var tokenAddress = tokens[selectedIndex].address;
-          var decimals = parseInt(tokens[selectedIndex].decimals);
 
           amount = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0);
           depositSender = (depositType === "recommended" ? amount : (new BigNumber(depositSender.toString()).times(new BigNumber(10).pow(decimals))).toFixed(0));
@@ -4468,14 +4805,24 @@
               multiplier = quantity;
             }
           }
+          var mytotal = web3.utils.toBN(amount).add(web3.utils.toBN(depositSender)).mul(web3.utils.toBN(multiplier));          
+          var mybal = web3.utils.toBN(balances[tokenAddress].amount);
+          if(accountprivkey != "") {
+            if(tokennames[tokenAddress] == tokens[0].token) {
+              mybal = mybal.add(web3.utils.toBN(balances['base'].amount));
+            } else {
+              mybal = mybal.add(web3.utils.toBN(balances[tokenAddress].amount2));
+            }
+          }
           if(myaccounts == sender2) {
-            if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(amount).add(web3.utils.toBN(depositSender)).mul(web3.utils.toBN(multiplier)))) {
+            if (mybal.lt(mytotal)) {
                 await Swal.fire(translateThis("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding."));
                 return false;
             }
           }
           if(myaccounts == recipient2) {
-            if (web3.utils.toBN(balances[tokenAddress].amount).lt(web3.utils.toBN(depositRecipient).mul(web3.utils.toBN(multiplier)))) {
+            mytotal = web3.utils.toBN(depositRecipient).mul(web3.utils.toBN(multiplier));
+            if (mybal.lt(mytotal)) {
                 await Swal.fire(translateThis("You don't have enough funds if someone were to accept this offer. Please deposit funds first before proceeding."));
                 return false;
             }
@@ -4613,20 +4960,41 @@
                 popupContainer.remove();
                 return;
               }
-              // Call solidity function to create contract
-              await DDEcontract.methods.createContract(
-                data.sender,
-                [data.recipient, data2.referred],
-                data.token,
-                data.amount,
-                data.depositSender,
-                data.depositRecipient,
-                data.quantity,
-                [data.timelimit.toString(), expiration.toString()],
-                style,
-                data.message,
-                myterms
-              ).send({"from":myaccounts,...gasOptions[gasSetting]});
+                // Call solidity function to create contract
+                if(accountprivkey == "") {
+                  await DDEcontract.methods.createContract(
+                    [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,...gasOptions[gasSetting]});
+                } else {
+                  mytotal = mytotal.toString();
+                  if(web3.utils.toBN(mytotal).lte(web3.utils.toBN(balances[data.token].amount))) {
+                    const gasEstimate = 700000;
+                    var res = await confirmTransaction(gasEstimate, mytotal, data.token);
+                    if(!res) {
+                      return;
+                    }
+                    await DDEcontract.methods.createContract(
+                      [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,...gasOptions[gasSetting]});
+                  } else {
+                    const gasEstimate = 750000;
+                    var res = await confirmTransaction(gasEstimate, mytotal, data.token);
+                    if(!res) {
+                      return;
+                    }
+                    await getApproval(data.token, mytotal);
+                    var myval = "0";
+                    var difference = web3.utils.toBN(mytotal).sub(web3.utils.toBN(balances[data.token].amount));
+                    if(tokennames[data.token] == tokens[0].token) {
+                      var mybase = web3.utils.toBN(balances['base'].amount);
+                      var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
+                      if(mybase.lt(difference.add(glimit))) {
+                        await Swal.fire(translateThis("Not enough funds"));
+                        return;
+                      }
+                      myval = difference.toString();
+                    }
+                    await DDEcontract.methods.depositAndCreateContract(data.token, difference.toString(), [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
+                  }
+                }
                 await Swal.fire(translateThis("Contract creation success!"));
                 await loadUser();
                 if(emailClient.checked && sender2 != "0x0000000000000000000000000000000000000000" && recipient2 != "0x0000000000000000000000000000000000000000" && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
@@ -4849,6 +5217,36 @@
               } else if (selectedValue === "one-month") {
                 accepttimelimit = parseInt(blockTimestamp + (30 * 24 * 60 * 60)); // Set the time limit to 1 month in seconds
               }
+              var returnMe = 0;
+              var depnotice = 0;
+              if(tokennames[mylisting.token] == tokens[0].token) {
+                if(parseInt(balances['base'].amount) != 0 && parseInt(balances[mylisting.token].amount) == 0) {
+                  depnotice = 1;
+                }
+              } else {
+                if(parseInt(balances[mylisting.token].amount2) != 0 && parseInt(balances[mylisting.token].amount) == 0) {
+                  depnotice = 1;
+                }
+              }          
+              if(depnotice == 1) {
+                await Swal.fire({
+                  title: translateThis('Deposit'),
+                  text: translateThis("You have funds in your wallet but you should move some to your markets/trading account in order to interact with offers like this. Would you like to do that now?"),
+                  icon: 'question',
+                  showCancelButton: true,
+                  confirmButtonText: translateThis('Yes'),
+                  cancelButtonText: translateThis('No'),
+                }).then(async (result) => {
+                  if (result.isConfirmed) {
+                    returnMe = 1;
+                    await deposit(1);
+                    return;
+                  }
+                });
+              }
+              if(returnMe == 1) {
+                return false;
+              }
               if(mylisting.sender == "0x0000000000000000000000000000000000000000" || mylisting.recipient == "0x0000000000000000000000000000000000000000" ) {
                 const offerID = DOMPurify.sanitize(await DDEcontract.methods.userMarketID(mylisting.hash).call());
                 if(offerID == 0) {
@@ -4898,10 +5296,20 @@
                     }
                     var counterbalance = "";
                     await DDEcontract.methods.userBalance(counterparty,mylisting.token).call().then(function (bal) {            
-                            counterbalance = DOMPurify.sanitize(bal);
+                      counterbalance = DOMPurify.sanitize(bal);
                     });
+                    var mytotal = "0";
+                    var mybal = web3.utils.toBN(balances[mylisting.token].amount);
+                    if(accountprivkey != "") {
+                      if(tokennames[mylisting.token] == tokens[0].token) {
+                        mybal = mybal.add(web3.utils.toBN(balances['base'].amount));
+                      } else {
+                        mybal = mybal.add(web3.utils.toBN(balances[mylisting.token].amount2));
+                      }
+                    }
                     if(mylisting.sender == "0x0000000000000000000000000000000000000000") {
-                      if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
+                      mytotal = web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity));
+                      if (web3.utils.toBN(mybal).lt(mytotal)) {
                           await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                           return false;
                       }
@@ -4911,7 +5319,8 @@
                       }
                     }
                     if(mylisting.recipient == "0x0000000000000000000000000000000000000000") {
-                      if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
+                      mytotal = web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity));
+                      if (web3.utils.toBN(mybal).lt(mytotal)) {
                           await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                           return false;
                       }
@@ -4941,31 +5350,62 @@
                     if (!web3.utils.isAddress(referral)) {
                         referral = "0x0000000000000000000000000000000000000000";
                     }
-                    await DDEcontract.methods.acceptOffer(
-                      mylisting.hash,
-                      quantity.toString(),
-                      accepttimelimit.toString(),
-                      referral
-                    ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                      await Swal.fire(translateThis("Contract accepted!"));
-                      await loadUser();
-                      if(emailClient.checked && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
-                        Swal.fire({
-                          title: translateThis('Notify Counterparty'),
-                          text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
-                          icon: 'question',
-                          showCancelButton: true,
-                          confirmButtonText: translateThis('Yes'),
-                          cancelButtonText: translateThis('No'),
-                        }).then((result) => {
-                          if (result.isConfirmed) {
-                            var emailSubject = encodeURIComponent(translateThis('Your offer on BitBay markets was accepted'));
-                            var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.'));
-                            const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
-                            window.location.href = mailtoLink;
+                    if(accountprivkey == "") {
+                      await DDEcontract.methods.acceptOffer(
+                        mylisting.hash,
+                        quantity.toString(),
+                        accepttimelimit.toString(),
+                        referral
+                      ).send({"from":myaccounts,...gasOptions[gasSetting]});
+                    } else {
+                      mytotal = mytotal.toString();
+                      if(web3.utils.toBN(mytotal).lte(web3.utils.toBN(balances[mylisting.token].amount))) {
+                        const gasEstimate = 500000;
+                        var res = await confirmTransaction(gasEstimate, mytotal, mylisting.token);
+                        if(!res) {
+                          return;
+                        }
+                        await DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,...gasOptions[gasSetting]});
+                      } else {
+                        const gasEstimate = 550000;
+                        var res = await confirmTransaction(gasEstimate, mytotal, mylisting.token);
+                        if(!res) {
+                          return;
+                        }
+                        await getApproval(mylisting.token, mytotal);
+                        var myval = "0";
+                        var difference = web3.utils.toBN(mytotal).sub(web3.utils.toBN(balances[mylisting.token].amount));
+                        if(tokennames[mylisting.token] == tokens[0].token) {
+                          var mybase = web3.utils.toBN(balances['base'].amount);
+                          var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
+                          if(mybase.lt(difference.add(glimit))) {
+                            await Swal.fire(translateThis("Not enough funds"));
+                            return;
                           }
-                        });
+                          myval = difference.toString();
+                        }
+                        await DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
                       }
+                    }
+                    await Swal.fire(translateThis("Contract accepted!"));
+                    await loadUser();
+                    if(emailClient.checked && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
+                      Swal.fire({
+                        title: translateThis('Notify Counterparty'),
+                        text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: translateThis('Yes'),
+                        cancelButtonText: translateThis('No'),
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                          var emailSubject = encodeURIComponent(translateThis('Your offer on BitBay markets was accepted'));
+                          var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.'));
+                          const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
+                          window.location.href = mailtoLink;
+                        }
+                      });
+                    }
                   });
                 }
               } else {
@@ -4978,8 +5418,18 @@
                 await DDEcontract.methods.userBalance(counterparty,mylisting.token).call().then(function (bal) {            
                         counterbalance = DOMPurify.sanitize(bal);
                 });
+                var mytotal = "0";
+                var mybal = web3.utils.toBN(balances[mylisting.token].amount);
+                if(accountprivkey != "") {
+                  if(tokennames[mylisting.token] == tokens[0].token) {
+                    mybal = mybal.add(web3.utils.toBN(balances['base'].amount));
+                  } else {
+                    mybal = mybal.add(web3.utils.toBN(balances[mylisting.token].amount2));
+                  }
+                }
                 if(mylisting.sender == myaccounts) {
-                  if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity)))) {
+                  mytotal = web3.utils.toBN(mylisting.amount).add(web3.utils.toBN(mylisting.depositSender)).mul(web3.utils.toBN(quantity));
+                  if (web3.utils.toBN(mybal).lt(mytotal)) {
                       await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                       return false;
                   }
@@ -4989,7 +5439,8 @@
                   }
                 }
                 if(mylisting.recipient == myaccounts) {
-                  if (web3.utils.toBN(balances[mylisting.token].amount).lt(web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity)))) {
+                  mytotal = web3.utils.toBN(mylisting.depositRecipient).mul(web3.utils.toBN(quantity));
+                  if (web3.utils.toBN(mybal).lt(mytotal)) {
                       await Swal.fire(translateThis("You don't have enough funds. Please deposit funds first before proceeding."));
                       return false;
                   }
@@ -5019,31 +5470,62 @@
                 if (!web3.utils.isAddress(referral)) {
                     referral = "0x0000000000000000000000000000000000000000";
                 }
-                await DDEcontract.methods.acceptOffer(
-                  mylisting.hash,
-                  quantity.toString(),
-                  accepttimelimit.toString(),
-                  referral
-                ).send({"from":myaccounts,...gasOptions[gasSetting]});
-                  await Swal.fire(translateThis("Contract accepted!"));
-                  await loadUser();
-                  if(emailClient.checked && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
-                    Swal.fire({
-                      title: translateThis('Notify Counterparty'),
-                      text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
-                      icon: 'question',
-                      showCancelButton: true,
-                      confirmButtonText: translateThis('Yes'),
-                      cancelButtonText: translateThis('No'),
-                    }).then((result) => {
-                      if (result.isConfirmed) {
-                        var emailSubject = encodeURIComponent(translateThis('Your offer on BitBay markets was accepted'));
-                        var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.'));
-                        const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
-                        window.location.href = mailtoLink;
+                if(accountprivkey == "") {
+                  await DDEcontract.methods.acceptOffer(
+                    mylisting.hash,
+                    quantity.toString(),
+                    accepttimelimit.toString(),
+                    referral
+                  ).send({"from":myaccounts,...gasOptions[gasSetting]});
+                } else {
+                  mytotal = mytotal.toString();
+                  if(web3.utils.toBN(mytotal).lte(web3.utils.toBN(balances[mylisting.token].amount))) {
+                    const gasEstimate = 500000;
+                    var res = await confirmTransaction(gasEstimate, mytotal, mylisting.token);
+                    if(!res) {
+                      return;
+                    }
+                    await DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,...gasOptions[gasSetting]});
+                  } else {
+                    const gasEstimate = 550000;
+                    var res =  await confirmTransaction(gasEstimate, mytotal, mylisting.token);;
+                    if(!res) {
+                      return;
+                    }
+                    await getApproval(mylisting.token, mytotal);
+                    var myval = "0";
+                    var difference = web3.utils.toBN(mytotal).sub(web3.utils.toBN(balances[mylisting.token].amount));
+                    if(tokennames[mylisting.token] == tokens[0].token) {
+                      var mybase = web3.utils.toBN(balances['base'].amount);
+                      var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
+                      if(mybase.lt(difference.add(glimit))) {
+                        await Swal.fire(translateThis("Not enough funds"));
+                        return;
                       }
-                    });
+                      myval = difference.toString();
+                    }
+                    await DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
                   }
+                }
+                await Swal.fire(translateThis("Contract accepted!"));
+                await loadUser();
+                if(emailClient.checked && contact2 != '' && typeof contact2 === 'object' && 'mycontact' in contact2 && contact2['mycontact'].includes("@")) {
+                  Swal.fire({
+                    title: translateThis('Notify Counterparty'),
+                    text: translateThis('Would you like to email the counterparty to notify them of your offer?'),
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: translateThis('Yes'),
+                    cancelButtonText: translateThis('No'),
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      var emailSubject = encodeURIComponent(translateThis('Your offer on BitBay markets was accepted'));
+                      var emailBody = encodeURIComponent(translateThis('Hello, this email was automatically composed to let you know that I have accepted your offer on the BitBay marketplace. For safety reasons, do not click any links from this email however you may log in to the official website on your own. Also for your safety, please only contact users at the email officially registered to their contracts. If you have any questions about our contract please let me know. Thank you and have a nice day.'));
+                      const mailtoLink = `mailto:${contact2['mycontact']}?subject=${emailSubject}&body=${emailBody}`;
+                      window.location.href = mailtoLink;
+                    }
+                  });
+                }
               }
         } catch (error) {
             console.error(error);
@@ -5090,6 +5572,13 @@
           cancelBtn.addEventListener("click", async () => {
             try {
               dialog.remove();
+              if(accountprivkey != "") {
+                const gasEstimate = 50000;
+                var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                if(!res) {
+                  return;
+                }
+              }
               await DDEcontract.methods.cancelPrivateOffer(
                 listing.hash,
                 myaccounts
@@ -5104,6 +5593,13 @@
       } else {
           try {
                 if(listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000" ) {
+                  if(accountprivkey != "") {
+                    const gasEstimate = 50000;
+                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    if(!res) {
+                      return;
+                    }
+                  }
                   await DDEcontract.methods.removeMarketOffer(
                     listing.hash,
                     myaccounts
@@ -5111,6 +5607,13 @@
                   await Swal.fire(translateThis("Contract removed!"));
                   await loadUser();
                 } else {
+                  if(accountprivkey != "") {
+                    const gasEstimate = 50000;
+                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    if(!res) {
+                      return;
+                    }
+                  }
                   await DDEcontract.methods.cancelPrivateOffer(
                     listing.hash,
                     myaccounts
@@ -5172,6 +5675,13 @@
                 await Swal.fire(translateThis("Quantity can not be changed to zero!"));  
                 return;
               }
+              if(accountprivkey != "") {
+                const gasEstimate = 50000;
+                var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                if(!res) {
+                  return;
+                }
+              }
               await DDEcontract.methods.updateQuantity(
                 listing.hash,
                 [quantity.toString(), quantity1.toString()]
@@ -5208,6 +5718,13 @@
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
           try {
+            if(accountprivkey != "") {
+              const gasEstimate = 50000;
+              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              if(!res) {
+                return;
+              }
+            }
             await DDEcontract.methods.changeReferralFee(listing.hash,value).send({"from":myaccounts,...gasOptions[gasSetting]});
             Swal.fire(translateThis("Success!"));
             await loadUser();
@@ -5223,6 +5740,13 @@
         var data = CryptoJS.AES.encrypt(JSON.stringify(text), AESkey).toString();
         console.log(data)
         try {
+            if(accountprivkey != "") {
+              const gasEstimate = 150000;
+              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              if(!res) {
+                return;
+              }
+            }
             await DDEcontract.methods.adddata(data).send({"from":myaccounts,...gasOptions[gasSetting]});
             await Swal.fire(translateThis("Data added!"));
           } catch (error) {
