@@ -4348,29 +4348,29 @@
       }
       // Create the popup container
       const popupContainer = document.createElement('div');
-      popupContainer.classList.add('popup-container');
+      popupContainer.classList.add('popup-container2');
       //popupContainer.onclick = function() { popupContainer.remove(); };
 
       const popup = document.createElement('div');
-      popup.classList.add('popup');
+      popup.classList.add('popup2');
 
       const closeButton = document.createElement('span');
       closeButton.innerHTML = '&times;';
-      closeButton.classList.add('close-button');
+      closeButton.classList.add('close-button2');
       closeButton.onclick = function() { popupContainer.remove(); };
 
       // Create the form element
       var form = document.createElement('form');
-      form.classList.add('popup-form');
+      form.classList.add('popup-form2');
       form.innerHTML = `
         <h2>` + translateThis('Deposit tokens to your balance') + `</h2>
         <div class="form-group">
-          <label for="token-select">` + translateThis('Select token:') + `</label>
-          <select id="token-select" name="token-select"></select>
+          <label for="token-select2">` + translateThis('Select token:') + `</label>
+          <select id="token-select2" name="token-select2"></select>
         </div>
         <div class="form-group">
-          <label for="amount-input">` + translateThis('Amount:') + `</label>
-          <input type="number" step="0.00000001" min="0.00000001" id="amount-input" name="amount-input" required>
+          <label for="amount-input2">` + translateThis('Amount:') + `</label>
+          <input type="number" step="0.00000001" min="0.00000001" id="amount-input2" name="amount-input2" required>
         </div>
         <div class="form-group">
           <button type="submit" class="btn">` + translateThis('Deposit') + `</button>
@@ -4378,7 +4378,7 @@
       `;
 
       // Populate the token select dropdown
-      var tokenSelect = form.querySelector('#token-select');
+      var tokenSelect = form.querySelector('#token-select2');
       for (var i = 0; i < tokens.length; i++) {
         var option = document.createElement('option');
         option.value = i;
@@ -4394,7 +4394,7 @@
         var token = tokens[selectedIndex].token;
         var tokenAddress = tokens[selectedIndex].address;
         var decimals = parseInt(tokens[selectedIndex].decimals);
-        var amount = parseFloat(document.getElementById('amount-input').value);
+        var amount = parseFloat(document.getElementById('amount-input2').value);
 
         if (token === tokens[0].token) {
           // If the selected token is ETH/BASE, deposit WETH instead
@@ -4446,7 +4446,7 @@
       const style = document.createElement('style');
       style.type = 'text/css';
       style.innerHTML = `
-        .popup-container {
+        .popup-container2 {
           position: fixed;
           top: 0;
           left: 0;
@@ -4458,7 +4458,7 @@
           align-items: center;
         }
 
-        .popup {
+        .popup2 {
           position: relative;
           background-color: white;
           padding: 20px;
@@ -4467,7 +4467,7 @@
           overflow-y: auto;
         }
 
-        .close-button {
+        .close-button2 {
           position: absolute;
           top: 10px;
           right: 10px;
@@ -4519,18 +4519,18 @@
       const { value: formValues, isConfirmed } = await Swal.fire({
         title: translateThis('Withdraw tokens from your balance'),
         html:
-          `<select id="token-select" class="swal2-input">
+          `<select id="token-select3" class="swal2-input">
              ${tokenOptions.map(option => `<option value="${option.value}">${option.text}</option>`).join('')}
            </select>
-           <input id="amount-input" class="swal2-input" placeholder=${translateThis('Amount:')}>
+           <input id="amount-input3" class="swal2-input" placeholder=${translateThis('Amount:')}>
            <input id="destination-input" class="swal2-input" placeholder=${translateThis('Recipient:')}>`,
         focusConfirm: false,
         showCancelButton: true,
         confirmButtonText: translateThis('Withdraw'),
         cancelButtonText: translateThis('Cancel'),
         preConfirm: () => {
-          const selectedIndex = document.getElementById('token-select').value;
-          const amount = parseFloat(document.getElementById('amount-input').value);
+          const selectedIndex = document.getElementById('token-select3').value;
+          const amount = parseFloat(document.getElementById('amount-input3').value);
           const destination = document.getElementById('destination-input').value;
           // Validate destination is not blank, amount is a valid number, and amount is greater than zero
           if (destination.trim() === '' || isNaN(amount) || amount <= 0 || !(/^(0x)?[0-9a-fA-F]{40}$/.test(destination))) {
@@ -4880,7 +4880,7 @@
               depnotice = 1;
             }
           }          
-          if(depnotice == 1) {
+          if(depnotice == 1 && accountprivkey != "") {
             await Swal.fire({
               title: translateThis('Deposit'),
               text: translateThis("You have funds in your wallet but you should move some to your markets/trading account in order to interact with offers like this. Would you like to do that now?"),
@@ -5409,7 +5409,7 @@
                   depnotice = 1;
                 }
               }          
-              if(depnotice == 1) {
+              if(depnotice == 1 && accountprivkey != "") {
                 await Swal.fire({
                   title: translateThis('Deposit'),
                   text: translateThis("You have funds in your wallet but you should move some to your markets/trading account in order to interact with offers like this. Would you like to do that now?"),
