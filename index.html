@@ -18,6 +18,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript" src="./translate.js"></script>
+    <script type="text/javascript" src="./faq.js"></script>
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <title t-id="1">BitBay Decentralized Markets</title>
     <style>
@@ -172,6 +173,31 @@
         .header2 a:hover {
             color: #007bff; /* Change link color on hover */            
         }
+        .top-bar-menu  {
+            height: 50px;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px #ccc;
+        }
+        .top-bar-menu  a {
+            text-decoration: none; /* Remove underlining */
+            color: #333; /* Change link color */
+            margin-right: 10px; /* Add some spacing between links */
+            font-size: 8.5px;
+        }
+        .top-bar-menu-item {
+          display: inline-block;
+          margin: 0 10px;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .top-bar-menu-item:hover {
+          color: #007bff; /* Change link color on hover */
+        }
         .header h1 {
             font-size: 12px;
             margin: 0;
@@ -183,6 +209,46 @@
         }
         .tabcontent {
           font-size: 10px;
+        }
+        /* Styles for Accordion */
+        .faq-header {
+          background-color: #f2f2f2;
+          color: #333;
+          padding: 18px;
+          border: none;
+          text-align: left;
+          outline: none;
+          transition: background-color 0.3s ease;
+        }
+
+        .faq-section {
+          background-color: #f9f9f9;
+          padding: 10px;
+          margin-top: 10px;
+        }
+
+        .accordion-question {
+          background-color: #fff;
+          border-bottom: 1px solid #ccc;
+          cursor: pointer;
+          padding: 12px;
+          margin: 0;
+          transition: background-color 0.3s ease;
+        }
+
+        .accordion-question:hover {
+          background-color: #a79ce8;
+        }
+
+        .accordion-answer {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease-out;
+        }
+
+        .accordion-answer p {
+          padding: 0 12px;
+          margin: 0;
         }
         @media screen and (min-width: 600px) {
           body .main.account * {
@@ -491,10 +557,12 @@
         <button onclick="setCustomFee()" t-id="49">Set custom referral fee</button><br><br>
     </div>
     <div class="main about" style="background-image: src('./bitbay-dynamic-peg-hero.png');"> <!-- ss-container tag can be used for custom scrollers but it's not totally cross platform -->
-        <div id="abount-container" style="width: 100%; max-width: 900px; border: 1px solid #3d0064; padding: 10px; margin-right: 15px; margin-bottom: 25px; align-items: center; display: block; margin-left: auto; margin-right: auto;">
+      <div class="top-bar-menu" id="top-bar-menu" style="width: 100%; max-width: 900px; margin-left: auto; margin-right: auto;"></div>
+        <div id="about-container" style="width: 100%; max-width: 900px; border: 1px solid #3d0064; padding: 10px; margin-right: 15px; margin-bottom: 25px; align-items: center; display: block; margin-left: auto; margin-right: auto;">
         <h2 t-id="40" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">About</h2>
         <p t-id="41" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together.</p><br><a href="https://www.youtube.com/watch?v=fge5inFWlkc"><img src="two-party-escrow.jpg" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;"></a><p t-id="42" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets.</p><br><p t-id="43" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">For selling goods, users will definitely want to consider a drop shipping service or a service that provides discount shipping to compete with the shipping rates typically found in major companies. To do this, you should sign up for a 3rd party shipping account which should allow you to save up to 75% in shipping in some cases. Sellers may also charge buyers for shipping while in escrow and buyers should be careful to make sure the amount doesn't exceed the deposits or that they buy the shipping label themselves. Users should try to keep in communication with each other through the escrow process and it's recommended to have a backup of your keys so both parties are protected during escrow. Although these markets could be moderated through AI(such as webgpt) and community driven moderation, users are entirely responsible for the risks of what they post and for their own escrows. With that in mind, it's strongly recommended to not post content that is illegal in the country you reside. For deals that involve cash users should do their own due dilligence and their own 'know your customer' if needed. It's in everyones best interest to use double deposit escrow to get rid of deception in the world of international commerce and services. It is an advantage when users administrate contracts themselves because arbiters are unable to know the truth of a deal ruling unfairly and can collude causing great losses and they also incur a greater cost. Users are forced to work with each other to achieve a desirable outcome. Users are also the ones who host the offers using IPFS. So it's good practice to run your own IPFS node to archive the markets. It's recommended that you register your contact information to the blockchain. This makes it guaranteed that counter-parties in the contract know how to contact you for any questions about the negotiations. The code may be run locally and can also be audited by visiting the github page where the code and website are hosted. This system is ownerless and entirely free to use. However, there is a setting that can be activated for affiliates/referrals which can range from 0-1%. In order to encourage users to engage with affiliates, the fee is burned if it is not paid to an affiliate. This helps market the system by giving users a way to earn. A user of the markets is automatically an affiliate if they complete 10 deals. That allows them to use the markets for free if they choose to(as they can be their own affiliate) and it allows them to send users to the website through an affiliate link. Visiting through a link registers the affiliate to that account when a deal is accepted and let's them benefit from that referral. Also, some sellers may offer a more attractive referral fee which should allow affiliates to net more by mutual consent. For more information on how BitBay works you may visit: </p><a href="https://bitbay.market" target="_blank" style="width: 100%; max-width: 900px; align-items: center; display: block; margin-left: auto; margin-right: auto;">https://bitbay.market</a>
-        <div id="abount-container">
+        </div>
+        <div id="accordion" style="width: 100%; max-width: 900px; border: 1px solid #3d0064; padding: 10px; margin-right: 15px; margin-bottom: 25px; align-items: center; display: block; margin-left: auto; margin-right: auto; display: none; z-index: 999;"></div>
     </div>
 </div>
 <script>
@@ -586,7 +654,78 @@
             // Reinsert the non-text content
             nonTextContent.forEach(node => element.appendChild(node));
         });
+        populateAbout();
     }
+    
+    // Top Bar Menu Data
+    const topBarMenuData = [
+      { label: 'About', contentId: 'about-container' },
+      { label: 'Frequently Asked Questions', contentId: 'accordion' }
+    ];
+
+    // Populate Top Bar Menu
+    const topBarMenu = document.getElementById('top-bar-menu');
+    function populateAbout() {
+      topBarMenu.innerHTML = "";
+      topBarMenuData.forEach(item => {
+        const menuItem = document.createElement('div');
+        menuItem.classList.add('top-bar-menu-item');
+        menuItem.textContent = translateThis(item.label) + "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+        menuItem.addEventListener('click', () => {
+          document.getElementById(topBarMenuData[0].contentId).style.display = "none";
+          document.getElementById(topBarMenuData[1].contentId).style.display = "none";
+          document.getElementById(item.contentId).style.display = "block";
+        });
+        topBarMenu.appendChild(menuItem);
+      });
+      const faqData = myfaq;
+
+      const accordion = document.getElementById('accordion');
+      accordion.innerHTML = "";
+
+      faqData.forEach((item, index) => {
+        if (index % 2 === 0) {
+          // FAQ Header
+          const header = document.createElement('div');
+          header.classList.add('faq-header');
+          header.textContent = translateThis(item);
+          accordion.appendChild(header);
+        } else {
+          // FAQ Questions and Answers
+          const section = document.createElement('div');
+          section.classList.add('faq-section');
+          item.forEach((qa, i) => {
+            if (i % 2 === 0) {
+              // Question
+              const question = document.createElement('div');
+              question.classList.add('accordion-question');
+              question.textContent = translateThis(qa);
+              console.log("HERE")
+              question.addEventListener('click', () => {
+                question.classList.toggle('active');
+                const answer = question.nextElementSibling;
+                if (answer.style.maxHeight) {
+                  answer.style.maxHeight = null;
+                } else {
+                  answer.style.maxHeight = answer.scrollHeight + 'px';
+                }
+              });
+              section.appendChild(question);
+            } else {
+              // Answer
+              const answer = document.createElement('div');
+              answer.classList.add('accordion-answer');
+              const paragraph = document.createElement('p');
+              paragraph.textContent = translateThis(qa);
+              answer.appendChild(paragraph);
+              section.appendChild(answer);
+            }
+          });
+          accordion.appendChild(section);
+        }
+      });
+    }
+    populateAbout();
 
     var loadedFiles = {};
     // Open or create the IndexedDB database
@@ -737,6 +876,7 @@
     var gasSetting = 1;
     var balances = {};
     var baseBalance = 0;
+    var newkey = 0;
     var myContactInfo = document.getElementById("myContactInfo");
     var offerExpiration = document.getElementById("offerExpiration");
     var AESkey = Crypto.SHA256("shared key")
@@ -828,7 +968,7 @@
         });
       }
     });    
-    defaultvars();
+    defaultvars();    
     function defaultvars() {
         DDEcontract = "";
         myaccounts = "";
@@ -842,7 +982,7 @@
         document.getElementById("mycontracts").innerHTML = ""; // clear the container first
         document.getElementById('publicemail').innerHTML = "";
         document.getElementById('myPasswordInput').value = "";
-        document.getElementById("myPasswordInput").disabled = false;
+        document.getElementById("myPasswordInput").disabled = true;
         offerExpiration.selectedIndex = 0;
         currentMarketsLength = 0;
         userpubkey = "";
@@ -852,6 +992,7 @@
         gasSetting = 1;
         baseFee = 0;
         myFavorites = [];
+        newkey = 0;
     }
 
     async function login(clear = 0) {
@@ -1050,22 +1191,64 @@
         if(theFavorites) {
           myFavorites = JSON.parse(theFavorites);
         }
-        checkFavorites();
-        const userPWHash = localStorage.getItem(myaccounts + ":password");
-        if(userPWHash && document.getElementById("myPasswordInput").value != Crypto.SHA256("default")) {
-          const userPWHash2 = localStorage.getItem(myaccounts + ":savedpw");
-          if(!userPWHash2) {
-            await getUserPassword();
+        checkFavorites();        
+        if(document.getElementById("myPasswordInput").value != Crypto.SHA256("default") && newkey == 0 && accountprivkey == "") {
+          const newPassHash =  localStorage.getItem(myaccounts + ":mypassword");
+          if(!newPassHash) {
+            await Swal.fire({
+              title: translateThis('Create encryption key'),
+              text: translateThis('The program needs to create your encryption key. To do this it will ask you to sign a secret message using your wallet. Please follow the instructions so that encryption may be enabled.')
+            });
+            var mysignature = "";
+            try {
+              mysignature = await window.ethereum.request({
+                method: 'personal_sign',
+                params: ["This message is used to generate your RSA key.", window.ethereum.selectedAddress],
+              });
+              mysignature=Crypto.SHA256(mysignature);
+              localStorage.setItem(myaccounts + ":mypassword", mysignature);
+              userprivkey = mysignature;
+              for(var i=1; i<50000; i++) {
+                userprivkey=Crypto.SHA256(userprivkey);
+              }
+              console.log(userprivkey);
+              userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
+              userpubkey = cryptico.publicKeyString(userprivkey);
+              document.getElementById("myPasswordInput").value = Crypto.SHA256("default");
+            } catch (error) {
+              await Swal.fire({
+                title: translateThis('Key creation failed'),
+                text: translateThis('You may choose to refresh the page to try again or you can attempt to create the key at a later date.')
+              });
+            }
+            newkey = 1;
           } else {
-            document.getElementById("myPasswordInput").value = userPWHash2;
-            userprivkey=userPWHash2;
+            userprivkey = newPassHash;
             for(var i=1; i<50000; i++) {
               userprivkey=Crypto.SHA256(userprivkey);
             }
+            console.log(userprivkey);
             userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
             userpubkey = cryptico.publicKeyString(userprivkey);
+            document.getElementById("myPasswordInput").value = Crypto.SHA256("default");
+            newkey = 1;
           }
         }
+        //const userPWHash = localStorage.getItem(myaccounts + ":password");
+        //if(userPWHash && document.getElementById("myPasswordInput").value != Crypto.SHA256("default")) {
+        //  const userPWHash2 = localStorage.getItem(myaccounts + ":savedpw");
+        //  if(!userPWHash2) {
+        //    await getUserPassword();
+        //  } else {
+        //    document.getElementById("myPasswordInput").value = userPWHash2;
+        //    userprivkey=userPWHash2;
+        //    for(var i=1; i<50000; i++) {
+        //      userprivkey=Crypto.SHA256(userprivkey);
+        //    }
+        //    userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
+        //    userpubkey = cryptico.publicKeyString(userprivkey);
+        //  }
+        //}
         const gasSetting2 = localStorage.getItem(myaccounts + DDEaddy + ":gasOption");        
         if(gasSetting2 && gasSetting2 == "1") {
           gasSetting = 1;
@@ -4131,9 +4314,9 @@
                 cancelButtonText: translateThis("Show wallet address for receiving more funds"),
                 showCancelButton: true
               });
-            }
-            if(result2.isConfirmed) {
-              depOptions = 1;
+              if(result2.isConfirmed) {
+                depOptions = 1;
+              }
             }
             if(depOptions == 0) {
               await Swal.fire({
