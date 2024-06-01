@@ -698,7 +698,6 @@
               const question = document.createElement('div');
               question.classList.add('accordion-question');
               question.textContent = translateThis(qa);
-              console.log("HERE")
               question.addEventListener('click', () => {
                 question.classList.toggle('active');
                 const answer = question.nextElementSibling;
@@ -865,7 +864,7 @@
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
-    var DDEaddy = "0x221e4385b0F3ac0bD4d64553c92B81E0D322315B"; //Sepolia testnet is default market view
+    var DDEaddy = "0x22680Be97c62AD69b4f1aeA4BB0f9633186cD4D0"; //Sepolia testnet is default market view
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
@@ -970,7 +969,7 @@
     function defaultvars() {
         DDEcontract = "";
         myaccounts = "";
-        DDEaddy = "0x221e4385b0F3ac0bD4d64553c92B81E0D322315B";
+        DDEaddy = "0x22680Be97c62AD69b4f1aeA4BB0f9633186cD4D0";
         balances = {};
         baseBalance = 0;
         gasPrice = "";
@@ -1128,7 +1127,7 @@
             });
             netname = "Sepolia Testnet";
             netname2 = "ETH";
-            DDEaddy = "0x221e4385b0F3ac0bD4d64553c92B81E0D322315B";     
+            DDEaddy = "0x22680Be97c62AD69b4f1aeA4BB0f9633186cD4D0";     
             gasOptions[0] = {
               gasLimit: 1500000,
               gasPrice: null,
@@ -1723,7 +1722,7 @@
                 return;
               }
             }
-            await DDEcontract.methods.authorizeCustodian(result.value, true).send({"from":myaccounts,...gasOptions[gasSetting]});
+            await DDEcontract.methods.authorizeCustodian(result.value, true, false).send({"from":myaccounts,...gasOptions[gasSetting]});
             Swal.fire(translateThis("Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance."));
           } catch (e) {
             console.log(e);

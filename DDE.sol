@@ -50,7 +50,9 @@ contract TwoPartyEscrow {
     mapping(address => address) public referral;
     mapping(address => uint) public customFee; //Users may want to give special offers
     mapping(address => uint) public minimumFeeThreshold;
+    mapping(bytes32 => mapping(address => string[])) public messages;
     mapping(address => mapping(address => bool)) public isCustodian; //Users can authorize a cosignee for selected contracts
+    mapping(address => mapping(address => bool)) public lockCustodian;
     mapping(address => mapping(address => mapping(bytes32 => bool))) public isAuthorized;
     mapping(address => address[]) public custodianList;
     mapping(address => address[]) public custodianList2;
@@ -99,12 +101,22 @@ contract TwoPartyEscrow {
         require(msg.sender == minter);
         cooldown[address(0)] = newtime;
     }
-    function authorizeCustodian(address custodian, bool status) public {
+    function authorizeCustodian(address custodian, bool status, bool lockThis) public {
         if(isCustodian[msg.sender][custodian] == false && status) {
             custodianList[msg.sender].push(custodian);
             custodianList2[custodian].push(msg.sender);
         }
-        isCustodian[msg.sender][custodian] = status;
+        if(!lockCustodian[msg.sender][custodian]) {
+            isCustodian[msg.sender][custodian] = status;
+        }
+        if(status && lockThis) {
+            lockCustodian[msg.sender][custodian] = true;
+        }
+    }
+    function unlockCustodian(address user) public {
+        if(lockCustodian[user][msg.sender]) {
+            lockCustodian[user][msg.sender] = false;
+        }
     }
     function authorizeContract(address custodian, bytes32 hash, bool status) public {
         isAuthorized[msg.sender][custodian][hash] = status;
@@ -269,7 +281,7 @@ contract TwoPartyEscrow {
                 contracts[hash].rfee = affiliateFee;
             }
         }
-        Contract memory newContract = contracts[hash];        
+        Contract memory newContract = contracts[hash];
         uint style = 0;
         if(!finalOffer) { //It's an open offer on the markets
             require(userMarketID[hash] != 0); //Offer is no longer available
@@ -501,13 +513,19 @@ contract TwoPartyEscrow {
     }
     function expireEscrow(bytes32 hash, address user) public { //Useful for a reputation system
         isAuthorizedUser(user, hash);
-        require(contracts[hash].sender == user || contracts[hash].recipient == user);        
+        require(contracts[hash].sender == user || contracts[hash].recipient == user);
         require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4);
         require(contracts[hash].status[0] > 0 && contracts[hash].status[1] > 0);
         require(block.timestamp > contracts[hash].timelimit[0]);
         completed[contracts[hash].sender][1] += 1;
         completed[contracts[hash].recipient][1] += 1;
         contracts[hash].status = [uint(5),uint(5)];
+    }
+    function sendMessage(bytes32 hash, address user, string memory message) public {
+        isAuthorizedUser(user, hash);
+        require(contracts[hash].sender == user || contracts[hash].recipient == user);
+        require(contracts[hash].status[0] < 4 && contracts[hash].status[1] < 4);
+        messages[hash][user].push(message);
     }
     function cancelPrivateOffer(bytes32 hash, address user) public {
         isAuthorizedUser(user, hash);
