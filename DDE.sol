@@ -507,9 +507,9 @@ contract TwoPartyEscrow {
                     completed[recipient][2] += 1;
                 }
             }
+            completed[sender][0] += 1;
+            completed[recipient][0] += 1;
         }
-        completed[sender][0] += 1;
-        completed[recipient][0] += 1;
     }
     function expireEscrow(bytes32 hash, address user) public { //Useful for a reputation system
         isAuthorizedUser(user, hash);
