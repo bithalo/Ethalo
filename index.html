@@ -2311,6 +2311,7 @@
     //the graphics card to moderate, they can call a list of volunteer services who run AI WebGPT to filter it(and maybe recommend tags)
     //for them based on their criteria. One way to enforce a search protocol is have those who post to markets do so from a separate contract.
     //This way they can also be the ones required to remove the search tags and the contract manages everything.
+    var tempCurator = "0x25A2c592DDD5F930a9CB271b9AC3e72bbBc3d351";
     async function loadMarkets(low = 1, high = 1, searchText = '') {        
         var DDEcontract3 = DDEcontract;
         if(DDEcontract == '') {
@@ -2321,6 +2322,16 @@
             currentMarketsLength = DOMPurify.sanitize(result);
             mlength = result;
         });
+        var listlen = DOMPurify.sanitize(await DDEcontract3.methods.getArrayLength(tempCurator,3).call());
+        var udata = {};
+        if(listlen > 0) {
+          var udata2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(tempCurator, listlen-1).call()));
+          if(typeof udata2 === 'object' && 'users' in udata2) {
+            for(var uinx = 0; uinx < udata2['users'].length; uinx++) {
+              udata[udata2['users'][uinx]] = 1;
+            }
+          }
+        }
         var index = 1;
         if(high > 1 && low != 0 && high <= mlength && low <= high) {
             index = low;
@@ -2351,6 +2362,9 @@
                   expiredOffers.push(hash);
                 } else {
                   jsondata = await getOrderHash(hash);
+                  if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
+                    continue;
+                  }
                   if(parseInt(jsondata.timelimit[1]) != 0) {
                     if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                       if(!marketOffers.hasOwnProperty(offerID)) {
@@ -2419,6 +2433,9 @@
                     added = 1;
                   } else {
                     jsondata = await getOrderHash(hash);
+                    if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
+                      continue;
+                    }
                     if(parseInt(jsondata.timelimit[1]) != 0) {
                       if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                         if(!marketOffers.hasOwnProperty(offerID)) {
@@ -2464,6 +2481,9 @@
               if (offerID == 0) {
               } else {
                 jsondata = await getOrderHash(hash);
+                if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
+                  throw new Error('a');
+                }
                 if(parseInt(jsondata.timelimit[1]) != 0) {
                   if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                     if(!marketOffers.hasOwnProperty(offerID)) {
@@ -2528,11 +2548,14 @@
                                   }
                                   jsondata = marketOffers[hash];
                                 } else {
+                                  jsondata = await getOrderHash(hash);
+                                  if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
+                                    return;
+                                  }
                                   if(!marketOffers.hasOwnProperty(offerID)) {
                                       marketOffers.indices.push(offerID);
                                   }
                                   marketOffers[offerID] = hash;
-                                  jsondata = await getOrderHash(hash);
                                   if(parseInt(jsondata.timelimit[1]) != 0) {
                                       if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                                           marketOffers[hash] = jsondata;
@@ -2575,6 +2598,9 @@
                     await DDEcontract3.methods.markets(index).call().then(async function (hash) {
                         hash = DOMPurify.sanitize(hash);
                         jsondata = await getOrderHash(hash);
+                        if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
+                          return;
+                        }
                         if(parseInt(jsondata.timelimit[1]) != 0) {
                             if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                                 if(!marketOffers.hasOwnProperty(index)) {
@@ -5915,7 +5941,10 @@
         }
       });
     }
-
+    async function postData(myuserdata) {
+      await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions[gasSetting]});
+      await Swal.fire(translateThis("Data added!"));
+    }
     async function addAPI(text) {
         var data = CryptoJS.AES.encrypt(JSON.stringify(text), AESkey).toString();
         console.log(data)
