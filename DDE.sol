@@ -45,7 +45,7 @@ contract TwoPartyEscrow {
     mapping(string => bytes32[]) public hashtag; //References for searching
     mapping(string => uint) public taglength;
     mapping(string => uint[]) public openslot;
-    mapping(string => uint) public openslotlength;
+    mapping(string => uint) private openslotlength;
     mapping(address => uint[3]) public completed;
     mapping(address => address) public referral;
     mapping(address => uint) public customFee; //Users may want to give special offers
@@ -608,6 +608,9 @@ contract TwoPartyEscrow {
         } else {
             return publicdata.length;
         }
+    }
+    function getMessageLength(bytes32 hash, address user) public view returns(uint) {
+        return messages[hash][user].length;
     }
     function getTags(bytes32 hash) public view returns (string[] memory) {
         return tagdata[hash];
