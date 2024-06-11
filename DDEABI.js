@@ -1001,6 +1001,30 @@ DDEabi=[
 				"internalType": "bytes32",
 				"name": "hash",
 				"type": "bytes32"
+			},
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "getMessageLength",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "hash",
+				"type": "bytes32"
 			}
 		],
 		"name": "getTags",
@@ -1265,25 +1289,6 @@ DDEabi=[
 			}
 		],
 		"name": "openslot",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "openslotlength",
 		"outputs": [
 			{
 				"internalType": "uint256",
