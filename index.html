@@ -1208,7 +1208,6 @@
               for(var i=1; i<50000; i++) {
                 userprivkey=Crypto.SHA256(userprivkey);
               }
-              console.log(userprivkey);
               userprivkey = cryptico.generateRSAKey(userprivkey, 1024);
               userpubkey = cryptico.publicKeyString(userprivkey);
               document.getElementById("myPasswordInput").value = Crypto.SHA256("default");
