@@ -2312,7 +2312,7 @@
     //for them based on their criteria. One way to enforce a search protocol is have those who post to markets do so from a separate contract.
     //This way they can also be the ones required to remove the search tags and the contract manages everything.
     var tempCurator = "0x25A2c592DDD5F930a9CB271b9AC3e72bbBc3d351";
-    async function loadMarkets(low = 1, high = 1, searchText = '') {        
+    async function loadMarkets(low = 1, high = 1, searchText = '') {
         var DDEcontract3 = DDEcontract;
         if(DDEcontract == '') {
             DDEcontract3 = DDEcontract2;
@@ -2325,7 +2325,7 @@
         var listlen = DOMPurify.sanitize(await DDEcontract3.methods.getArrayLength(tempCurator,3).call());
         var udata = {};
         if(listlen > 0) {
-          var udata2 = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(tempCurator, listlen-1).call()));
+          var udata2 = JSON.parse(DOMPurify.sanitize(await DDEcontract3.methods.userdata(tempCurator, listlen-1).call()));
           if(typeof udata2 === 'object' && 'users' in udata2) {
             for(var uinx = 0; uinx < udata2['users'].length; uinx++) {
               udata[udata2['users'][uinx]] = 1;
