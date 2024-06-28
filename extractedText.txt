@@ -239,8 +239,37 @@
   "Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.": true,
   "Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance.": true,
   "You are currently not a cosigner for any active user": true,
+}
+{
   "Select address to cosign for:": true,
-  "Select contract:": true
+  "Select contract:": true,
+  "Remove Cosigner": true,
+  "Remove Cosigners/Custodians": true,
+  "Remove a cosigner/custodian.": true,
+  "select": true,
+  "Select a cosigner to remove": true,
+  "Remove": true,
+  "Cancel": true,
+  "You need to select a cosigner.": true,
+  "Cosigner removal successful.": true,
+  "Please login to view offers and contracts.": true,
+  "Action is already in progress for this contract.": true,
+  "No active contracts": true,
+  "No Sent Offers": true,
+  "No Received contracts": true,
+  "Text file attachments are preferred due to security reasons. You are uploading a DOC/PDF/ZIP file. Please make sure you trust any files being sent before proceeding.": true,
+  "Security Warning": true,
+  "Unsupported File Type": true,
+  "Only image, text, and specific document files are allowed. Please select a different file": true,
+  "Please provide contact information.": true,
+  "Email is preferred for contact due to automatic email settings. Please enter a valid email address if possible.": true,
+  "Please add less than the maximum of 10 files": true,
+  "Please enter a valid email address.": true,
+  "Next Image": true,
+  "Previous Image": true,
+  "No favorites found.": true,
+  "Please enter a valid email address. Other contact methods are optional.": true,
+  "No active custodians to remove.": true,
 }
 {
   "Login/connect": true,
@@ -349,3 +378,77 @@
   "Is it safer to use Metamask or login using a password?": true,
   "Logging in with a password is the safest because it doesn't rely on a 'browser extension' that could be maliciously updated without the user understanding the changes. However it is strongly recommended you use an open source browser such as Chromium, Thorium or Firefox. Mandatory browser updates should be disabled and the browser should be run without any extensions on a clean open source operating system such as Linux.": true
 }
+{
+  "Download File": true,
+  "downloaded_file": true,
+  "You are about to download a file. Please make sure you trust any files being sent before proceeding.": true,
+  "Proceed": true,
+  "File Size Exceeded": true,
+  "The file size should not exceed 10 MB. Please select a smaller file.": true,
+  "No notifications": true,
+  "Pending": true,
+  "Accepted": true,
+  "Rejected": true,
+  "Completed": true,
+  "Cancelled": true,
+  "Expired": true,
+  "Initial State, Pending Review": true,
+  "Accepted by One Party, Awaiting Response": true,
+  "Mutually Accepted": true,
+  "Rejected by One Party": true,
+  "Mutually Rejected": true,
+  "Completed by One Party, Awaiting Closure": true,
+  "Fully Completed": true,
+  "Cancelled by Initiator": true,
+  "Mutually Agreed Cancellation": true,
+  "Expired, Not Finalized": true,
+  "Expired and Closed": true,
+  "Download File": true,
+  "downloaded_file": true,
+  "You are about to download a file. Please make sure you trust any files being sent before proceeding.": true,
+  "Proceed": true,
+  "File Size Exceeded": true,
+  "The file size should not exceed 10 MB. Please select a smaller file.": true,
+  "No notifications": true,
+  "No active custodians to remove.": true
+}
+{
+  "Maximum file size: 10 MB per file.": true
+}
+
+{
+  "Registration Required": true,
+  "No user data found. Please register your contact information and encryption key.": true,
+  "Type your message here..." : true,
+  "Messages": true,
+  "Your message has been sent successfully.": true,
+  "Message Sent": true,
+  "Transaction cancelled by user": true,
+  "Send Anyway" : true,
+  "Warning: your encryption key is not registered, messages you receive will be visible to everyone.": true,
+  "Your Encryption Key is Not Registered": true,
+  "Please be aware, the recipient does not support encryption. Any private messages sent will be visible to anyone.": true,
+  "Recipient Does Not Support Encryption" : true,
+  "Encryption Not Supported by Both Parties": true,
+  "Neither you nor the recipient support encryption. Any private messages sent will be visible to anyone.": true,
+  "Your notes have been saved successfully.": true,
+  "Notes Saved": true,
+  "Enter your notes for this offer": true,
+  "Encryption Supported": true,
+}
+{
+  "Register Contact Information and Public Key": true,
+  "Would you like to register this public key to your account now? This is how users will know how to encrypt their offers to you.": true,
+  "Enter your email/contact information": true,
+  "Please enter your contact information.": true,
+  "Please Login/connect your wallet to create a contract.": true,
+  "You": true,
+  "Counterparty": true
+}
+{
+  "Please enter a valid email address so you can automatically email users who share their email address.": true,
+  "Registration Recommended": true,
+  "We recommend registering your contact information and encryption key before creating a contract. Would you like to register now?": true,
+  "Don't show this again": true
+}
+
