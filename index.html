@@ -2461,7 +2461,7 @@ body {
           <a href="#" t-id="11" onclick="changeSearchText('services', this)">Services</a>
           <a href="#" t-id="12" onclick="changeSearchText('barter', this)">Barter</a>
           <a href="#" t-id="13" onclick="changeSearchText('p2p-trading', this)">P2P Trading</a>
-          <a href="#" t-id="14" onclick="changeSearchText('commodities', this)">Commodities</a>
+          <!-- <a href="#" t-id="14" onclick="changeSearchText('commodities', this)">Commodities</a> -->
         </div>
       </div>
       <h2 t-id="15">MARKETS</h2>
@@ -9547,14 +9547,21 @@ body {
       document.body.setAttribute('data-theme', currentTheme);
       themeToggleButton.innerHTML = currentTheme === 'dark' ? '<a href="#" class="day-night-icon"><img src="day-icon.png" alt="day icon"/></a>' : '<a href="#" class="day-night-icon"><img src="night-icon.svg" alt="night icon"/></a>';
       currentTheme === 'dark' ? body.classList.add("dark-theme") : body.removeAttribute("class");
-
-        themeToggleButton.addEventListener('click', function() {
+      if(currentTheme == 'dark') {
+        document.head.insertAdjacentHTML("beforeend", "<style>.main.markets::after { content: ''; background: url('') center no-repeat; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.25; z-index: -1; }</style>");
+      }
+      themeToggleButton.addEventListener('click', function() {
         const currentTheme = document.body.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         document.body.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         themeToggleButton.innerHTML = newTheme === 'dark' ? '<a href="#" class="day-night-icon"><img src="day-icon.png" alt="day icon"/></a>' : '<a href="#" class="day-night-icon"><img src="night-icon.svg" alt="night icon"/></a>';
         currentTheme === 'light' ? body.classList.add("dark-theme") : body.removeAttribute("class");
+        if(newTheme == 'light') {
+          document.head.insertAdjacentHTML("beforeend", "<style>.main.markets::after { content: ''; background: url('./bitbay-dynamic-peg-hero.png') center/cover; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.25; z-index: -1; }</style>");
+        } else {
+          document.head.insertAdjacentHTML("beforeend", "<style>.main.markets::after { content: ''; background: url('') center no-repeat; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.25; z-index: -1; }</style>");
+        }
       });
       document.getElementById("myoffers").innerHTML = '<p>Please login to view offers and contracts.</p>';
       document.getElementById("mycontracts"). innerHTML = '<p>Please login to view offers and contracts.</p>';
