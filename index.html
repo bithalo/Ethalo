@@ -3125,25 +3125,35 @@ body {
     var isFavoritesShown = false;
     var activeActions = {};
     const statusDescriptions = {
-      "0": "Pending",
-      "1": "Accepted",
-      "2": "Rejected",
-      "3": "Completed",
-      "4": "Cancelled",
-      "5": "Expired"
+      "0": "",
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "5": ""
     };
 
     const combinedStatusDescriptions = {
-        "0,0": "Initial State, Pending Review",
-        "1,0": "Accepted by One Party, Awaiting Response",
+        "1,0": "Offer",
+        "2,0": "Public Offer",
+        "3,0": "Public Offer",
+        "0,1": "Private Offer",
         "1,1": "Mutually Accepted",
-        "2,0": "Rejected by One Party",
-        "2,2": "Mutually Rejected",
-        "3,0": "Completed by One Party, Awaiting Closure",
-        "3,3": "Fully Completed",
-        "4,0": "Cancelled by Initiator",
-        "4,4": "Mutually Agreed Cancellation",
-        "5,0": "Expired, Not Finalized",
+        "1,2": "Cancelled by One Party, Awaiting Closure",
+        "1,3": "Cancelled by One Party, Awaiting Closure",
+        "1,4": "Mutually Agreed Cancellation",
+        "2,1": "Completed by One Party, Awaiting Closure",
+        "2,2": "Completed by One Party, Awaiting Closure",
+        "2,3": "Completed by One Party, Awaiting Closure",
+        "2,4": "Mutually Agreed Cancellation",
+        "3,1": "Completed by One Party, Awaiting Closure",
+        "3,2": "Completed by One Party, Awaiting Closure",
+        "3,3": "Completed by One Party, Awaiting Closure",
+        "3,4": "Mutually Agreed Cancellation",
+        "4,1": "Fully Completed",
+        "4,2": "Fully Completed",
+        "4,3": "Fully Completed",
+        "4,4": "Private offer cancelled",
         "5,5": "Expired and Closed"
     };
     var loader = '<div class="site-loader"><div class="loader"></div></div>';
