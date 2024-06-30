@@ -3077,7 +3077,7 @@ body {
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
-    var DDEaddy = "0x22680Be97c62AD69b4f1aeA4BB0f9633186cD4D0"; //Sepolia testnet is default market view
+    var DDEaddy = "0x917ade76a2614A23A94C38425f77627868284f8B"; //Sepolia testnet is default market view
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
@@ -3220,7 +3220,7 @@ body {
     function defaultvars() {
       DDEcontract = "";
       myaccounts = "";
-      DDEaddy = "0x22680Be97c62AD69b4f1aeA4BB0f9633186cD4D0";
+      DDEaddy = "0x917ade76a2614A23A94C38425f77627868284f8B";
       balances = {};
       baseBalance = 0;
       gasPrice = "";
@@ -3473,7 +3473,7 @@ body {
         });
         netname = "Sepolia Testnet";
         netname2 = "ETH";
-        DDEaddy = "0x22680Be97c62AD69b4f1aeA4BB0f9633186cD4D0";
+        DDEaddy = "0x917ade76a2614A23A94C38425f77627868284f8B";
         gasOptions[0] = {
           gasLimit: 1500000,
           gasPrice: null,
@@ -4158,8 +4158,8 @@ body {
             Swal.fire(translateThis("Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance."));
           } catch (e) {
             console.log(e);
-            await showError(e);
             hideLoader();
+            await showError(e);
             return;
           } finally {
             setActionActive(actionId, false);
@@ -7622,7 +7622,11 @@ body {
         cancelButtonText: translateThis('Cancel'),
         preConfirm: () => {
           const selectedIndex = document.getElementById('token-select2').value;
-          const amount = parseFloat(document.getElementById('amount-input2').value);
+          const amount = document.getElementById('amount-input2').value;
+          if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+            Swal.showValidationMessage(translateThis('Please enter a valid destination and a positive amount.'));
+            return false;
+          }
           return { selectedIndex, amount };
         }
       });
@@ -7741,10 +7745,10 @@ body {
         cancelButtonText: translateThis('Cancel'),
         preConfirm: () => {
           const selectedIndex = document.getElementById('token-select3').value;
-          const amount = parseFloat(document.getElementById('amount-input3').value);
+          const amount = document.getElementById('amount-input3').value;
           const destination = document.getElementById('destination-input').value;
           // Validate destination is not blank, amount is a valid number, and amount is greater than zero
-          if (destination.trim() === '' || isNaN(amount) || amount <= 0 || !(/^(0x)?[0-9a-fA-F]{40}$/.test(destination))) {
+          if (destination.trim() === '' || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0 || !(/^(0x)?[0-9a-fA-F]{40}$/.test(destination))) {
             Swal.showValidationMessage(translateThis('Please enter a valid destination and a positive amount.'));
             return false;
           }
@@ -8140,6 +8144,7 @@ body {
       // Event listener for type select
       contractType.addEventListener('change', () => {
         if (contractType.value === 'private') {
+          publicoffer = false;
           counterPartyAddressField.style.display = 'block';
           auto.style.display = 'none';
           document.getElementById("autoacceptlabel").style.display = 'none';
@@ -8149,6 +8154,7 @@ body {
           addWord.style.display = 'none';
           addWordLabel.style.display = 'none';
         } else {
+          publicoffer = true;
           counterPartyAddressField.style.display = 'none';
           auto.style.display = 'block';
           document.getElementById("autoacceptlabel").style.display = 'block';
@@ -8707,6 +8713,7 @@ body {
             popupContainer.remove();
           } catch (error) {
             console.error(error);
+            hideLoader();
             await showError(error);
           } finally {
             setActionActive(actionId, false);
@@ -9230,6 +9237,7 @@ body {
         }
       } catch (error) {
         console.error(error);
+        hideLoader();
         await showError(error);
       } finally {
         setActionActive(actionId, false);
@@ -9447,7 +9455,7 @@ body {
           return;
         } catch (error) {
           console.error(error);
-            hideLoader();
+          hideLoader();
           await showError(error);
         } finally {
           setActionActive(actionId, false);
