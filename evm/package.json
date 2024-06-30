@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^2.1.4",
+    "chai-as-promised": "^7.1.1",
+    "chai-truffle": "^0.2.3",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.3",
+    "elliptic": "^6.5.4",
+    "ethers": "^5.7.2",
+    "js-sha3": "^0.8.0"
+  },
+  "devDependencies": {
+    "eth-gas-reporter": "^0.2.27",
+    "ganache-cli": "^6.12.2",
+    "solidity-coverage": "^0.7.22"
+  }
+}
