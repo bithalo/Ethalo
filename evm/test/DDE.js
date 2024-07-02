@@ -1,6 +1,8 @@
 // TwoPartyEscrow test suite
 
 const DDE = artifacts.require("TwoPartyEscrow");
+const DDE_Vault = artifacts.require("DDE_Vault");
+const DDE_Board = artifacts.require("DDE_Board");
 const WETH = artifacts.require("WETH9");
 const TDAI = artifacts.require("TDAI");
 
@@ -25,6 +27,8 @@ function timeout(ms) {
 }
 
 let dde;
+let dde_board;
+let dde_vault;
 let weth;
 let tdai;
 let dde_contract_1;
@@ -33,7 +37,10 @@ let dde_contract_2;
 let init1 = async function() {
   weth = await WETH.deployed();
   tdai = await TDAI.deployed();
-  dde = await DDE.deployed(weth.address);
+  dde_board = await DDE_Board.deployed();
+  dde_vault = await DDE_Vault.deployed(weth.address);
+  dde = await DDE.deployed(dde_vault.address, dde_board.address);
+  await dde_vault.pair(dde.address);
 };
 
 contract('DDE', (accounts) => {
@@ -81,89 +88,89 @@ contract('DDE', (accounts) => {
   });
 
   it('deposit-1', async () => {
-    const a1 = await dde.userBalance(accounts[0], tdai.address);
+    const a1 = await dde_vault.userBalance(accounts[0], tdai.address);
     assert.equal(a1.toString(), ether(0).toString(), "match user0 tdai balance");
 
-    await dde.deposit(tdai.address, ether(100)).should.be.rejected; // no allowance
-    await tdai.approve(dde.address, ether(101));
-    await dde.deposit(tdai.address, ether(100));
-    await dde.deposit(tdai.address, ether(100)).should.be.rejected; // no replay no-allowance
-    await dde.deposit(tdai.address, ether(1)); // OK replay
-    await dde.deposit(tdai.address, ether(1)).should.be.rejected; // no replay no-allowance
+    await dde_vault.deposit(tdai.address, ether(100)).should.be.rejected; // no allowance
+    await tdai.approve(dde_vault.address, ether(101));
+    await dde_vault.deposit(tdai.address, ether(100));
+    await dde_vault.deposit(tdai.address, ether(100)).should.be.rejected; // no replay no-allowance
+    await dde_vault.deposit(tdai.address, ether(1)); // OK replay
+    await dde_vault.deposit(tdai.address, ether(1)).should.be.rejected; // no replay no-allowance
 
-    const a2 = await dde.userBalance(accounts[0], tdai.address);
+    const a2 = await dde_vault.userBalance(accounts[0], tdai.address);
     assert.equal(a2.toString(), ether(101).toString(), "match user0 tdai balance");
-    const a3 = await tdai.balanceOf(dde.address);
+    const a3 = await tdai.balanceOf(dde_vault.address);
     assert.equal(a3.toString(), ether(101).toString(), "match dde tdai balance");
   });
 
   it('deposit-2', async () => {
-    const a1 = await dde.userBalance(accounts[0], weth.address);
+    const a1 = await dde_vault.userBalance(accounts[0], weth.address);
     assert.equal(a1.toString(), ether(0).toString(), "match user0 weth balance");
 
-    await dde.depositWETH({ value: ether(10) });
-    await dde.depositWETH({ value: ether(1) });
+    await dde_vault.depositWETH({ value: ether(10) });
+    await dde_vault.depositWETH({ value: ether(1) });
 
-    const a2 = await dde.userBalance(accounts[0], weth.address);
+    const a2 = await dde_vault.userBalance(accounts[0], weth.address);
     assert.equal(a2.toString(), ether(11).toString(), "match user0 weth balance");
-    const a3 = await weth.balanceOf(dde.address);
+    const a3 = await weth.balanceOf(dde_vault.address);
     assert.equal(a3.toString(), ether(11).toString(), "match dde weth balance");
   });
 
   it('deposit-3', async () => {
-    const a1 = await dde.userBalance(accounts[1], tdai.address);
+    const a1 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a1.toString(), ether(0).toString(), "match user1 tdai balance");
 
     await tdai.transfer(accounts[1], ether(101));
-    await dde.deposit(tdai.address, ether(100), { from: accounts[1] }).should.be.rejected; // no allowance
-    await tdai.approve(dde.address, ether(101), { from: accounts[1] });
-    await dde.deposit(tdai.address, ether(100), { from: accounts[1] });
-    await dde.deposit(tdai.address, ether(100), { from: accounts[1] }).should.be.rejected; // no replay no-allowance
-    await dde.deposit(tdai.address, ether(1), { from: accounts[1] }); // OK replay
-    await dde.deposit(tdai.address, ether(1), { from: accounts[1] }).should.be.rejected; // no replay no-allowance
+    await dde_vault.deposit(tdai.address, ether(100), { from: accounts[1] }).should.be.rejected; // no allowance
+    await tdai.approve(dde_vault.address, ether(101), { from: accounts[1] });
+    await dde_vault.deposit(tdai.address, ether(100), { from: accounts[1] });
+    await dde_vault.deposit(tdai.address, ether(100), { from: accounts[1] }).should.be.rejected; // no replay no-allowance
+    await dde_vault.deposit(tdai.address, ether(1), { from: accounts[1] }); // OK replay
+    await dde_vault.deposit(tdai.address, ether(1), { from: accounts[1] }).should.be.rejected; // no replay no-allowance
 
-    const a2 = await dde.userBalance(accounts[1], tdai.address);
+    const a2 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a2.toString(), ether(101).toString(), "match user1 tdai balance");
-    const a3 = await tdai.balanceOf(dde.address);
+    const a3 = await tdai.balanceOf(dde_vault.address);
     assert.equal(a3.toString(), ether(202).toString(), "match dde tdai balance");
   });
 
   it('withdraw-1', async () => {
-    const a1 = await dde.userBalance(accounts[0], tdai.address);
+    const a1 = await dde_vault.userBalance(accounts[0], tdai.address);
     assert.equal(a1.toString(), ether(101).toString(), "match user0 tdai balance");
 
-    await dde.withdraw(tdai.address, ether(102)).should.be.rejected; // no amount
-    await dde.withdraw(tdai.address, ether(1));
+    await dde_vault.withdraw(tdai.address, ether(102)).should.be.rejected; // no amount
+    await dde_vault.withdraw(tdai.address, ether(1));
 
-    const a2 = await dde.userBalance(accounts[0], tdai.address);
+    const a2 = await dde_vault.userBalance(accounts[0], tdai.address);
     assert.equal(a2.toString(), ether(100).toString(), "match user0 tdai balance");
-    const a3 = await tdai.balanceOf(dde.address);
+    const a3 = await tdai.balanceOf(dde_vault.address);
     assert.equal(a3.toString(), ether(201).toString(), "match dde tdai balance");
   });
 
   it('withdraw-2', async () => {
-    const a1 = await dde.userBalance(accounts[0], weth.address);
+    const a1 = await dde_vault.userBalance(accounts[0], weth.address);
     assert.equal(a1.toString(), ether(11).toString(), "match user0 weth balance");
 
-    await dde.withdraw(weth.address, ether(12)).should.be.rejected; // no amount
-    await dde.withdraw(weth.address, ether(1));
+    await dde_vault.withdraw(weth.address, ether(12)).should.be.rejected; // no amount
+    await dde_vault.withdraw(weth.address, ether(1));
 
-    const a2 = await dde.userBalance(accounts[0], weth.address);
+    const a2 = await dde_vault.userBalance(accounts[0], weth.address);
     assert.equal(a2.toString(), ether(10).toString(), "match user0 weth balance");
-    const a3 = await weth.balanceOf(dde.address);
+    const a3 = await weth.balanceOf(dde_vault.address);
     assert.equal(a3.toString(), ether(10).toString(), "match dde weth balance");
   });
 
   it('withdraw-3', async () => {
-    const a1 = await dde.userBalance(accounts[1], tdai.address);
+    const a1 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a1.toString(), ether(101).toString(), "match user1 tdai balance");
 
-    await dde.withdraw(tdai.address, ether(102), { from: accounts[1] }).should.be.rejected; // no amount
-    await dde.withdraw(tdai.address, ether(1), { from: accounts[1] });
+    await dde_vault.withdraw(tdai.address, ether(102), { from: accounts[1] }).should.be.rejected; // no amount
+    await dde_vault.withdraw(tdai.address, ether(1), { from: accounts[1] });
 
-    const a2 = await dde.userBalance(accounts[1], tdai.address);
+    const a2 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a2.toString(), ether(100).toString(), "match user1 tdai balance");
-    const a3 = await tdai.balanceOf(dde.address);
+    const a3 = await tdai.balanceOf(dde_vault.address);
     assert.equal(a3.toString(), ether(200).toString(), "match dde tdai balance");
   });
 
@@ -188,7 +195,7 @@ contract('DDE', (accounts) => {
     const _message = "test";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -205,12 +212,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_hash1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_hash1);
-    const dde_contract_obj = await dde.getContract(dde_contract_hash1);
+    const dde_contract_hash1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_hash1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_hash1);
 
     //console.log("contract obj:", dde_contract_obj);
 
@@ -228,7 +235,7 @@ contract('DDE', (accounts) => {
   });
 
   it('acceptOffer-1', async () => {
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     await dde.acceptOffer(
@@ -241,7 +248,7 @@ contract('DDE', (accounts) => {
       { from: accounts[1] }
     );
 
-    const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+    const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
     assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
     assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -252,8 +259,8 @@ contract('DDE', (accounts) => {
 
     // user balances reduced by deposit and amount
 
-    const a3 = await dde.userBalance(accounts[0], tdai.address);
-    const a4 = await dde.userBalance(accounts[1], tdai.address);
+    const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+    const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a3.toString(), ether(89).toString(), "match user0 tdai balance");
     assert.equal(a4.toString(), ether(99).toString(), "match user1 tdai balance");
 
@@ -274,8 +281,8 @@ contract('DDE', (accounts) => {
 
     //console.log("contract obj:", dde_contract_obj2);
 
-    const a3 = await dde.userBalance(accounts[0], tdai.address);
-    const a4 = await dde.userBalance(accounts[1], tdai.address);
+    const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+    const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a3.toString(), ether(89).toString(), "match user0 tdai balance");
     assert.equal(a4.toString(), ether(99).toString(), "match user1 tdai balance");
 
@@ -295,8 +302,8 @@ contract('DDE', (accounts) => {
 
     //console.log("contract obj:", dde_contract_obj2);
 
-    const a3 = await dde.userBalance(accounts[0], tdai.address);
-    const a4 = await dde.userBalance(accounts[1], tdai.address);
+    const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+    const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
     assert.equal(a3.toString(), ether(90).toString(), "match user0 tdai balance");
     assert.equal(a4.toString(), ether(110).toString(), "match user1 tdai balance");
 
@@ -316,7 +323,7 @@ contract('DDE', (accounts) => {
     const _message = "test2";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -333,12 +340,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -352,7 +359,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -367,7 +374,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -378,8 +385,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(79).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(109).toString(), "match user1 tdai balance");
     }
@@ -398,8 +405,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(79).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(109).toString(), "match user1 tdai balance");
     }
@@ -418,8 +425,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(80).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(120).toString(), "match user1 tdai balance");
 
@@ -442,7 +449,7 @@ contract('DDE', (accounts) => {
     const _message = "test3";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -459,12 +466,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -478,7 +485,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -493,7 +500,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -504,8 +511,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
@@ -524,8 +531,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
@@ -544,8 +551,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
 
@@ -565,8 +572,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(80).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(120).toString(), "match user1 tdai balance");
 
@@ -590,7 +597,7 @@ contract('DDE', (accounts) => {
     const _message = "test4";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -607,12 +614,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -626,7 +633,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -641,7 +648,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -652,8 +659,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
@@ -672,8 +679,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
@@ -692,8 +699,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
 
@@ -713,8 +720,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(80).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(120).toString(), "match user1 tdai balance");
     }
@@ -739,7 +746,7 @@ contract('DDE', (accounts) => {
     const _message = "test5";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -756,12 +763,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -775,7 +782,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -790,7 +797,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -801,15 +808,15 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
 
     { // now removeMarketOffer
 
-      await dde.removeMarketOffer(
+      await dde_board.removeMarketOffer(
 
         dde_contract_1,
         zeroaddr,
@@ -817,7 +824,7 @@ contract('DDE', (accounts) => {
         { from: accounts[0] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -828,8 +835,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
@@ -848,8 +855,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(69).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(119).toString(), "match user1 tdai balance");
     }
@@ -868,8 +875,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(70).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(130).toString(), "match user1 tdai balance");
 
@@ -901,7 +908,7 @@ contract('DDE', (accounts) => {
     const _message = "test6";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -918,12 +925,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -937,7 +944,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -952,7 +959,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -964,8 +971,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(59).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(129).toString(), "match user1 tdai balance");
     }
@@ -984,8 +991,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(59).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(129).toString(), "match user1 tdai balance");
     }
@@ -1004,8 +1011,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(60).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(139.9).toString(), "match user1 tdai balance");
 
@@ -1015,7 +1022,7 @@ contract('DDE', (accounts) => {
 
   it('collected-fee-1', async () => {
 
-      const a2 = await dde.userBalance(accounts[2], tdai.address);
+      const a2 = await dde_vault.userBalance(accounts[2], tdai.address);
       assert.equal(a2.toString(), ether(0.1).toString(), "match user2 tdai balance (collected fee)");
 
   });
@@ -1035,7 +1042,7 @@ contract('DDE', (accounts) => {
     const _message = "test7";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -1052,12 +1059,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -1071,12 +1078,12 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // updateQuantity
 
-      await dde.updateQuantity(
+      await dde_board.updateQuantity(
 
         dde_contract_1,
         [2,2],
@@ -1097,7 +1104,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "2", "match quantity");
 
@@ -1109,8 +1116,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(137.9).toString(), "match user1 tdai balance");
     }
@@ -1129,8 +1136,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(137.9).toString(), "match user1 tdai balance");
     }
@@ -1149,8 +1156,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(40).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(159.7).toString(), "match user1 tdai balance");
 
@@ -1160,7 +1167,7 @@ contract('DDE', (accounts) => {
 
   it('collected-fee-2', async () => {
 
-      const a2 = await dde.userBalance(accounts[2], tdai.address);
+      const a2 = await dde_vault.userBalance(accounts[2], tdai.address);
       assert.equal(a2.toString(), ether(0.3).toString(), "match user2 tdai balance (collected fee)"); // +0.2 for two items
 
   });
@@ -1180,7 +1187,7 @@ contract('DDE', (accounts) => {
     const _message = "test8";
     const _hashtags = [];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -1197,12 +1204,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -1216,7 +1223,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -1231,7 +1238,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -1241,8 +1248,8 @@ contract('DDE', (accounts) => {
       //console.log("contract obj2:", dde_contract_obj2);
 
       // user balances reduced by deposit and amount
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(29).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(158.7).toString(), "match user1 tdai balance");
     }
@@ -1281,7 +1288,7 @@ contract('DDE', (accounts) => {
         { from: accounts[2] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -1291,8 +1298,8 @@ contract('DDE', (accounts) => {
       //console.log("contract obj2:", dde_contract_obj2);
 
       // user balances reduced by deposit and amount
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(29).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(158.7).toString(), "match user1 tdai balance");
     }
@@ -1317,7 +1324,7 @@ contract('DDE', (accounts) => {
     const _message = "test9";
     const _hashtags = ["abc","bcd"];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -1335,12 +1342,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -1354,7 +1361,7 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
@@ -1369,7 +1376,7 @@ contract('DDE', (accounts) => {
         { from: accounts[0] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "0", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -1381,15 +1388,15 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(28).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(147.7).toString(), "match user1 tdai balance");
     }
 
     { // removeTags-1
 
-      await dde.removeExpiredTags(
+      await dde_board.removeExpiredTags(
 
         dde_contract_1,
 
@@ -1410,8 +1417,8 @@ contract('DDE', (accounts) => {
       const dde_contract_obj2 = await dde.getContract(dde_contract_2);
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(28).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(147.7).toString(), "match user1 tdai balance");
     }
@@ -1462,8 +1469,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
 
@@ -1483,8 +1490,8 @@ contract('DDE', (accounts) => {
 
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
 
@@ -1508,7 +1515,7 @@ contract('DDE', (accounts) => {
     const _message = "test10";
     const _hashtags = ["abc","bcd"];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -1526,12 +1533,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "2", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(1);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(1);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
 
     //console.log("contract obj1:", dde_contract_obj);
 
@@ -1545,14 +1552,14 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "1", "match userMarketID");
 
     { // accept-offer-1
 
       { // before
-        const a3 = await dde.userBalance(accounts[0], tdai.address);
-        const a4 = await dde.userBalance(accounts[1], tdai.address);
+        const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+        const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
         assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
         assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
       }
@@ -1567,7 +1574,7 @@ contract('DDE', (accounts) => {
         { from: accounts[0] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "1", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -1579,8 +1586,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
     }
@@ -1598,8 +1605,8 @@ contract('DDE', (accounts) => {
       const dde_contract_obj2 = await dde.getContract(dde_contract_2);
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
     }
@@ -1620,7 +1627,7 @@ contract('DDE', (accounts) => {
     const _message = "test11";
     const _hashtags = ["abc","bcd"];
 
-    await dde.createContract(
+    await dde_board.createContract(
 
       _sender,
       _recepient,
@@ -1638,12 +1645,12 @@ contract('DDE', (accounts) => {
     );
 
     // read hash via markets
-    const marketslength = await dde.marketslength();
+    const marketslength = await dde_board.marketslength();
     assert.equal(marketslength.toString(), "3", "match marketslength");
 
-    const dde_contract_1 = await dde.markets(2);
-    const a1 = await dde.initialized(dde_contract_1);
-    const dde_contract_obj = await dde.getContract(dde_contract_1);
+    const dde_contract_1 = await dde_board.markets(2);
+    const a1 = await dde_board.initialized(dde_contract_1);
+    const dde_contract_obj = await dde.getBoardContract(dde_contract_1);
     //console.log("contract obj1:", dde_contract_obj);
 
     assert.equal(a1, true, "match initialized");
@@ -1656,14 +1663,14 @@ contract('DDE', (accounts) => {
     assert.equal(dde_contract_obj.quantity[0], "1", "match quantity");
     assert.equal(dde_contract_obj.quantity[1], "1", "match quantity");
 
-    const a2 = await dde.userMarketID(dde_contract_1);
+    const a2 = await dde_board.userMarketID(dde_contract_1);
     assert.equal(a2.toString(), "2", "match userMarketID");
 
     { // accept-offer-1
 
       { // before
-        const a3 = await dde.userBalance(accounts[0], tdai.address);
-        const a4 = await dde.userBalance(accounts[1], tdai.address);
+        const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+        const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
         assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
         assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
       }
@@ -1678,7 +1685,7 @@ contract('DDE', (accounts) => {
         { from: accounts[0] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "1", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -1690,8 +1697,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
     }
@@ -1699,8 +1706,8 @@ contract('DDE', (accounts) => {
     { // accept-offer-2
 
       { // before
-        const a3 = await dde.userBalance(accounts[0], tdai.address);
-        const a4 = await dde.userBalance(accounts[1], tdai.address);
+        const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+        const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
         assert.equal(a3.toString(), ether(38.9).toString(), "match user0 tdai balance");
         assert.equal(a4.toString(), ether(148.7).toString(), "match user1 tdai balance");
       }
@@ -1715,7 +1722,7 @@ contract('DDE', (accounts) => {
         { from: accounts[1] }
       );
 
-      const dde_contract_obj1 = await dde.getContract(dde_contract_1);
+      const dde_contract_obj1 = await dde.getBoardContract(dde_contract_1);
       assert.equal(dde_contract_obj1.quantity[0], "1", "match quantity");
       assert.equal(dde_contract_obj1.quantity[1], "1", "match quantity");
 
@@ -1727,8 +1734,8 @@ contract('DDE', (accounts) => {
 
       // user balances reduced by deposit and amount
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(37.9).toString(), "match user0 tdai balance"); // -1
       assert.equal(a4.toString(), ether(137.7).toString(), "match user1 tdai balance"); // -10 -1
     }
@@ -1746,8 +1753,8 @@ contract('DDE', (accounts) => {
       const dde_contract_obj2 = await dde.getContract(dde_contract_2);
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(37.9).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(137.7).toString(), "match user1 tdai balance");
     }
@@ -1765,8 +1772,8 @@ contract('DDE', (accounts) => {
       const dde_contract_obj2 = await dde.getContract(dde_contract_2);
       //console.log("contract obj:", dde_contract_obj2);
 
-      const a3 = await dde.userBalance(accounts[0], tdai.address);
-      const a4 = await dde.userBalance(accounts[1], tdai.address);
+      const a3 = await dde_vault.userBalance(accounts[0], tdai.address);
+      const a4 = await dde_vault.userBalance(accounts[1], tdai.address);
       assert.equal(a3.toString(), ether(48.8).toString(), "match user0 tdai balance");
       assert.equal(a4.toString(), ether(138.7).toString(), "match user1 tdai balance");
 

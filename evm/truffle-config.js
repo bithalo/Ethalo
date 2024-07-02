@@ -53,13 +53,16 @@ module.exports = {
     //   network_id: 5,       // Goerli's id
     //   chain_id: 5
     // }
+
+    test: {
+    }
   },
 
   // Set default mocha options here, use special reporters etc.
   mocha: {
     // timeout: 100000
     reporter: 'eth-gas-reporter',
-    reporterOptions : { excludeContracts: ['Migrations'], gasPrice: 20, coinmarketcap: "074fe116-a96c-4e58-bc5a-0bc5f06dcded", currency: "USD" }
+    reporterOptions : { excludeContracts: ['Migrations'] }
   },
 
   plugins: ["solidity-coverage"],
@@ -71,7 +74,10 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 200
+          runs: 5,
+          details: {
+            yul: true
+          }
         }
       }
     }

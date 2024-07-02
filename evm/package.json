@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@truffle/hdwallet-provider": "^2.1.4",
     "chai-as-promised": "^7.1.1",
     "chai-truffle": "^0.2.3",
     "crypto-js": "^4.1.1",
@@ -10,6 +9,8 @@
     "js-sha3": "^0.8.0"
   },
   "devDependencies": {
+    "@codechecks/client": "^0.1.12",
+    "chai": "^4.4.1",
     "eth-gas-reporter": "^0.2.27",
     "ganache-cli": "^6.12.2",
     "solidity-coverage": "^0.7.22"
