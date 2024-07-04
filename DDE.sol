@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: Jelurida Public License
+// SPDX-License-Identifier: Coinleft Public License for BitBay
 pragma solidity ^0.8.0;
 
 interface ERC20 {

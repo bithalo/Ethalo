@@ -54,7 +54,7 @@ myfaq=[
     "What happens if I forget my password or lose my account?",
     "There is no account recovery. So please be sure you are able to back up any relevant keys or passwords. The security advantage to blockchain is that your funds are perfectly safe and never shared with anyone.",
     "Is this code open source?",
-    "All of the code is completely free and open source under the 'Jelurida Public License'. The code has also been audited multiple times and those reports are published on Github. Users and companies should continue to audit it proving it's safety.",
+    "All of the code is completely free and open source under the 'Coinleft Public License for BitBay'. The code has also been audited multiple times and those reports are published on Github. Users and companies should continue to audit it proving it's safety.",
     "What is the safest way to access this site?",
     "The most secure way to access this page is to download it's source code from Github and run it locally. This way nobody on earth can change the code as you have a hard copy.",
     "When should users automatically accept offers?",
