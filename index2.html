@@ -232,7 +232,7 @@ html, body {
   left: 0;
   top: 0;
 }
-.offer-popup-wrapper .arrows-container .right-arrow {
+.offer-popup-wrapper .arrows-container .right-arrow  {
   position: absolute;
   right: 0;
   top: 0;
@@ -504,7 +504,7 @@ h2 {
   background-color: #F5F5F5;
 }
 
-.popup-container, .popup-container2 {
+.popup-container {
   position: fixed;
   top: 0;
   left: 0;
@@ -515,7 +515,7 @@ h2 {
   justify-content: center;
   align-items: center;
 }
-.popup, .popup2, .withdraw-swal-wrapper {
+.popup, .withdraw-swal-wrapper {
   position: relative;
   background-color: white;
   padding: 30px;
@@ -523,7 +523,7 @@ h2 {
   width: 100%;
   border-radius: 6px;
 }
-.close-button, .close-button2 {
+.popup .close-button {
   font-size: 38px;
   color: #263886;
   position: absolute;
@@ -1738,7 +1738,7 @@ h2 {
   .header {
     justify-content: space-between;
   }
-  .header h1, .connectionstatus {
+  .header h1, .connectionstatus  {
     display: none;
   }
   .sidebar {
@@ -1844,7 +1844,7 @@ h2 {
     margin-bottom: 35px;
     font-size: 11px;
   }
-  .popup, .popup2 {
+  .popup {
     padding: 25px 20px;
     max-width: calc(540px - 25px);
   }
@@ -1951,7 +1951,7 @@ h2 {
     transition: transform 0.3s ease;
     transform: translateX(-100%);
   }
-  .popup, .popup2 {
+  .popup {
     max-width: 90%;
   }
   .input-wrapper-area {
@@ -2096,7 +2096,7 @@ h2 {
 }
 
 @media screen and (max-width: 480px) {
-      .sidebar-background {
+    .sidebar-background {
       background-image: url("");
     }
     .sidebar {
@@ -2705,7 +2705,7 @@ body {
       <div id="abount-container">
       </div>
     </div>
-    <a href="#" class="notification-lottie-file">
+    <a href="#" class="notification-lottie-file" onclick="notifications()">
       <lottie-player
           src="https://lottie.host/ef562761-9dbd-49d2-8caa-39438d4ee918/p99FGDA20q.json"
           background="transparent" speed="1" loop></lottie-player>
@@ -2715,8 +2715,19 @@ body {
     </div>
   </div>
   <script>
-    function setActionActive(actionCode, isActive) {
-      activeActions[Crypto.SHA256(actionCode)] = isActive;
+
+    function isActionActive(contractHash) {
+      return !!activeActions[contractHash];
+    }
+
+    function generateActionId(contractHash, methodName, additionalParams = '') {
+      let actionId = `${contractHash}:${methodName}:${additionalParams}`;
+      console.log("Action ID: ", actionId);
+      return actionId;
+    }
+
+    function setActionActive(contractHash, isActive) {
+      activeActions[contractHash] = isActive;
     }
 
     function validateContactInfo(contactInput) {
@@ -3060,11 +3071,7 @@ body {
     }
 
     document.getElementById('SortBy').addEventListener('change', function () {
-      if(currentViewContext == "searchTag") {
-        populateListings("", 1);
-      } else {
-        populateListings();
-      }
+      populateListings();
     });
 
     showMain('markets');
@@ -3108,8 +3115,6 @@ body {
     var DDEcontract2 = new web3.eth.Contract(DDEabi, DDEaddy);
     var marketOffers = {'indices':[], 'results':[]};
     var currentViewContext = '';
-    var contextIndex = 0;
-    var maxContextLoad = [2,2,2,2];
     //web3[0] = new Web3("https://cloudflare-eth.com");
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
@@ -3118,7 +3123,6 @@ body {
     var body = document.body;
     var isMobile = window.innerWidth <= 992;
     var isFavoritesShown = false;
-    var locked = false;
     var activeActions = {};
     const statusDescriptions = {
       "0": "",
@@ -3195,6 +3199,23 @@ body {
       once: true,
     });
 
+    window.addEventListener("load", async function() {
+      if (window.ethereum) {
+        // detect Metamask account change
+        window.ethereum.on('accountsChanged', async function (newaccounts) {
+          console.log('accountsChanges',newaccounts);
+          defaultvars();
+          await login2();
+        });
+        // detect Network account change
+        window.ethereum.on('chainChanged', async function(thenetworkId){
+          console.log('chainChanged',thenetworkId);
+          marketOffers = {'indices':[], 'results':[]};
+          defaultvars();
+          await login2();
+        });
+      }
+    });
     defaultvars();
     function defaultvars() {
       DDEcontract = "";
@@ -3221,7 +3242,6 @@ body {
       baseFee = 0;
       myFavorites = [];
       newkey = 0;
-      activeActions = {};
     }
 
     async function login(clear = 0) {
@@ -3366,7 +3386,6 @@ body {
                     }
                 }).then(async (result) => {
                     if (result.isConfirmed) {
-                        defaultvars();
                         const { network, confirmedPassword } = result.value;
                         showLoader();
                         var hashedPassword = Crypto.SHA256(confirmedPassword);
@@ -3388,9 +3407,6 @@ body {
                         wallet.add(account);
                         hideLoader();
                         isConnected = true;
-                        if (clear == 1) {
-                            marketOffers = {'indices': [], 'results': []};
-                        }
                         document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
                         document.getElementById("account").innerHTML = loader;
                         document.getElementById("loginButton").style.display = 'none'; // Hide login button
@@ -3405,6 +3421,7 @@ body {
             }
         });
     }
+
 
     async function login2(clear = 0) {
       if (window.ethereum) { //Note: for mobile this only works if the webpage has <head> tag
@@ -3431,9 +3448,7 @@ body {
           document.getElementById("loginButton").style.display = 'block'; // Show login button
       }
     }
-    
-    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-    
+
     async function loadUser(login=0) {
       if (!isConnected) {
         return;
@@ -3518,6 +3533,7 @@ body {
       const theFavorites =  localStorage.getItem(myaccounts + DDEaddy + ":myFavorites");
       if(theFavorites) {
         myFavorites = JSON.parse(theFavorites);
+        updatePaginationControls(myFavorites.length);
       }
       checkFavorites();        
       if(document.getElementById("myPasswordInput").value != Crypto.SHA256("default") && newkey == 0 && accountprivkey == "") {
@@ -3719,46 +3735,15 @@ body {
         });
       }
       if(login == 1) {
-        await getUserAPI(currentChainId);        
-        await waitLock();
+        await getUserAPI(currentChainId);
         document.getElementById("loadingStatus").innerHTML = loader;
-        currentViewContext = '';
-        marketOffers = {'indices':[], 'results':[]};
-        locked = true;
-        await loadMarkets(0, maxContextLoad[0]);
-        locked = false;
+        await loadMarkets(0, 5);
         document.getElementById("loadingStatus").innerHTML = '';
       } else {
         await checkMarketUpdate();
       }
-      // await updateNotifications();
+      await updateNotifications();
       await populateOffers();
-    }
-
-    async function loadDefaultMarkets() {      
-      await waitLock();
-      document.getElementById("loadingStatus").innerHTML = loader;
-      currentViewContext = '';
-      locked = true;
-      await loadMarkets(0, maxContextLoad[0]);
-      locked = false;
-      document.getElementById("loadingStatus").innerHTML = '';
-    }
-
-    var breakThis = false;
-    async function waitLock(breakLoad = true) {
-      waited = 0;
-      while(locked) {
-        if(waited == 20) {
-          break;
-        }
-        if(breakLoad) {
-          breakThis = true;
-        }
-        await sleep(1000);
-        waited += 1;
-      }
-      breakThis = false;
     }
 
     async function showError(error) {
@@ -3838,7 +3823,7 @@ body {
     async function RefreshContracts() {
       if(myaccounts != '') {
         localStorage.setItem(myaccounts + DDEaddy + ":readmessages3", JSON.stringify({}));
-        // await updateNotifications();
+        await updateNotifications();
         await populateOffers();
       }
     }
@@ -4105,8 +4090,13 @@ body {
         }
       }).then(async (result) => {
         if (result.isConfirmed) {
+          const actionId = generateActionId('removeCustodian', "authorizeCustodian");
+          if (isActionActive(actionId)) {
+            await Swal.fire(translateThis("Action is already in progress for this contract."));
+            return;
+          }
           try {
-            setActionActive(myaccounts+"removeCosigner"+result.value, true);
+            setActionActive(actionId, true);
             if (accountprivkey !== "") {
               const gasEstimate = 130000;
               var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -4123,13 +4113,18 @@ body {
             hideLoader();
             await showError(e);
           } finally {
-            setActionActive(myaccounts+"removeCosigner"+result.value, false);
+            setActionActive(actionId, false);
           }
         }
       });
     }
 
     async function setCustodian() {
+      const actionId = generateActionId('setCustodian', "authorizeCustodian");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       await Swal.fire({
         title: translateThis('Set Cosigner/Custodian'),
         text: translateThis('Having a cosigner is useful in case you are unable to complete your deals. This should be someone you trust completely. They will only be given authorization to sign on your behalf to confirm or complete contracts so the contracts do not get held up in escrow. Please enter the custodians address below.'),
@@ -4149,7 +4144,7 @@ body {
             return;
           }
           try {
-            setActionActive(myaccounts+"addCosigner"+result.value, true);
+            setActionActive(actionId, true);
             if(accountprivkey != "") {
               const gasEstimate = 130000;
               var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -4167,10 +4162,10 @@ body {
             await showError(e);
             return;
           } finally {
-            setActionActive(myaccounts+"addCosigner"+result.value, false);
+            setActionActive(actionId, false);
           }
           try {
-            setActionActive(myaccounts+"addCosigner"+result.value, true);
+            setActionActive(actionId, true);
             if(accountprivkey != "") {
               const gasEstimate = 50000;
               var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -4188,7 +4183,7 @@ body {
             await showError(e);
             return;
           } finally {
-            setActionActive(myaccounts+"addCosigner"+result.value, false);
+            setActionActive(actionId, false);
           }
         }
       });
@@ -4350,6 +4345,12 @@ body {
     }
 
     async function registerData(contactInfo) {
+      const actionId = generateActionId("registerData", "registerData");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
+
       myemail = contactInfo || document.getElementById('myContactInfo').value;
       const { value: formValues } = await Swal.fire({
         title: '',
@@ -4389,7 +4390,7 @@ body {
         return;
       }
       try {
-        setActionActive(myaccounts+"register"+JSON.stringify(myuserdata), true);
+        setActionActive(actionId, true);
         if(accountprivkey != "") {
             const gasEstimate = 150000;
             var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -4406,7 +4407,7 @@ body {
         hideLoader();
         await showError(error);
       } finally {
-        setActionActive(myaccounts+"register"+JSON.stringify(myuserdata), false);
+        setActionActive(actionId, false);
       }
     }
 
@@ -4470,6 +4471,11 @@ body {
       });
     }
     async function changeAffiliate() {
+      const actionId = generateActionId("changeAffiliate", "changeAffiliate");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       await Swal.fire({
         title: translateThis('Please enter preferred affiliate'),
         input: 'text',
@@ -4492,7 +4498,7 @@ body {
           reputation = JSON.parse(DOMPurify.sanitize(JSON.stringify(await DDEcontract.methods.getCompleted(affiliate).call())));
           if(reputation[2] >= 10) {
             try {
-              setActionActive(myaccounts+"changeAffiliate"+affiliate, true);
+              setActionActive(actionId, true);
               if(accountprivkey != "") {
                 const gasEstimate = 50000;
                 var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -4511,7 +4517,7 @@ body {
               await showError(e);
               return;
             } finally {
-              setActionActive(myaccounts+"changeAffiliate"+affiliate, false);
+              setActionActive(actionId, false);
             }
           } else {
             Swal.fire(translateThis("This person has not completed enough qualified deals yet."));
@@ -4520,6 +4526,11 @@ body {
       });
     }
     async function setCustomFee() {
+      const actionId = generateActionId("changeCustomFee", "changeCustomFee");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       await Swal.fire({
         title: translateThis('Set base affiliate fee'),
         text: translateThis('Please enter the percentage fee that you wish to offer to affiliates who help find customers for you.'),
@@ -4539,7 +4550,6 @@ body {
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
           try {
-            setActionActive(myaccounts+"changeFee"+value, true);
             if(accountprivkey != "") {
               const gasEstimate = 50000;
               var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -4556,7 +4566,7 @@ body {
             hideLoader();
             await showError(e);
           } finally {
-            setActionActive(myaccounts+"changeFee"+value, false);
+            setActionActive(actionId, false);
           }
         }
       });
@@ -4746,7 +4756,7 @@ body {
     };
 
     async function checkMarketUpdate() {
-      const timethis = 900000; // 15 minutes in milliseconds
+      const ONE_HOUR_IN_MS = 900000; // 15 minutes in milliseconds
       const lastTimestamp = localStorage.getItem('lastTimestamp');
       var marketsLength = 0;
       await DDEcontract.methods.marketslength().call().then(async function (result) {
@@ -4756,20 +4766,16 @@ body {
 
       if (!lastTimestamp) {
         localStorage.setItem('lastTimestamp', currentTimestamp2.toString());
-      } else if (currentTimestamp2 - lastTimestamp >= timethis) {
+      } else if (currentTimestamp2 - lastTimestamp >= ONE_HOUR_IN_MS) {
         localStorage.setItem('lastTimestamp', currentTimestamp2.toString());
-        await loadDefaultMarkets();
+        await loadMarkets(1, 5);
         currentMarketsLength = marketsLength;
         return;
       }
 
       if (parseInt(currentMarketsLength) !== parseInt(marketsLength)) {
-        await loadDefaultMarkets();
+        await loadMarkets(1, 5);
       }
-    }
-    function setAutoUpdate() {
-      const currentTimestamp2 = new Date().getTime();
-      localStorage.setItem('lastTimestamp', currentTimestamp2.toString());
     }
     //Currently everything is loaded at once with a basic search. There is the option to post key words to the chain
     //although this could get expensive depending on the blockchain. Costs can be reduced by using a p2p search index.
@@ -4780,15 +4786,15 @@ body {
     //for them based on their criteria. One way to enforce a search protocol is have those who post to markets do so from a separate contract.
     //This way they can also be the ones required to remove the search tags and the contract manages everything.
     var tempCurator = "0x25A2c592DDD5F930a9CB271b9AC3e72bbBc3d351";
-    async function loadMarkets(low = 0, high = 1, searchText = '') {
+    async function loadMarkets(low = 1, high = 1, searchText = '') {
         var DDEcontract3 = DDEcontract;
         if(DDEcontract == '') {
             DDEcontract3 = DDEcontract2;
         }
-        var mlength = 0;
+        var mlength = 1;
         await DDEcontract3.methods.marketslength().call().then(async function (result) {
             currentMarketsLength = DOMPurify.sanitize(result);
-            mlength = parseInt(DOMPurify.sanitize(result));
+            mlength = DOMPurify.sanitize(result);
         });
         var listlen = DOMPurify.sanitize(await DDEcontract3.methods.getArrayLength(tempCurator,3).call());
         var udata = {};
@@ -4800,13 +4806,14 @@ body {
             }
           }
         }
-        setAutoUpdate();
-        var index = low;
+        var index = 1;
+        if(high > 1 && low != 0 && high <= mlength && low <= high) {
+            index = low;
+            mlength = high;
+        }
         var jsondata = {};
         var sortHits = 0;
-        if(low == 0) {
-          marketOffers['results'] = [];
-        }
+        marketOffers['results'] = [];
         if(showOrder == false) {
           var qpar = getQueryParam("o") || "default";
           if(qpar != "default") {
@@ -4815,75 +4822,58 @@ body {
           }
           showOrder = true;
         }
-        if(document.getElementById('searchText').value.includes("offer:")) {
-          searchText = document.getElementById('searchText').value;
-        }
-        contextIndex = index;
         if (searchText !== '') {
-          if (Array.isArray(searchText)) { //Favorites
+          if (Array.isArray(searchText)) {
             var expiredOffers = [];
-            var tot = 0;
-            var mlen = searchText.length;
-            for (var myinx = contextIndex; myinx < searchText.length; myinx++) {              
-              if(tot == high || breakThis) {
+            for (var myinx = 0; myinx < searchText.length; myinx++) {
+              if(myinx == high) {
                 break;
               }
               try {
                 const hash = searchText[myinx];
-                const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
+                const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
                 if (offerID == 0) {
                   expiredOffers.push(hash);
-                  mlen -= 1;
                 } else {
                   jsondata = await getOrderHash(hash);
                   if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
-                    mlen -= 1;
                     continue;
                   }
                   if(parseInt(jsondata.timelimit[1]) != 0) {
                     if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                       if(!marketOffers.hasOwnProperty(offerID)) {
-                        marketOffers.indices.push(offerID);
+                          marketOffers.indices.push(offerID);
                       }
                       marketOffers[offerID] = hash;
                       marketOffers[hash] = jsondata;
-                      contextIndex = myinx + 1;
                       if(!marketOffers['results'].includes(hash)) {
-                        tot+=1;
-                        marketOffers.results.push(hash);                        
+                          marketOffers.results.push(hash);
                       }
                     } else {
                       expiredOffers.push(hash);
-                      mlen -= 1;
                     }
                   } else {
                     if(!marketOffers.hasOwnProperty(offerID)) {
-                      marketOffers.indices.push(offerID);
+                        marketOffers.indices.push(offerID);
                     }
                     marketOffers[offerID] = hash;
                     marketOffers[hash] = jsondata;
-                    contextIndex = myinx + 1;
                     if(!marketOffers['results'].includes(hash)) {
-                      tot+=1;
-                      marketOffers.results.push(hash);                      
+                        marketOffers.results.push(hash);
                     }
                   }
                 }
-                updatePaginationControls(marketOffers.results.length, mlen);
                 await populateListings("", 2);
               } catch (e) {
                   console.log("Error loading offer: ",e);
               }
             }
-            contextIndex = myinx;
             if(expiredOffers.length > 0) {
               for (var myinx = 0; myinx < expiredOffers.length; myinx++) {
-                contextIndex -= 1;
                 myFavorites.splice(myFavorites.indexOf(expiredOffers[myinx]),1);
               }
               localStorage.setItem(myaccounts + DDEaddy + ':myFavorites', JSON.stringify(myFavorites));
             }
-            updatePaginationControls(marketOffers.results.length, mlen);
             await populateListings("", 2);
             return;
           } else if(searchText.includes("userStore:")){
@@ -4900,66 +4890,57 @@ body {
                   expiredOffers = JSON.parse(cached);
                 }
               }
-              var tot = 0;
-              var truetot = mylen;
-              for (var myinx = contextIndex; myinx < mylen; myinx++) {
-                if(tot == high || breakThis) {
+              var validOffers = 0;
+              updatePaginationControls(mylen);
+              for (var myinx = 0; myinx < mylen; myinx++) {
+                if(validOffers == high) {
                   break;
                 }
                 if(expiredOffers.includes(myinx)) {
-                  truetot -= 1;
                   continue;
-                }                
+                }
+                validOffers++;
                 try {
                   const hash = DOMPurify.sanitize(await DDEcontract3.methods.openOffers(userAddress, myinx).call());
-                  const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
+                  const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
                   if (offerID == 0) {
-                    truetot -= 1;
                     expiredOffers.push(myinx);
                     added = 1;
                   } else {
                     jsondata = await getOrderHash(hash);
                     if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
-                      truetot -= 1;
                       continue;
                     }
                     if(parseInt(jsondata.timelimit[1]) != 0) {
                       if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
                         if(!marketOffers.hasOwnProperty(offerID)) {
-                          marketOffers.indices.push(offerID);
+                            marketOffers.indices.push(offerID);
                         }
                         marketOffers[offerID] = hash;
                         marketOffers[hash] = jsondata;
-                        contextIndex = myinx + 1;
                         if(!marketOffers['results'].includes(hash)) {
-                          tot++;                          
-                          marketOffers.results.push(hash);                          
+                            marketOffers.results.push(hash);
                         }
                       } else {
-                        truetot -= 1;
                         expiredOffers.push(myinx);
                         added = 1;
                       }
                     } else {
                         if(!marketOffers.hasOwnProperty(offerID)) {
-                          marketOffers.indices.push(offerID);
+                            marketOffers.indices.push(offerID);
                         }
                         marketOffers[offerID] = hash;
                         marketOffers[hash] = jsondata;
-                        contextIndex = myinx + 1;
                         if(!marketOffers['results'].includes(hash)) {
-                          tot++;
-                          marketOffers.results.push(hash);                          
+                            marketOffers.results.push(hash);
                         }
                     }
                   }
-                  updatePaginationControls(marketOffers.results.length, truetot);
                   await populateListings("", 2);
                 } catch (e) {
                     console.log("Error loading offer: ",e);
                 }
               }
-              contextIndex = myinx;
               if(expiredOffers.length > 0 && added == 1) {
                 localStorage.setItem(userAddress + DDEaddy + ':userStoreCache', JSON.stringify(expiredOffers));
               }
@@ -4971,7 +4952,7 @@ body {
           } else if(searchText.includes("offer:")){
             const hash = searchText.split("offer:")[1].trim();
             try {
-              const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
+              const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
               if (offerID == 0) {
               } else {
                 jsondata = await getOrderHash(hash);
@@ -4987,7 +4968,6 @@ body {
                     marketOffers[hash] = jsondata;
                     if(!marketOffers['results'].includes(hash)) {
                         marketOffers.results.push(hash);
-                        updatePaginationControls(marketOffers.results.length);
                     }
                   }
                 } else {
@@ -4998,7 +4978,6 @@ body {
                   marketOffers[hash] = jsondata;
                   if(!marketOffers['results'].includes(hash)) {
                       marketOffers.results.push(hash);
-                      updatePaginationControls(marketOffers.results.length);
                   }
                 }
               }
@@ -5009,140 +4988,106 @@ body {
             return;
           } else {
             sortHits = 1;
-            var longestKey = 0;
-            const keywords = searchText.split(/[,\s]+/); // Split by commas and one or more whitespace characters
-            if(low == 0) {
-              contextIndex = new Array(keywords.length).fill(0);
-              longestKey = 0;
-            } else {
-              longestKey = prevBatch;
-            }
-            var pos = 0;
-            for (let k = 0; k < keywords.length; k++) {
-              var keyword = keywords[k];
-              // Perform operations on each keyword
-              if (keyword.length === 0) {
-                pos+=1;
-                continue; // Skip further execution for empty keyword
-              }
-              let keywordIndex = 0; // Declare a separate index for each keyword iteration
-              let keywordLength = 0;
-              await DDEcontract3.methods.taglength(keyword.toLowerCase()).call().then(async function (result) {
-                  keywordIndex = 0;
-                  keywordLength = parseInt(DOMPurify.sanitize(result));
-                  if(low == 0) {
-                    longestKey += keywordLength;
-                  }
-                  var tot = 0;
-                  for (keywordIndex = contextIndex[pos]; keywordIndex < keywordLength; keywordIndex++) {
-                      if(tot == high) {
-                        break;
-                      }
-                      try {
-                          await DDEcontract3.methods.hashtag(keyword.toLowerCase(), keywordIndex).call().then(async function (hash) {
-                              hash = DOMPurify.sanitize(hash);
-                              if(hash == "0x0000000000000000000000000000000000000000000000000000000000000000") {
-                                longestKey -= 1;
-                                return;
-                              }
-                              const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
-                              if (offerID == 0) {
-                                longestKey -= 1;
-                                return;
-                              }
-                              if(hash in marketOffers) {
-                                if(!('searchTerms' in marketOffers[hash])) {
-                                  marketOffers[hash]['searchTerms'] = [];                                  
+            const keywords = searchText.split(/[,\s]+/); // Split by commas and one or more whitespace characters            
+            await Promise.all(keywords.map(async keyword => {
+                // Perform operations on each keyword
+                if (keyword.length === 0) {
+                    return; // Skip further execution for empty keyword
+                }
+                let keywordIndex = 0; // Declare a separate index for each keyword iteration
+                let keywordLength = 0;
+                await DDEcontract3.methods.taglength(keyword.toLowerCase()).call().then(async function (result) {
+                    keywordIndex = 0;
+                    keywordLength = parseInt(DOMPurify.sanitize(result));
+                    if(high > 1 && low >= 0 && high <= keywordLength && low <= high) {
+                        keywordIndex = low;
+                        keywordLength = high;
+                    }
+                    for (keywordIndex; keywordIndex < keywordLength; keywordIndex++) {
+                        try {
+                            await DDEcontract3.methods.hashtag(keyword.toLowerCase(), keywordIndex).call().then(async function (hash) {
+                                hash = DOMPurify.sanitize(hash);
+                                if(hash == "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                                    return;
                                 }
-                                if(!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {                                  
-                                  marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
-                                }
-                                jsondata = marketOffers[hash];
-                              } else {
-                                jsondata = await getOrderHash(hash);
-                                if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
-                                  longestKey -= 1;
+                                const offerID = DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call());
+                                if (offerID == 0) {
                                   return;
-                                }
-                                if(!marketOffers.hasOwnProperty(offerID)) {
-                                  marketOffers.indices.push(offerID);
-                                }
-                                marketOffers[offerID] = hash;
-                                if(parseInt(jsondata.timelimit[1]) != 0) {
-                                  if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
-                                    marketOffers[hash] = jsondata;
-                                  } else {
-                                    longestKey -= 1;
+                                } 
+                                if(hash in marketOffers) {
+                                  if(!('searchTerms' in marketOffers[hash])) {
+                                    marketOffers[hash]['searchTerms'] = [];
+                                  }
+                                  if(!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
+                                      marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
+                                  }
+                                  jsondata = marketOffers[hash];
+                                } else {
+                                  jsondata = await getOrderHash(hash);
+                                  if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
                                     return;
                                   }
-                                } else {
-                                  marketOffers[hash] = jsondata;
+                                  if(!marketOffers.hasOwnProperty(offerID)) {
+                                      marketOffers.indices.push(offerID);
+                                  }
+                                  marketOffers[offerID] = hash;
+                                  if(parseInt(jsondata.timelimit[1]) != 0) {
+                                      if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
+                                          marketOffers[hash] = jsondata;
+                                      } else {
+                                        return;
+                                      }
+                                  } else {
+                                      marketOffers[hash] = jsondata;
+                                  }
+                                  if(!('searchTerms' in marketOffers[hash])) {
+                                    marketOffers[hash]['searchTerms'] = [];
+                                  }
+                                  if(!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
+                                      marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
+                                  }
                                 }
-                                if(!('searchTerms' in marketOffers[hash])) {
-                                  marketOffers[hash]['searchTerms'] = [];
+                                if(!marketOffers['results'].includes(hash)) {
+                                    marketOffers.results.push(hash);
                                 }
-                                if(!marketOffers[hash]['searchTerms'].includes(keyword.toLowerCase())) {
-                                  marketOffers[hash]['searchTerms'].push(keyword.toLowerCase())
-                                }
-                              }
-                              if(!marketOffers['results'].includes(hash)) {                                
-                                tot += 1;
-                                marketOffers.results.push(hash);                                
-                              } else {
-                                longestKey -= 1;
-                              }
-                          });
-                          updatePaginationControls(marketOffers.results.length, longestKey);
-                          await populateListings("", 1);
-                      } catch (e) {
-                          console.log("Error loading offer: ",e);
-                      }
-                  }
-                  contextIndex[pos] = keywordIndex;                    
-              });
-              pos+=1;
-            };            
-            if(marketOffers.results.length==0) {              
-              await populateListings(searchText);
+                            });
+                            await populateListings("", 1);
+                        } catch (e) {
+                            console.log("Error loading offer: ",e);
+                        }
+                    }
+                });
+            }));
+            if(marketOffers.results.length==0) {
+                await populateListings(searchText);
             } else {
-              updatePaginationControls(marketOffers.results.length, longestKey);
-              await populateListings("", 1);
+                await populateListings("", 1);
             }
             return;
           }
         } else {
             var searchThis = [];
-            var trueLength = mlength - 1;
-            var tot = 0;
             for (index; index < mlength; index++) {
-                if(index == 0) {
-                  continue;
-                }
-                if(tot == high || breakThis) {
-                  break;
-                }
                 searchThis = [];
                 try {
                     await DDEcontract3.methods.markets(index).call().then(async function (hash) {
                         hash = DOMPurify.sanitize(hash);
                         jsondata = await getOrderHash(hash);
                         if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
-                          trueLength -= 1;                          
                           return;
                         }
                         if(parseInt(jsondata.timelimit[1]) != 0) {
                             if(parseInt(jsondata.timelimit[1]) > parseInt(CurrentTimeStamp)) {
-                              if(!marketOffers.hasOwnProperty(index)) {
-                                  marketOffers.indices.push(index);
-                              }
-                              marketOffers[index] = hash;
-                              if(hash in marketOffers) {
-                                  searchThis = marketOffers[hash]['searchTerms'];
-                              }
-                              marketOffers[hash] = jsondata;
-                              marketOffers[hash]['searchTerms'] = searchThis;
+                                if(!marketOffers.hasOwnProperty(index)) {
+                                    marketOffers.indices.push(index);
+                                }
+                                marketOffers[index] = hash;
+                                if(hash in marketOffers) {
+                                    searchThis = marketOffers[hash]['searchTerms'];
+                                }
+                                marketOffers[hash] = jsondata;
+                                marketOffers[hash]['searchTerms'] = searchThis;
                             } else {
-                              trueLength -= 1;                              
                               return;
                             }
                         } else {
@@ -5158,16 +5103,13 @@ body {
                         }
                         if(!marketOffers['results'].includes(hash)) {
                             marketOffers.results.push(hash);
-                            tot+=1;                            
                         }
                     });
-                    updatePaginationControls(marketOffers.results.length, trueLength);
                     await populateListings();
                 } catch (e) {
                     console.log("Error loading offer: ",e);
                 }
             }
-            contextIndex = index;
         }
         if(DDEcontract == '') {
             await populateListings("", sortHits);
@@ -5392,14 +5334,12 @@ body {
           myhash = web3.utils.keccak256(li.innerHTML);
           if(offerHash in notifications) {
             if(notifications[offerHash] != myhash) {
-              updateNotifications(notifications[offerHash], myhash, offerHash, offerData, 1);
               notifications[offerHash] = myhash;
               notify = 1;
             }
           } else {
             notifications[offerHash] = myhash;
             notify = 1;
-            updateNotifications(notifications[offerHash], myhash, offerHash, offerData, 1);
           }
           li.onclick = function() {
             document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
@@ -5488,33 +5428,13 @@ body {
           `;
           myhash = web3.utils.keccak256(li2.innerHTML);
           if(offerHash2 in notifications) {
-            let mode;
-            if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
-              mode = 1;
-            }
-            if(myaccounts == offerData2.sender && offerData2.status[0] == 0) {
-              mode = 2;
-            }
-            if(myaccounts == offerData2.recipient && offerData2.status[1] == 1) {
-              mode = 1;
-            }
-            if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
-              mode = 2;
-            }
-            var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(counterpartyAddress2).call()));
-            var msIndex = localStorage.getItem(myaccounts + DDEaddy + offerHash2 + counterpartyAddress2 + 'lastMessageIndex') || 0;
-            if(mslen > msIndex) {
-              offerData2.newMessage = true;
-            }
-            if(notifications[offerHash2] != myhash || offerData2.newMessage == true) {
-              updateNotifications(notifications[offerHash2], myhash, offerHash2, offerData2, mode);
+            if(notifications[offerHash2] != myhash) {
               notifications[offerHash2] = myhash;
               notify = 1;
             }
           } else {
             notifications[offerHash2] = myhash;
             notify = 1;
-            updateNotifications(notifications[offerHash2], myhash, offerHash2, offerData2, mode);
           }
           offerData2.index = i;
           if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
@@ -5723,20 +5643,13 @@ body {
           const inputString = li3.innerHTML.replace(lineToExcludeRegex, '');
           myhash = web3.utils.keccak256(inputString);
           if(offerHash3 in notifications) {
-            var mslen2 = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(counterpartyAddress3).call()));
-            var msIndex2 = localStorage.getItem(myaccounts + DDEaddy + offerHash3 + counterpartyAddress3 + 'lastMessageIndex') || 0;
-            if(mslen2 > msIndex2) {
-              offerData3.newMessage = true;
-            }
-            if(notifications[offerHash3] != myhash || offerData3.newMessage == true) {
-              updateNotifications(notifications[offerHash3], myhash, offerHash3, offerData3, 4);
+            if(notifications[offerHash3] != myhash) {
               notifications[offerHash3] = myhash;
-              notify = 1;              
+              notify = 1;
             }
           } else {
             notifications[offerHash3] = myhash;
             notify = 1;
-            updateNotifications(notifications[offerHash3], myhash, offerHash3, offerHash3, 4);
           }
           offerData3.index = i;
           li3.onclick = function() {
@@ -5833,7 +5746,7 @@ body {
     //**************MARKETS TAB//**************
     // global variables for pagination
     var currentPage = 1;
-    var listingsPerPage = 2;
+    var listingsPerPage = 4 ;
 
     async function populateListings(searchText = "", sortHits = 0) {
       if(sortHits == 1) {
@@ -5865,6 +5778,7 @@ body {
 
       var gridContainer = document.createElement('div');
       gridContainer.classList.add('listings-grid');
+      
       for (var i = startIndex; i < endIndex; i++) {
         if (shown == listingsPerPage) {
           break;
@@ -5876,18 +5790,10 @@ body {
           continue;
         }
         if (searchText !== "") {
-          if(currentViewContext == '') {
-            if (i < marketOffers.results.length) {
-              offer = marketOffers[marketOffers.results[i]];
-            } else {
-              offer = marketOffers[marketOffers[marketOffers.indices[i]]];
-            }
+          if (i < marketOffers.results.length) {
+            offer = marketOffers[marketOffers.results[i]];
           } else {
-            if (i < marketOffers.results.length) {
-              offer = marketOffers[marketOffers.results[i]];
-            } else {
-              break;
-            }
+            offer = marketOffers[marketOffers[marketOffers.indices[i]]];
           }
           const keywords = searchText.split(/[,\s]+/);
           let foundKeyword = false;
@@ -5920,11 +5826,7 @@ body {
               if(sortHits == 2) {
                 continue;
               }
-              if(currentViewContext == '') {
-                offer = marketOffers[marketOffers[marketOffers.indices[i]]];
-              } else {
-                continue;
-              }
+              offer = marketOffers[marketOffers[marketOffers.indices[i]]];
             }
           } else {
             offer = marketOffers[marketOffers[marketOffers.indices[i]]];
@@ -5934,7 +5836,8 @@ body {
           continue;
         } else {
           myhashes[offer.hash] = 1;
-        }    
+        }
+        // updatePaginationControls(marketOffers.indices.length);
         var gridItem = document.createElement('div');
         gridItem.classList.add('listing-grid-item');
         var myimg = await getFile(offer.image);
@@ -5944,11 +5847,11 @@ body {
         if (myimg.length > 0) {
           const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
 
-          for (let j = 0; j < myimg.length; j++) {
-              const mimeType = myimg[j].match(/^data:(.*?);/)[1].toLowerCase();
+          for (let i = 0; i < myimg.length; i++) {
+              const mimeType = myimg[i].match(/^data:(.*?);/)[1].toLowerCase();
 
               if (imageMimeTypes.includes(mimeType)) {
-                  tempimg = '<img src="' + myimg[j] + '" alt="./blank-image.jpg">';
+                  tempimg = '<img src="' + myimg[i] + '" alt="./blank-image.jpg">';
                   foundImage = true;
                   break; 
               }
@@ -5981,6 +5884,7 @@ body {
         shown++;
       }
       listingsDiv.appendChild(gridContainer);
+      // updatePaginationControls(shown);
       // Inject CSS styles into a style tag
       var style = document.createElement('style');
       style.textContent = `
@@ -5988,184 +5892,135 @@ body {
       document.head.appendChild(style);
     }
 
-    function updateNotifications(oldHash, newHash, offerHash, newOfferData, mode) {
-      try {
-        if (oldHash === undefined || newHash === undefined) {
-          console.log("One or both hashes are undefined. No action taken.");
-          return;
-        }
+    async function updateNotifications() {
+        var notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":unifiedNotifications") || "{}");
+        var readMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":readmessages") || "{}");
 
-        var notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":unifiedNotifications")) || {};
-        var oldOfferData = notifications[offerHash] ? notifications[offerHash].listing : null;
+        await fetchOffersFromMethod('openOffers', notifications, readMessages);
+        await fetchOffersFromMethod('privateOffers', notifications, readMessages);
+        await fetchOffersFromMethod('escrows', notifications, readMessages);
 
-        if (oldHash !== newHash || newOfferData.newMessage == true) {
-          let message = generateNotificationMessage(oldOfferData, newOfferData);
-          newOfferData.newMessage = false;
-          notifications[offerHash] = {
-            isRead: false,
-            message: message,
-            listing: newOfferData,
-            timestamp: new Date().toISOString(),
-            mode
-          };
-
-          localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", JSON.stringify(notifications));
-
-          displayNotifications();
-          updateBellIcon(notifications);
-        }
-      } catch (error) {
-        console.error("Error processing notification update:", error);
-      }
+        localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", JSON.stringify(notifications));
+        displayNotifications();
     }
 
-    function generateNotificationMessage(oldOfferData, newOfferData) {
-      if (!oldOfferData) return ["New Offer", "A new offer has been posted."];
+    async function fetchOffersFromMethod(methodName, notifications, readMessages) {
+        var mylen = 0;
+        try {
+            mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, methodName === 'escrows' ? 2 : (methodName === 'privateOffers' ? 1 : 0)).call());
+            for (var i = 0; i < mylen; i++) {
+                if (readMessages[i]) {
+                    continue;
+                }
+                const offerHash = DOMPurify.sanitize(await DDEcontract.methods[methodName](myaccounts, i).call());
+                const offerData = await getOrderHash(offerHash);
+                const previousData = JSON.parse(localStorage.getItem(offerHash) || "{}");
+                localStorage.setItem(offerHash, JSON.stringify(offerData)); // Update the cache with the latest data
 
-      let title = "Contract Update";
-      let details = [];
+                let mode = 0; 
+                if (methodName === 'openOffers') {
+                    mode = 1;
+                } else if (methodName === 'privateOffers') {
+                    mode = offerData.status[0] === 1 ? 1 : 2; 
+                } else if (methodName === 'escrows') {
+                    mode = 4; 
+                }
 
-      // Check for changes in message content
-      if (newOfferData.newMessage == true) {
-        title = "New Message";
-        details.push("You have unread messages");
-      }
-
-      // Check for changes in the status
-      if (oldOfferData.status.join(',') !== newOfferData.status.join(',')) {
-        let statusKey = newOfferData.status.join(',');
-        let statusMessage = combinedStatusDescriptions[statusKey] || "Status updated";
-        title = "Notification on Contract";
-        details.push(statusMessage);
-      }
-
-      // Check for changes in time remaining
-      if (oldOfferData.timeRemaining !== newOfferData.timeRemaining) {        
-        if (newOfferData.timeRemaining < 7 && oldOfferData.timeRemaining - newOfferData.timeRemaining > .5) {
-          title = "Time Update";
-          details.push(`Time remaining updated to ${newOfferData.timeRemaining} days.`);
+                let changes = detectChanges(offerData, previousData);
+                if (changes.length > 0) {
+                    notifications[offerHash] = {
+                        type: methodName.replace('Offers', ''),
+                        title: offerData.message,
+                        message: changes.join(", "),
+                        timestamp: new Date().toISOString(),
+                        listing: offerData,
+                        mode: mode 
+                    };
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching offer data:", error);
         }
-      }
-
-      // Check for changes in escrow information
-      if (oldOfferData.escrowInfo !== newOfferData.escrowInfo) {
-        title = "Escrow Update";
-        details.push("Notification on escrow");
-      }
-
-      // Default message if no specific changes are detected
-      if (details.length === 0) {
-        details.push("Changes detected in the offer details.");
-      }
-
-      return [title, details.join(' ')];
     }
 
-    function updateBellIcon(notifications){
-      const notificationBell = document.querySelector(".notification-lottie-file lottie-player");
-      const unreadNotifications = Object.keys(notifications).filter(hash => !notifications[hash].isRead).length;
-      if (myaccounts === "" || unreadNotifications ===  0) {
-        notificationBell.stop();
-      } else {
-        notificationBell.play();
-      }
+    function detectChanges(currentData, previousData) {
+        let changes = [];
+
+        // Determine default status based on the context or type of data
+        let defaultStatus = "Offer"; // Default fallback
+        if (currentData.type && currentData.type === "escrow") {
+            defaultStatus = "Escrow";
+        } else if (currentData.type && currentData.type === "contract") {
+            defaultStatus = "Contract";
+        }
+
+        // Ensure previousData has default values if undefined
+        if (!previousData || Object.keys(previousData).length === 0) {
+            previousData = { status: [defaultStatus, defaultStatus], amount: "0" };
+        }
+
+        // Ensure currentData has default values if undefined
+        if (!currentData.status) {
+            currentData.status = [defaultStatus, defaultStatus];
+        }
+        if (!previousData.status) {
+            previousData.status = [defaultStatus, defaultStatus];
+        }
+
+        // Construct status keys
+        const prevStatusKey = `${previousData.status[0]},${previousData.status[1]}`;
+        const currStatusKey = `${currentData.status[0]},${currentData.status[1]}`;
+
+        // Fetch status descriptions based on the keys
+        const oldStatus = combinedStatusDescriptions[prevStatusKey] || `${statusDescriptions[previousData.status[0]] || defaultStatus}, ${statusDescriptions[previousData.status[1]] || defaultStatus}`;
+        const newStatus = combinedStatusDescriptions[currStatusKey] || `${statusDescriptions[currentData.status[0]] || defaultStatus}, ${statusDescriptions[currentData.status[1]] || defaultStatus}`;
+
+        // Check if status has changed and push the new status description
+        if (prevStatusKey !== currStatusKey) {
+            changes.push(newStatus);
+        }
+
+        return changes;
     }
 
-    async function displayNotifications() {
+
+    function displayNotifications() {
       const notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":unifiedNotifications") || "{}");
       const notificationBox = document.getElementById("notification-box");
 
       // Clear existing notifications
       notificationBox.innerHTML = '';
-      if (myaccounts === "") {
-        notificationBox.innerHTML = `<div class="notification-empty">${translateThis("Login to see notifications")}</div>`;
+
+      // Check if there are any notifications
+      if (Object.keys(notifications).length === 0) {
+          notificationBox.innerHTML = `<div class="notification-empty">${translateThis("No notifications")}</div>`;
       } else {
-        const unreadNotifications = Object.entries(notifications).filter(([hash, notification]) => !notification.isRead);
-          if (Object.keys(unreadNotifications).length === 0) {
-            notificationBox.innerHTML = `<div class="notification-empty">${translateThis("You have no unread notifications")}</div>`;
-          } else {
-            unreadNotifications.forEach(async ([hash, notification]) => {
+        Object.entries(notifications).forEach(([hash, notification]) => {
             const notificationContent = document.createElement('div');
             notificationContent.className = 'notification-box-content';
 
             const notificationButton = document.createElement('button');
             notificationButton.className = 'notification-box-content-button';
-
-            let myimg = await getFile(notification.listing.image);
-            let tempimg = '<img src="./blank-image.jpg" alt="No image available">'; 
-            let foundImage = false;
-
-            // Check if there are any images returned and process them
-            if (myimg && myimg.length > 0) {
-              const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
-
-              for (let i = 0; i < myimg.length; i++) {
-                const mimeTypeMatch = myimg[i].match(/^data:(.*?);/);
-                if (mimeTypeMatch && imageMimeTypes.includes(mimeTypeMatch[1].toLowerCase())) {
-                  tempimg = `<img src="${myimg[i]}" alt="Notification image">`;
-                  foundImage = true;
-                  break;
-                }
-              }
-
-              if (!foundImage) {
-                tempimg = '<img src="./blank-image.jpg" alt="Document Placeholder">';
-              }
-            }
-
             notificationButton.innerHTML = `
               <div class="notification-badge">
-                ${tempimg}
+                  <img src="telegram.png" alt="notification img"/>
               </div>
               <div class="notification-box-content-info">
-                <h6>${notification.message[0] || "Default Title"}</h6>
-                <p>${translateThis(notification.message[1]) || "No details available."}</p>
+                  <h6>${notification.title || "Default Title"}</h6>
+                  <p>${translateThis(notification.message) || "No details available."}</p>
               </div>
             `;
 
             notificationButton.addEventListener('click', () => {
-              showListing(notification.listing, notification.mode);
+                showListing(notification.listing, notification.mode);
             });
             notificationContent.appendChild(notificationButton);
 
             notificationBox.appendChild(notificationContent);
-          });
-        }
+        });
       }
     }
 
-    function markAllNotificationsAsRead() {
-      const notifications = JSON.parse("{}");
-      localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", "{}");
-      updateBellIcon(notifications);
-    }
-
-    document.querySelector(".notification-lottie-file").addEventListener('click', () => {
-      const notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":unifiedNotifications") || "{}");
-      const notificationBox = document.getElementById("notification-box");
-      const notificationBell = document.querySelector(".notification-lottie-file lottie-player");
-      if (myaccounts === "") {
-        notificationBox.innerHTML = `<div class="notification-empty">${translateThis("Login to see notifications")}</div>`;
-      } else {
-        const unreadNotifications = Object.entries(notifications).filter(([hash, notification]) => !notification.isRead);
-        if (unreadNotifications.length === 0) {
-          notificationBox.innerHTML = `<div class="notification-empty">${translateThis("You have no unread notifications")}</div>`;
-        } else {
-          displayNotifications();
-          notificationBell.stop();
-        }
-      }
-      notificationsToggle();
-    });
-
-    function notificationsToggle() {
-      const notificationBox = document.getElementById('notification-box');
-      const isActive = notificationBox.classList.toggle('active');
-      if (!isActive) {
-        markAllNotificationsAsRead();
-      }
-    }
-    
     function displayDecimals(token, amountString) {
       var formattedAmount = '';
       for (var i = 0; i < tokens.length; i++) {
@@ -6197,19 +6052,9 @@ body {
       // filter the marketOffers array based on the searchText
       // and update the currentPage to 1
       currentPage = 1;
-      if (searchText.trim() === "") {        
-        if(deep == 1) {          
-          await loadDefaultMarkets();
-        }
-        return;
-      }      
       if (deep == 1) {
-        await waitLock();
         document.getElementById("loadingStatus").innerHTML = loader;
-        currentViewContext = 'searchTag';
-        locked = true;
-        await loadMarkets(0, maxContextLoad[1], searchText);
-        locked = false;
+        await loadMarkets(0, 5, searchText);
         document.getElementById("loadingStatus").innerHTML = "";
       } else {
         await populateListings(searchText);
@@ -6223,8 +6068,8 @@ body {
     // }
 
     async function searchFavorites() {
-      await waitLock();
-      document.getElementById("loadingStatus").innerHTML = loader;     
+      document.getElementById("loadingStatus").innerHTML = loader;
+      
       if (!isFavoritesShown) {
           const favorites = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":myFavorites")) || [];
           if (favorites.length === 0) {
@@ -6232,30 +6077,22 @@ body {
              return;
          }
          currentViewContext = 'favorites';
-         locked = true;
-         await loadMarkets(0, maxContextLoad[2], favorites);
-         locked = false;
+         await loadMarkets(0, 5, favorites);
+         updatePaginationControls(favorites.length);
          isFavoritesShown = true;
+        //  document.getElementById("favorites-text").textContent = translateThis("Hide Favorites");
        } else {
            currentViewContext = '';
-           locked = true;
-           await loadMarkets(0, maxContextLoad[0]);
-           locked = false;
-           isFavoritesShown = false;
-       }       
+           await loadMarkets(1, 5);
+           isFavoritesShown = false; 
+          //  document.getElementById("favorites-text").textContent = translateThis("Show Favorites");
+       }
+       
        document.getElementById("loadingStatus").innerHTML = "";
     }
 
-    var prevLength = 0;
-    var prevBatch = 0;
-    function updatePaginationControls(totalItems = currentMarketsLength, batchLength = 0, mdefault = 0) {      
-      if(mdefault == 0) {
-        prevLength = totalItems;
-        prevBatch = batchLength;
-      } else {
-        totalItems = prevLength;
-        batchLength = prevBatch;
-      }
+
+    function updatePaginationControls(totalItems = currentMarketsLength) {
       var totalPages = Math.ceil(totalItems / listingsPerPage);
       var prevButton = document.querySelector('[onclick="previousPage()"]');
       var nextButton = document.querySelector('[onclick="nextPage()"]');
@@ -6263,22 +6100,21 @@ body {
 
       paginationNumbers.innerHTML = '';
 
-      if (currentPage > 1) {
+      if (currentPage > 1 && !isMobile) {
           createPageButton(currentPage - 1);
       }
+
       createPageButton(currentPage);
+
       if (currentPage < totalPages) {
           createPageButton(currentPage + 1);
       }
 
       // Disable or enable buttons based on the current page
       prevButton.disabled = currentPage === 1;
-      nextButton.disabled = false;
-      if(totalItems >= batchLength) {
-        nextButton.disabled = currentPage * listingsPerPage >=  totalItems;
-      }
+      nextButton.disabled = currentPage * listingsPerPage >=  totalItems;
       prevButton.classList.toggle('button-disabled', currentPage === 1);
-      nextButton.classList.toggle('button-disabled', nextButton.disabled);
+      nextButton.classList.toggle('button-disabled', currentPage * listingsPerPage >=  totalItems);
 
       function createPageButton(page) {
         let pageButton = document.createElement('button');
@@ -6298,7 +6134,7 @@ body {
     async function goToPage(pageNumber, totalItems){
       currentPage = pageNumber;
       await populateListings();
-      updatePaginationControls(0,0,1);
+      updatePaginationControls(totalItems);
     }
 
     // async function previousPage() {
@@ -6310,10 +6146,26 @@ body {
     // }
 
     async function previousPage() {
+        var totalItems;
+        // Determine the total items based on the current context
+        switch (currentViewContext) {
+            case 'favorites':
+                const favorites = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":myFavorites")) || [];
+                totalItems = favorites.length;
+                break;
+            case 'userStore':
+                const userStoreKey = document.getElementById("searchText").value.split("userStore:")[1].trim();
+                totalItems = await getTotalItemsForUserStore(userStoreKey);
+                break;
+            default:
+                totalItems = marketOffers.indices.length;
+                break;
+        }
+
         if (currentPage > 1) {
             currentPage--;
             await populateListings();
-            updatePaginationControls(0,0,1);
+            updatePaginationControls(totalItems);
         }
     }
 
@@ -6328,63 +6180,40 @@ body {
     }
 
     async function nextPage() {
-        var totalItems = marketOffers['results'].length;
+        var totalItems;
         var startIndex = currentPage * listingsPerPage;
-        var totalPages = Math.ceil(totalItems / listingsPerPage);
-        if(currentPage < totalPages) {
-          currentPage += 1;
-          updatePaginationControls(0,0,1);
-        }
-        // Handle different contexts for loading markets        
+        var endIndex = startIndex + listingsPerPage;
+
+        // Handle different contexts for loading markets
         switch (currentViewContext) {
             case 'favorites':
                 const favorites = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":myFavorites")) || [];
-                if (startIndex >= totalItems) {
-                  currentPage += 1;
-                  await waitLock();
-                  document.getElementById("loadingStatus").innerHTML = loader;
-                  locked = true;
-                  await loadMarkets(contextIndex, maxContextLoad[2], favorites);
-                  locked = false;
-                  document.getElementById("loadingStatus").innerHTML = "";
+                totalItems = favorites.length;
+                if (startIndex < totalItems) {
+                    await loadMarkets(startIndex, Math.min(endIndex, totalItems), favorites);
                 }
                 break;
             case 'userStore':
                 const userStoreKey = document.getElementById("searchText").value.split("userStore:")[1].trim();
-                if (startIndex >= totalItems) {
-                  currentPage += 1;
-                  await waitLock();
-                  document.getElementById("loadingStatus").innerHTML = loader;
-                  locked = true;
-                  await loadMarkets(contextIndex, maxContextLoad[3], "userStore:" + userStoreKey);
-                  locked = false;
-                  document.getElementById("loadingStatus").innerHTML = "";
-                }
-                break;
-            case 'searchTag':
-                if (startIndex >= totalItems) {
-                  currentPage += 1;
-                  await waitLock();
-                  document.getElementById("loadingStatus").innerHTML = loader;
-                  locked = true;
-                  await loadMarkets(contextIndex, maxContextLoad[1], document.getElementById("searchText").value);
-                  locked = false;
-                  document.getElementById("loadingStatus").innerHTML = "";
+                totalItems = await getTotalItemsForUserStore(userStoreKey);
+                if (startIndex < totalItems) {
+                    await loadMarkets(startIndex, Math.min(endIndex, totalItems), "userStore:" + userStoreKey);
                 }
                 break;
             default:
-                if (startIndex >= totalItems) {
-                  currentPage += 1;
-                  await waitLock();
-                  document.getElementById("loadingStatus").innerHTML = loader;
-                  locked = true;
-                  await loadMarkets(contextIndex, maxContextLoad[0]);
-                  locked = false;
-                  document.getElementById("loadingStatus").innerHTML = "";
+                totalItems = marketOffers.indices.length;
+                if (startIndex < totalItems) {
+                    await loadMarkets(startIndex, endIndex);
                 }
                 break;
-        }        
-        await populateListings();        
+        }
+        console.log("totalItems", totalItems);
+        var totalPages = Math.ceil(totalItems / listingsPerPage);
+        currentPage = Math.min(currentPage + 1, totalPages); // Ensure currentPage does not exceed totalPages
+
+        document.getElementById("loadingStatus").innerHTML = "";
+        await populateListings();
+        updatePaginationControls(totalItems);
     }
 
     //   async function nextPage() {
@@ -6409,6 +6238,11 @@ body {
     // populateListings();
     // Function to show the details popup for a listing
     async function showListing(listing, mode = 0) {
+      const actionId = generateActionId(listing.hash, "showListing");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       var theuser = myaccounts;
       if(mode == 4 && listing.sender != myaccounts && listing.recipient != myaccounts) {
         theuser = listing.originalUser;
@@ -6678,14 +6512,9 @@ body {
             if (result.isConfirmed) {
               popupContainer.remove();
               showMain('markets');
-              document.getElementById("searchText").value="userStore:"+listing.sender;              
-              await waitLock();
+              document.getElementById("searchText").value="userStore:"+listing.sender;
               currentViewContext = 'userStore';
-              document.getElementById("loadingStatus").innerHTML = loader;
-              locked = true;
-              await loadMarkets(0, maxContextLoad[3], "userStore:"+listing.sender);
-              locked = false;
-              document.getElementById("loadingStatus").innerHTML = "";
+              loadMarkets(0, 5, "userStore:"+listing.sender);
             }
           });
         };
@@ -6742,14 +6571,9 @@ body {
             if (result.isConfirmed) {
               popupContainer.remove();
               showMain('markets');
-                document.getElementById("searchText").value="userStore:"+listing.recipient;                
-                await waitLock();
+                document.getElementById("searchText").value="userStore:"+listing.recipient;
                 currentViewContext = 'userStore';
-                document.getElementById("loadingStatus").innerHTML = loader;
-                locked = true;
-                loadMarkets(0, maxContextLoad[3], "userStore:"+listing.recipient);
-                locked = false;
-                document.getElementById("loadingStatus").innerHTML = "";
+                loadMarkets(0, 5, "userStore:"+listing.recipient);
             }
           });
         };
@@ -6938,7 +6762,7 @@ body {
               }).then(async (result) => {
                 if (result.isConfirmed) {
                   try {
-                    setActionActive(myaccounts+"expireEscrow"+listing.hash, true);
+                    setActionActive(actionId, true);
                     if(accountprivkey != "") {
                       const gasEstimate = 100000;
                       var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -6957,7 +6781,7 @@ body {
                     hideLoader();
                     await showError(error);
                   } finally {
-                    setActionActive(myaccounts+"expireEscrow"+listing.hash, false);
+                    setActionActive(actionId, false);
                   }
                 }
               });
@@ -6985,7 +6809,7 @@ body {
               acceptTime.id = 'acceptTime';
               acceptTime.onclick = async function() {
                 try {
-                  setActionActive(myaccounts+"acceptExtend"+listing.hash, true);
+                  setActionActive(actionId, true);
                   if(accountprivkey != "") {
                     const gasEstimate = 70000;
                     var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -7004,7 +6828,7 @@ body {
                   hideLoader();
                   await showError(error);
                 } finally {
-                  setActionActive(myaccounts+"acceptExtend"+listing.hash, false);
+                  setActionActive(actionId, false);
                 }
               }
               buttonContainer.appendChild(acceptTime);
@@ -7017,7 +6841,7 @@ body {
               acceptTime.id = 'acceptTime';
               acceptTime.onclick = async function() {
                 try {
-                  setActionActive(myaccounts+"acceptExtend"+listing.hash, true);
+                  setActionActive(actionId, true);
                   if(accountprivkey != "") {
                     const gasEstimate = 70000;
                     var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -7036,7 +6860,7 @@ body {
                   hideLoader();
                   await showError(error);
                 } finally {
-                  setActionActive(myaccounts+"acceptExtend"+listing.hash, false);
+                  setActionActive(actionId, false);
                 }
               }
               buttonContainer.appendChild(acceptTime);
@@ -7079,7 +6903,7 @@ body {
               confirmBtn.addEventListener("click", async () => {
                 const newtime = parseInt(listing.timelimit[0]) + parseInt(parseInt(dialog.querySelector("#new-time").value) * 24 * 60 * 60);
                 dialog.remove();
-                setActionActive(myaccounts+"requestExtend"+listing.hash, true);
+                setActionActive(actionId, true);
                 if(accountprivkey != "") {
                   const gasEstimate = 70000;
                   var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -7099,7 +6923,7 @@ body {
               console.error(error);
               await showError(error);
             } finally {
-              setActionActive(myaccounts+"requestExtend"+listing.hash, false);
+              setActionActive(actionId, false);
             }
           }
           buttonContainer.appendChild(extendTime);
@@ -7120,7 +6944,7 @@ body {
                   return;
                 }
               }
-              setActionActive(myaccounts+"requestCancel"+listing.hash, true);
+              setActionActive(actionId, true);
               if(accountprivkey != "") {
                 const gasEstimate = 70000;
                 var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -7143,7 +6967,7 @@ body {
               hideLoader();
               await showError(error);
             } finally {
-              setActionActive(myaccounts+"requestCancel"+listing.hash, false);
+              setActionActive(actionId, false);
             }
           }
           buttonContainer.appendChild(cancelButton);
@@ -7164,7 +6988,7 @@ body {
                   return;
                 }
               }
-              setActionActive(myaccounts+"requestComplete"+listing.hash, true);
+              setActionActive(actionId, true);
               if(accountprivkey != "") {
                     const gasEstimate = 150000;
                     var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -7187,7 +7011,7 @@ body {
               hideLoader();
               await showError(error);
             } finally {
-              setActionActive(myaccounts+"requestComplete"+listing.hash, false);
+              setActionActive(actionId, false);
             }
           }
           buttonContainer.appendChild(confirmButton);
@@ -7384,9 +7208,7 @@ body {
       });
       if(mode !== 3){
         topBar.appendChild(notesButton);
-        if(listing.sender != "0x0000000000000000000000000000000000000000" && listing.recipient != "0x0000000000000000000000000000000000000000" ) {
-          topBar.appendChild(messageButton);
-        }
+        topBar.appendChild(messageButton);
       }
       topBar.appendChild(closeButton);
       popup.appendChild(topBar);
@@ -7414,15 +7236,15 @@ body {
         const isContractActive = (listing.status[0] < 4 && listing.status[1] < 4);
         const isLoggedIn = (myaccounts !== "");
 
-        messageButton.onclick = async function() {
-          messageCountIndicator.style.display = 'none';
-          if (isStatusValid && isContractActive && isLoggedIn) {
-            messageButton.style.display = 'inline-flex';
-            await fetchMessages(listing.hash, theuser);
-          } else {
-            messageButton.style.display = 'none';
-          }
+        if (isStatusValid && isParticipant && isContractActive && isLoggedIn) {
+          messageButton.style.display = 'inline-flex';
 
+          const lastMessageIndex = localStorage.getItem(myaccounts + DDEaddy + listing.hash + 'lastMessageIndex') || 0;
+          await fetchMessages(listing.hash, theuser, lastMessageIndex);
+        } else {
+          messageButton.style.display = 'none';
+        }
+        messageButton.onclick = async function() {
           if(theuser == listing.sender) {
             var recipientAddress = listing.recipient;
             var senderAddress = listing.sender;
@@ -7432,9 +7254,7 @@ body {
           }
           const { supportsEncryption: recipientSupportsEncryption, publicKey: recipientPublicKey } = await userSupportsEncryption(recipientAddress);
           const { supportsEncryption: senderSupportsEncryption } = await userSupportsEncryption(senderAddress);
-          if(!isParticipant) {
-            senderSupportsEncryption = false;
-          }          
+          
           if (!recipientSupportsEncryption && !senderSupportsEncryption) {
             Swal.fire({
               icon: 'warning',
@@ -7471,7 +7291,7 @@ body {
               cancelButtonText: translateThis('Cancel'),
             }).then(async (result) => {
               if (result.isConfirmed) {
-                await handleSendMessage(listing.hash, recipientAddress, recipientSupportsEncryption, recipientPublicKey, listing.sender, listing.recipient);
+                await handleSendMessage(listing.hash, recipientAddress, result.value, recipientPublicKey, listing.sender, listing.recipient);
               }
             });
           } else {
@@ -7512,15 +7332,17 @@ body {
 
    
     async function handleSendMessage(hash, recipient, encrypt = false, recipientPublicKey = null, listingSender, listingRecipient) {
-      const existingMessages = await fetchMessages(hash, recipient);
-      const messagesContainer = createMessagePopup(existingMessages, listingSender, listingRecipient);      
+      const lastMessageIndex = localStorage.getItem(myaccounts + DDEaddy + hash + 'lastMessageIndex') || 0;
+      const existingMessages = await fetchMessages(hash, recipient, lastMessageIndex);
+      const { supportsEncryption: senderSupportsEncryption, publicKey: senderPublicKey } = await userSupportsEncryption(myaccounts);
+      const messagesContainer = createMessagePopup(existingMessages, senderSupportsEncryption, listingSender, listingRecipient);
 
       const messagePopup = document.querySelector('.popup-container');
       messagePopup.appendChild(messagesContainer);
       messagesContainer.style.display = 'block';
 
       const input = messagesContainer.querySelector('textarea');
-      const sendButton = messagesContainer.querySelector('button');      
+      const sendButton = messagesContainer.querySelector('button');
 
       sendButton.onclick = async () => {
         try {
@@ -7536,27 +7358,24 @@ body {
 
           // Encrypt message for local storage if sender's public key is available
           if (userpubkey != "") {
-            const timestamp = new Date().getTime();
-            const padding = Crypto.SHA256(timestamp).substring(0, 16);
-            storedMessage = "ENC:" + cryptico.encrypt(message + "#*#*#" + timestamp + padding, userpubkey).cipher;
+            storedMessage = "ENC:" + cryptico.encrypt(message, userpubkey).cipher;
           }
-          setActionActive(myaccounts+"sendMessage"+finalMessage, true);
+
           showLoader();
-          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(listingSender).call())) + 1;
-          const sendResult = await DDEcontract.methods.sendMessage(hash, listingSender, finalMessage).send({ from: myaccounts });
+          const sendResult = await DDEcontract.methods.sendMessage(hash, myaccounts, finalMessage).send({ from: myaccounts });
           if (sendResult) {
               const newMessage = {
                   message: storedMessage,
-                  sender: listingSender,
-                  timestamp: new Date().getTime(),
-                  index: mslen + ":" + listingSender
+                  sender: myaccounts,
+                  timestamp: new Date().getTime()
               };
               if (!existingMessages.some(msg => msg.timestamp === newMessage.timestamp && msg.message === newMessage.message)) {
                   existingMessages.push(newMessage);
-                  localStorage.setItem(myaccounts + DDEaddy + hash + 'messages', JSON.stringify(existingMessages));
+                  localStorage.setItem(myaccounts + DDEaddy + hash + recipient + 'messages', JSON.stringify(existingMessages));
               }
           }
           hideLoader();
+          setActionActive('sendMessage', false);
           Swal.fire({
             icon: 'success',
             title: translateThis('Message Sent'),
@@ -7566,41 +7385,30 @@ body {
           input.value = '';
           messagesContainer.remove();
         } catch (error) {
+
           hideLoader();
           console.error(error);
           await showError(error);
+          setActionActive('sendMessage', false);
           messagesContainer.remove();
           console.error('Failed to send message:', error);
         } finally {
           hideLoader();
-          setActionActive(myaccounts+"sendMessage"+finalMessage, false);
+          setActionActive('sendMessage', false);
           messagesContainer.remove();
         }
       }
     }
 
 
-    function createMessagePopup(messages, sender, recipient) {
+    function createMessagePopup(messages, userSupportsEncryption, sender, recipient) {
       const decryptedMessages = messages.map(msg => {
-          if (userpubkey != "" && msg.message.startsWith("ENC:")) {
+          if (userSupportsEncryption && msg.message.startsWith("ENC:")) {
               const encryptedPart = msg.message.substring(4);
               const decryptionResult = cryptico.decrypt(encryptedPart, userprivkey);
               if (decryptionResult.status === "success") {
                   const messageParts = decryptionResult.plaintext.split("#*#*#");
-                  if (messageParts.length === 2) {
-                    const timestampAndPadding = messageParts[1];
-                    const timestamp = timestampAndPadding.slice(0, 13);
-                    const padding = timestampAndPadding.slice(13);
-                    if (padding.length === 16 && !isNaN(timestamp)) {
-                      return { ...msg, message: messageParts[0] }; // Only return the actual message part
-                    } else {
-                      console.error("Invalid padding or timestamp length");
-                      return { ...msg, message: "Failed to decrypt message" };
-                    }
-                  } else {
-                    console.error("Invalid padding length");
-                    return { ...msg, message: "Failed to decrypt message" };
-                  }
+                  return { ...msg, message: messageParts[0] }; // Only return the actual message part
               } else {
                   console.error("Decryption failed:", decryptionResult.status);
                   return { ...msg, message: "Failed to decrypt message" };
@@ -7642,45 +7450,30 @@ body {
     }
 
 
-    async function fetchMessages(hash, user) {
-      var startIndex = localStorage.getItem(myaccounts + DDEaddy + hash + user + 'lastMessageIndex') || 0;
-      let storedMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + hash + 'messages') || '[]');
+    async function fetchMessages(hash, user, startIndex) {
+      let storedMessages = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + hash + user + 'messages') || '[]');
       let index = parseInt(startIndex);
       let newMessagesFetched = false;
       let unreadMessageCount = 0;
 
       try {
-          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(user).call()));
-          while (index < mslen) {
+          while (true) {
               const message = DOMPurify.sanitize(await DDEcontract.methods.messages(hash, user, index).call());
               if (!message) break;
-              var msgtimestamp =  new Date().getTime();
+
               let decryptedMessage = message;
               if (message.startsWith("ENC:")) {
-                const decryptionResult = cryptico.decrypt(message.substring(4), userprivkey);
-                if (decryptionResult.status === "success") {
-                  const messageParts = decryptionResult.plaintext.split("#*#*#");
-                  if (messageParts.length === 2) {
-                      const timestampAndPadding = messageParts[1];
-                      msgtimestamp = timestampAndPadding.slice(0, 13);
-                      const padding = timestampAndPadding.slice(13);
-                      if (padding.length === 16 && !isNaN(timestamp)) {
-                          decryptedMessage = messageParts[0];
-                      } else {
-                          console.error("Invalid padding or timestamp length");
-                          decryptedMessage = "Failed to decrypt message";
-                      }
+                  const decryptionResult = cryptico.decrypt(message.substring(4), userprivkey);
+                  if (decryptionResult.status === "success") {
+                      decryptedMessage = decryptionResult.plaintext.split("#*#*#")[0];
                   } else {
-                      console.error("Invalid message format");
+                      console.error("Decryption failed:", decryptionResult.status);
                       decryptedMessage = "Failed to decrypt message";
                   }
-                } else {
-                    console.error("Decryption failed:", decryptionResult.status);
-                    decryptedMessage = "Failed to decrypt message";
-                }
               }
-              if (!storedMessages.some(msg => msg.index === index+":"+user)) {
-                  storedMessages.push({ message: decryptedMessage, sender: user, timestamp: msgtimestamp, index: index+":"+user });
+
+              if (!storedMessages.some(msg => msg.index === index)) {
+                  storedMessages.push({ message: decryptedMessage, sender: user, timestamp: new Date().getTime(), index: index });
                   newMessagesFetched = true;
                   unreadMessageCount++;
               }
@@ -7690,7 +7483,7 @@ body {
           console.error('Error fetching messages:', error);
       } finally {
           if (newMessagesFetched) {
-              localStorage.setItem(myaccounts + DDEaddy + hash + 'messages', JSON.stringify(storedMessages));
+              localStorage.setItem(myaccounts + DDEaddy + hash + user + 'messages', JSON.stringify(storedMessages));
               localStorage.setItem(myaccounts + DDEaddy + hash + user + 'lastMessageIndex', index.toString());
               updateMessageCountIndicator(unreadMessageCount);
           }
@@ -7716,12 +7509,9 @@ body {
     }
 
     async function deposit(skipthis = 0) {
-      if (!isConnected) {
-        await Swal.fire(translateThis("Please Login/Connect to Continue."));
-        return;
-      }
-      if (!myaccounts || myaccounts.length === 0 || balances['base'] === undefined) {
-        await Swal.fire(translateThis("Please wait for your account data to load."));
+      const actionId = generateActionId("depositFunds");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
         return;
       }
       if(accountprivkey != "" && skipthis == 0) {
@@ -7767,7 +7557,7 @@ body {
             }
           } catch (e) {
             await Swal.fire(translateThis("Not connected."));
-            return; 
+            return;            
           }
           if (result.isConfirmed) {            
             if(baseBal != 0) {
@@ -7849,14 +7639,12 @@ body {
           // If the selected token is ETH/BASE, deposit WETH instead
           try {
             var value = web3.utils.toWei(amount.toString(), 'ether');
-            if(accountprivkey != "") {
-              const gasEstimate = 90000;
-              var res = await confirmTransaction(gasEstimate, value, tokenAddress);
-              if(!res) {
-                return;
-              }
+            const gasEstimate = 90000;
+            var res = await confirmTransaction(gasEstimate, value, tokenAddress);
+            if(!res) {
+              return;
             }
-            setActionActive(myaccounts+"depositWETH"+value, true);
+            setActionActive(actionId, true);
             showLoader();
             await DDEcontract.methods.depositWETH().send({ "from": myaccounts, "value": value, ...gasOptions[gasSetting] });
             hideLoader();
@@ -7867,7 +7655,7 @@ body {
             console.error(error);
             await showError(error);
           } finally {
-            setActionActive(myaccounts+"depositWETH"+value, false);
+            setActionActive(actionId, false);
           }
         } else {
           // If the selected token is not ETH, deposit the selected token
@@ -7875,29 +7663,24 @@ body {
             // var tokenContract = new web3.eth.Contract(ERC20abi, tokenAddress);
             // var allowance = DOMPurify.sanitize(await tokenContract.methods.allowance(myaccounts, DDEaddy).call());
             var value = (new BigNumber(amount.toString()).times(new BigNumber(10).pow(decimals))).toString()
-            setActionActive(myaccounts+"deposit"+tokenAddress+value, true);
+            setActionActive(actionId, true);
             await getApproval(tokenAddress, value);
-            if(accountprivkey != "") {
-                const gasEstimate = 90000;
-                var res = await confirmTransaction(gasEstimate, value, tokenAddress);
-                if(!res) {
-                  return;
-              }
+            const gasEstimate = 90000;
+            var res = await confirmTransaction(gasEstimate, value, tokenAddress);
+            if(!res) {
+              return;
             }
             showLoader();
             await DDEcontract.methods.deposit(tokenAddress, value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
-            popupContainer.remove();
           } catch (error) {
-            popupContainer.remove();
             console.error(error);
             hideLoader();
             await showError(error);
           } finally {
-            popupContainer.remove();
-            setActionActive(myaccounts+"deposit"+tokenAddress+value, false);
+            setActionActive(actionId, false);
           }
         }
       };
@@ -7935,12 +7718,9 @@ body {
     }
 
     async function withdraw() {
-      if (!isConnected) {
-        await Swal.fire(translateThis("Please Login/Connect to Continue."));
-        return;
-      }
-      if (!myaccounts || myaccounts.length === 0 || balances['base'] === undefined) {
-        await Swal.fire(translateThis("Please wait for your account data to load."));
+      const actionId = generateActionId("withdrawFunds");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
         return;
       }
       // Populate the token select dropdown for Swal
@@ -7982,7 +7762,7 @@ body {
         const decimals = parseInt(tokens[selectedIndex].decimals);
         const value = (new BigNumber(amount).times(new BigNumber(10).pow(decimals))).toFixed(0);
         try {
-          setActionActive(myaccounts+"withdraw"+tokenAddress+value, true);
+          setActionActive(actionId, true);
           if(accountprivkey == "") {
             showLoader();
             await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
@@ -8029,7 +7809,7 @@ body {
           hideLoader();
           await showError(error);
         } finally {
-          setActionActive(myaccounts+"withdraw"+tokenAddress+value, false);
+          setActionActive(actionId, false);
           hideLoader();
         }
       }
@@ -8076,6 +7856,11 @@ body {
     async function createContract(publicoffer = true, counterdata = {}) {
       if(myaccounts == "") {
         await Swal.fire({title: translateThis("Please Login/connect your wallet to create a contract."), icon: 'warning'});
+        return;
+      }
+      const actionId = generateActionId(counterdata, "createContract");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
         return;
       }
       var DDEcontract4 = new web3.eth.Contract(DDEabi, DDEaddy);
@@ -8273,8 +8058,9 @@ body {
                 <textarea id="contractDetails"></textarea>
               </div>
               <div class="input-wrapper-content">
-                  <label for="contractImage">` + translateThis('Contract Images/files:') + `</label>
+                  <label for="contractImage">` + translateThis('Contract Images:') + `</label>
                   <input type="file" id="contractImage" multiple">
+                  <span style="color: black;" id="fileNames"></span>
                   <div id="fileDisplayArea"></div>
                   <button type="button" id="changefile" style="display:none;">` + translateThis('Change Images') + `</button>
                   <p style="color: grey; font-size: 0.8em;">` + translateThis('Maximum file size: 10 MB per file.') + `</p>
@@ -8299,7 +8085,7 @@ body {
                 </div>
                 <div class="input-wrapper input-checkboxes">
                   <label for="autoaccept" id="autoacceptlabel">` + translateThis('Automatically accept matching offers') + `  
-                    <input type="checkbox" id="autoaccept">
+                    <input type="checkbox" id="autoaccept" checked="checked">
                     <span class="checkmark"></span>
                   </label>
                 </div>
@@ -8345,7 +8131,7 @@ body {
       senderDepositInput.style.display = 'none';
       recipientDepositInput.style.display = 'none';
 
-      auto.addEventListener('change', async() => {
+        auto.addEventListener('change', async() => {
         if (auto.checked) {
           await Swal.fire({
             icon: 'info',
@@ -8480,18 +8266,16 @@ body {
         
         const fileElement = document.createElement('div');
         fileElement.className = 'file-display';
-        const truncatedFileName = file.name.length > 9 ? file.name.substring(0, 9) + '...' : file.name;
+
         if (isImage) {
           fileElement.innerHTML = `
-            <img src="${imgSrc}" alt="${file.name}">
-            <span class="file-name">${truncatedFileName}</span>
+            <img src="${imgSrc}" alt="Uploaded File">
             <span class="remove-file" data-index="${index}">&times;</span>
           `;
         } else {
           // Use a generic document icon for non-image files
           fileElement.innerHTML = `
             <img src="document-icon.png" alt="${file.name}">
-            <span class="file-name">${truncatedFileName}</span>
             <span class="remove-file" data-index="${index}">&times;</span>
           `;
         }
@@ -8832,8 +8616,6 @@ body {
             return;
           }
           try {
-            var cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'},{value: blockTimestamp, type: 'uint256'}));
-            console.log(cHash);
             var returnThis2 = false;
             if(publicoffer) {
               if(myterms.length == 0) {
@@ -8856,12 +8638,14 @@ body {
             if(returnThis2) {
               return;
             }
+            var cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'},{value: blockTimestamp, type: 'uint256'}));
+            console.log(cHash);
             if(DOMPurify.sanitize(await DDEcontract.methods.initialized(cHash).call()) == "true") {
               await Swal.fire(translateThis("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again."));
               popupContainer.remove();
               return;
             }
-            setActionActive(myaccounts+"createContract"+cHash, true);
+            setActionActive(actionId, true);
             // Call solidity function to create contract
             if(accountprivkey == "") {
               showLoader();
@@ -8905,7 +8689,7 @@ body {
                 hideLoader();
               }
             }
-            setActionActive(myaccounts+"createContract"+cHash, false);
+            setActionActive(actionId, false);
             hideLoader();
             await Swal.fire(translateThis("Contract creation success!"));
             await loadUser();
@@ -8932,7 +8716,7 @@ body {
             hideLoader();
             await showError(error);
           } finally {
-            setActionActive(myaccounts+"createContract"+cHash, false);
+            setActionActive(actionId, false);
             hideLoader();
           }
       });
@@ -9093,6 +8877,11 @@ body {
     }
 
     async function acceptOffer(listing) {
+      const actionId = generateActionId(listing.hash, "acceptOffer");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       try {
         mylisting = JSON.parse(JSON.stringify(listing));
         var quantity = 1;
@@ -9236,7 +9025,7 @@ body {
                 referral = "0x0000000000000000000000000000000000000000";
               }
               try {
-                setActionActive(myaccounts+"acceptOffer"+mylisting.hash, true);                
+                setActionActive(actionId, true);                
                 if (accountprivkey == "") {
                   showLoader();
                   await DDEcontract.methods.acceptOffer(
@@ -9304,7 +9093,7 @@ body {
                 hideLoader();
                 await showError(error);
               } finally {
-                setActionActive(myaccounts+"acceptOffer"+mylisting.hash, false);
+                setActionActive(actionId, false);
               }
             });
           }
@@ -9372,7 +9161,7 @@ body {
             referral = "0x0000000000000000000000000000000000000000";
           }
           try {
-            setActionActive(myaccounts+"acceptOffer"+mylisting.hash, true);            
+            setActionActive(actionId, true);            
             if(accountprivkey == "") {
               showLoader();
               await DDEcontract.methods.acceptOffer(
@@ -9442,7 +9231,7 @@ body {
             hideLoader();
             await showError(error);
           } finally {
-            setActionActive(myaccounts+"acceptOffer"+mylisting.hash, false);
+            setActionActive(actionId, false);
             hideLoader();
           }
         }
@@ -9451,6 +9240,7 @@ body {
         hideLoader();
         await showError(error);
       } finally {
+        setActionActive(actionId, false);
         hideLoader();
       }
     }
@@ -9459,6 +9249,12 @@ body {
     }
 
     async function cancelOffer(listing, hide = 0) {
+      const actionId = generateActionId(listing.hash, "cancelOffer");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
+
       if (hide == 1) {
         const dialog = document.createElement("div");
         dialog.innerHTML = `
@@ -9494,7 +9290,7 @@ body {
 
         cancelBtn.addEventListener("click", async () => {
           try {
-            setActionActive(myaccounts+"cancelOffer"+listing.hash, true);
+            setActionActive(actionId, true);
             dialog.remove();
             if(accountprivkey != "") {
               const gasEstimate = 50000;
@@ -9516,13 +9312,13 @@ body {
             hideLoader();
             await showError(error);
           } finally {
-            setActionActive(myaccounts+"cancelOffer"+listing.hash, false);
+            setActionActive(actionId, false);
             hideLoader();
           }
         });
       } else {
         try {
-          setActionActive(myaccounts+"cancelOffer"+listing.hash, true);
+          setActionActive(actionId, true);
           if (listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000") {
             if(accountprivkey != "") {
               const gasEstimate = 50000;
@@ -9561,7 +9357,7 @@ body {
           hideLoader();
           await showError(error);
         } finally {
-          setActionActive(myaccounts+"cancelOffer"+listing.hash, false);
+          setActionActive(actionId, false);
         }
       }
     }
@@ -9586,6 +9382,12 @@ body {
     }
 
     async function updateQuantity(listing) {
+      const actionId = generateActionId(listing.hash, "updateQuantity");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
+
       const dialog = document.createElement("div");
       dialog.innerHTML = `
         <div>` + translateThis('Please enter the updated quantity:') + `<br></div>
@@ -9633,7 +9435,7 @@ body {
             await Swal.fire(translateThis("Quantity can not be changed to zero!"));
             return;
           }
-          setActionActive(myaccounts+"changeQuantity"+listing.hash, true);
+          setActionActive(actionId, true);
           if(accountprivkey != "") {
             const gasEstimate = 50000;
             var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -9656,7 +9458,7 @@ body {
           hideLoader();
           await showError(error);
         } finally {
-          setActionActive(myaccounts+"changeQuantity"+listing.hash, false);
+          setActionActive(actionId, false);
           hideLoader();
         }
         dialog.remove();
@@ -9664,6 +9466,11 @@ body {
     }
 
     async function updateFee(listing) {
+      const actionId = generateActionId(listing.hash, "updateFee");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       await Swal.fire({
         title: translateThis('Set order fee'),
         text: translateThis('Please enter the percentage fee that you wish to offer to affiliates for this order.'),
@@ -9683,7 +9490,7 @@ body {
         if (result.isConfirmed) {
           var value = parseInt(result.value) * parseInt(100);
           try {
-            setActionActive(myaccounts+"changeOrderFee"+listing.hash, true);
+            setActionActive(actionId, true);
             if(accountprivkey != "") {
               const gasEstimate = 50000;
               var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -9701,7 +9508,7 @@ body {
             hideLoader();
             await showError(error);
           } finally {
-            setActionActive(myaccounts+"changeOrderFee"+listing.hash, false);
+            setActionActive(actionId, false);
           }
         }
       });
@@ -9713,10 +9520,15 @@ body {
     }
 
     async function addAPI(text) {
+      const actionId = generateActionId("addAPI", "addAPI");
+      if (isActionActive(actionId)) {
+        await Swal.fire(translateThis("Action is already in progress for this contract."));
+        return;
+      }
       var data = CryptoJS.AES.encrypt(JSON.stringify(text), AESkey).toString();
       console.log(data)
       try {
-        setActionActive(myaccounts+"addAPI"+text, true);
+        setActionActive(actionId, true);
         if(accountprivkey != "") {
           const gasEstimate = 150000;
           var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
@@ -9733,7 +9545,7 @@ body {
         hideLoader();
         await showError(error);
       } finally {
-        setActionActive(myaccounts+"addAPI"+text, false);
+        setActionActive(actionId, false);
       }
     }
     async function getAPI(index) {
@@ -9761,9 +9573,20 @@ body {
       });
     }
 
+    // Auto Connect Wallet
     window.addEventListener("load", async function() {
       async function handleEthereum() {
         if (window.ethereum) {
+          if (window.ethereum.selectedAddress) {
+            // Automatically connect if a wallet was previously connected
+            console.log("Auto-connecting Metamask.");
+            marketOffers = {'indices': [], 'results': []};
+            defaultvars();
+            await login2();
+          } else {
+            console.log("No wallet connected.");
+          }
+
           window.ethereum.on('accountsChanged', async function (newaccounts) {
             console.log('accountsChanges', newaccounts);
             defaultvars();
@@ -9817,10 +9640,8 @@ body {
     //End Dark/Light Mode
     setInterval(loadUser, 90000);
     document.getElementById("loadingStatus").innerHTML = loader;
-    locked = true;
-    loadMarkets(0, maxContextLoad[0]).then(() => {
-      locked = false;
-      currentViewContext = '';
+    loadMarkets(0, 5).then(() => {
+      updatePaginationControls(marketOffers.indices.length);
       document.getElementById("loadingStatus").innerHTML = '';
     });
     var accItem = document.getElementsByClassName('accordionItem');
@@ -9858,6 +9679,11 @@ body {
       }
       document.getElementById(cityName).style.display = "block";
       evt.currentTarget.className += " active";
+    }
+    // notification
+    function notifications() {
+      let sidebar = document.getElementById('notification-box');
+      sidebar.classList.toggle('active');
     }
 
     //Notes:

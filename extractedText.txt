@@ -451,4 +451,10 @@
   "We recommend registering your contact information and encryption key before creating a contract. Would you like to register now?": true,
   "Don't show this again": true
 }
-
+{
+  "Login to see notifications": true,
+  "You have no unread notifications": true,
+  "Contract Images/files:":  true,
+  "Please Login/Connect to Continue.": true,
+  "Please wait for your account data to load." true, 
+}
