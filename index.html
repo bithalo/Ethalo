@@ -5502,7 +5502,7 @@ body {
             if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
               mode = 2;
             }
-            var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(counterpartyAddress2).call()));
+            var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(offerHash2, counterpartyAddress2).call()));
             var msIndex = localStorage.getItem(myaccounts + DDEaddy + offerHash2 + counterpartyAddress2 + 'lastMessageIndex') || 0;
             if(mslen > msIndex) {
               offerData2.newMessage = true;
@@ -5724,7 +5724,7 @@ body {
           myhash = web3.utils.keccak256(inputString);
           offerData3.index = i;
           if(offerHash3 in notifications) {
-            var mslen2 = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(counterpartyAddress3).call()));
+            var mslen2 = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(offerHash3, counterpartyAddress3).call()));
             var msIndex2 = localStorage.getItem(myaccounts + DDEaddy + offerHash3 + counterpartyAddress3 + 'lastMessageIndex') || 0;
             if(mslen2 > msIndex2) {
               offerData3.newMessage = true;
@@ -7551,7 +7551,7 @@ body {
           }
           setActionActive(myaccounts+"sendMessage"+finalMessage, true);
           showLoader();
-          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(listingSender).call())) + 1;
+          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, listingSender).call())) + 1;
           const sendResult = await DDEcontract.methods.sendMessage(hash, listingSender, finalMessage).send({ from: myaccounts });
           if (sendResult) {
               const newMessage = {
@@ -7659,7 +7659,7 @@ body {
       let unreadMessageCount = 0;
 
       try {
-          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(user).call()));
+          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, user).call()));
           while (index < mslen) {
               const message = DOMPurify.sanitize(await DDEcontract.methods.messages(hash, user, index).call());
               if (!message) break;
