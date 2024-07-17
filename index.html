@@ -5453,7 +5453,7 @@ body {
           if(parseInt(new Date().getTime()/1000) > lastNotified2 + 300) {
             notenough = 0;
             if(myaccounts==offerData2.sender && (web3.utils.toBN(offerData2.amount).add(web3.utils.toBN(offerData2.depositSender))).gt(web3.utils.toBN(balances[offerData2.token].amount))) {
-              if(offerData.status[0] == 1) {
+              if(offerData2.status[0] == 1) {
                 notenough = 1;
               }
             }
@@ -5487,6 +5487,7 @@ body {
             <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData2.message.slice(0, 20)}...</div><br>
           `;
           myhash = web3.utils.keccak256(li2.innerHTML);
+          offerData2.index = i;
           if(offerHash2 in notifications) {
             let mode;
             if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
@@ -5515,8 +5516,7 @@ body {
             notifications[offerHash2] = myhash;
             notify = 1;
             updateNotifications(notifications[offerHash2], myhash, offerHash2, offerData2, mode);
-          }
-          offerData2.index = i;
+          }          
           if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
             li2.onclick = function() {
               document.getElementById("offersButton").style.backgroundColor = "#f2f2f2";
@@ -5722,6 +5722,7 @@ body {
           const lineToExcludeRegex = new RegExp("<div>" + translateThis("Time Until Funds Expire:") + ".*" + translateThis("days") + "</div>");
           const inputString = li3.innerHTML.replace(lineToExcludeRegex, '');
           myhash = web3.utils.keccak256(inputString);
+          offerData3.index = i;
           if(offerHash3 in notifications) {
             var mslen2 = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(counterpartyAddress3).call()));
             var msIndex2 = localStorage.getItem(myaccounts + DDEaddy + offerHash3 + counterpartyAddress3 + 'lastMessageIndex') || 0;
@@ -5737,8 +5738,7 @@ body {
             notifications[offerHash3] = myhash;
             notify = 1;
             updateNotifications(notifications[offerHash3], myhash, offerHash3, offerHash3, 4);
-          }
-          offerData3.index = i;
+          }          
           li3.onclick = function() {
             document.getElementById("contractsButton").style.backgroundColor = "#f2f2f2";
             showListing(offerData3, 4);
@@ -6004,7 +6004,7 @@ body {
           notifications[offerHash] = {
             isRead: false,
             message: message,
-            listing: newOfferData,
+            listing: {hash:offerHash,newMessage:false,timeRemaining:newOfferData.timeRemaining,status:newOfferData.status,escrowInfo:newOfferData.escrowInfo,image:newOfferData.image,index:newOfferData.index},
             timestamp: new Date().toISOString(),
             mode
           };
@@ -6020,42 +6020,42 @@ body {
     }
 
     function generateNotificationMessage(oldOfferData, newOfferData) {
-      if (!oldOfferData) return ["New Offer", "A new offer has been posted."];
+      if (!oldOfferData) return [translateThis("New Offer"), translateThis("A new offer has been posted.")];
 
-      let title = "Contract Update";
+      let title = translateThis("Contract Update");
       let details = [];
 
       // Check for changes in message content
       if (newOfferData.newMessage == true) {
-        title = "New Message";
-        details.push("You have unread messages");
+        title = translateThis("New Message");
+        details.push(translateThis("You have unread messages"));
       }
 
       // Check for changes in the status
       if (oldOfferData.status.join(',') !== newOfferData.status.join(',')) {
         let statusKey = newOfferData.status.join(',');
         let statusMessage = combinedStatusDescriptions[statusKey] || "Status updated";
-        title = "Notification on Contract";
-        details.push(statusMessage);
+        title = translateThis("Notification on Contract");
+        details.push(translateThis(statusMessage));
       }
 
       // Check for changes in time remaining
-      if (oldOfferData.timeRemaining !== newOfferData.timeRemaining) {        
+      if (oldOfferData.timeRemaining !== undefined && newOfferData.timeRemaining !== undefined && oldOfferData.timeRemaining !== newOfferData.timeRemaining) {        
         if (newOfferData.timeRemaining < 7 && oldOfferData.timeRemaining - newOfferData.timeRemaining > .5) {
-          title = "Time Update";
-          details.push(`Time remaining updated to ${newOfferData.timeRemaining} days.`);
+          title = translateThis("Time Update");
+          details.push(translateThis("Time Until Funds Expire:") + " " + newOfferData.timeRemaining + " " + translateThis("days"));
         }
       }
 
       // Check for changes in escrow information
       if (oldOfferData.escrowInfo !== newOfferData.escrowInfo) {
-        title = "Escrow Update";
-        details.push("Notification on escrow");
+        title = translateThis("Escrow Update");
+        details.push(translateThis("Notification on escrow"));
       }
 
       // Default message if no specific changes are detected
       if (details.length === 0) {
-        details.push("Changes detected in the offer details.");
+        details.push(translateThis("Changes detected in the offer details."));
       }
 
       return [title, details.join(' ')];
@@ -6119,12 +6119,21 @@ body {
               </div>
               <div class="notification-box-content-info">
                 <h6>${notification.message[0] || "Default Title"}</h6>
-                <p>${translateThis(notification.message[1]) || "No details available."}</p>
+                <p>${notification.message[1] || "No details available."}</p>
               </div>
             `;
 
-            notificationButton.addEventListener('click', () => {
-              showListing(notification.listing, notification.mode);
+            notificationButton.addEventListener('click', async () => {
+              var mylisting = await getOrderHash(notification.listing.hash);
+              if(notification.mode == 4) {
+                const currentBlockNumber = await web3.eth.getBlockNumber();
+                const currentBlock = await web3.eth.getBlock(currentBlockNumber);
+                const blockTimestamp = DOMPurify.sanitize(currentBlock.timestamp);
+                mylisting.timeRemaining = (parseFloat(parseInt(mylisting.timelimit[0]) - parseInt(blockTimestamp)) / parseFloat(60 * 60 * 24)).toFixed(2);
+                mylisting.escrowInfo = notification.listing.escrowInfo;
+                mylisting.index = notification.listing.index;
+              }
+              showListing(mylisting, notification.mode);
             });
             notificationContent.appendChild(notificationButton);
 
@@ -9094,7 +9103,7 @@ body {
 
     async function acceptOffer(listing) {
       try {
-        mylisting = JSON.parse(JSON.stringify(listing));
+        var mylisting = JSON.parse(JSON.stringify(listing));
         var quantity = 1;
         var accepttimelimit = 0;
         var offerExpirationSelect = document.getElementById("offerExpiration");

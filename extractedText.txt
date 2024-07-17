@@ -456,5 +456,16 @@
   "You have no unread notifications": true,
   "Contract Images/files:":  true,
   "Please Login/Connect to Continue.": true,
-  "Please wait for your account data to load." true, 
+  "Please wait for your account data to load.": true, 
+  "New Offer": true,
+  "A new offer has been posted.": true,
+  "Contract Update": true,
+  "New Message": true,
+  "You have unread messages": true,
+  "Status updated": true,
+  "Notification on Contract": true,
+  "Time Update": true,
+  "Escrow Update": true,
+  "Notification on escrow": true,
+  "Changes detected in the offer details.": true
 }
