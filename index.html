@@ -5488,20 +5488,20 @@ body {
           `;
           myhash = web3.utils.keccak256(li2.innerHTML);
           offerData2.index = i;
+          let mode;
+          if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
+            mode = 1;
+          }
+          if(myaccounts == offerData2.sender && offerData2.status[0] == 0) {
+            mode = 2;
+          }
+          if(myaccounts == offerData2.recipient && offerData2.status[1] == 1) {
+            mode = 1;
+          }
+          if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
+            mode = 2;
+          }
           if(offerHash2 in notifications) {
-            let mode;
-            if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
-              mode = 1;
-            }
-            if(myaccounts == offerData2.sender && offerData2.status[0] == 0) {
-              mode = 2;
-            }
-            if(myaccounts == offerData2.recipient && offerData2.status[1] == 1) {
-              mode = 1;
-            }
-            if(myaccounts == offerData2.recipient && offerData2.status[1] == 0) {
-              mode = 2;
-            }
             var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(offerHash2, counterpartyAddress2).call()));
             var msIndex = localStorage.getItem(myaccounts + DDEaddy + offerHash2 + counterpartyAddress2 + 'lastMessageIndex') || 0;
             if(mslen > msIndex) {
@@ -6478,7 +6478,7 @@ body {
                 var message = cryptico.decrypt(testdata['recipient'].cipher, userprivkey2).plaintext;
                 var padding = message.split("#*#*#")[1];
                 if(padding.length > 30) {
-                  thisText = message.split("#*#*#")[0];
+                  thisText = DOMPurify.sanitize(message.split("#*#*#")[0]);
                   successful = 1;
                 } else {
                   throw new Error("Not enough padding");
@@ -7535,17 +7535,14 @@ body {
           const message = input.value;
           let finalMessage = message;
           let storedMessage = message; // Message to store locally in plaintext
-
+          const timestamp = new Date().getTime();
+          const padding = Crypto.SHA256(timestamp).substring(0, 16);
           if (encrypt && recipientPublicKey) {
-            const timestamp = new Date().getTime();
-            const padding = Crypto.SHA256(timestamp).substring(0, 16);
             finalMessage = "ENC:" + cryptico.encrypt(message + "#*#*#" + timestamp + padding, recipientPublicKey, userprivkey).cipher;
           }
 
           // Encrypt message for local storage if sender's public key is available
           if (userpubkey != "") {
-            const timestamp = new Date().getTime();
-            const padding = Crypto.SHA256(timestamp).substring(0, 16);
             storedMessage = "ENC:" + cryptico.encrypt(message + "#*#*#" + timestamp + padding, userpubkey).cipher;
           }
           setActionActive(myaccounts+"sendMessage"+finalMessage, true);
@@ -7556,7 +7553,7 @@ body {
               const newMessage = {
                   message: storedMessage,
                   sender: senderAddress,
-                  timestamp: new Date().getTime(),
+                  timestamp: timestamp,
                   index: (mslen - 1) + ":" + senderAddress
               };
               if (!existingMessages.some(msg => msg.timestamp === newMessage.timestamp && msg.message === newMessage.message)) {
@@ -7601,21 +7598,21 @@ body {
                     const timestamp = timestampAndPadding.slice(0, 13);
                     const padding = timestampAndPadding.slice(13);
                     if (padding.length === 16 && !isNaN(timestamp)) {
-                      return { ...msg, message: messageParts[0] }; // Only return the actual message part
+                      return { ...DOMPurify.sanitize(msg), message: DOMPurify.sanitize(messageParts[0]) }; // Only return the actual message part
                     } else {
                       console.error("Invalid padding or timestamp length");
-                      return { ...msg, message: "Failed to decrypt message" };
+                      return { ...DOMPurify.sanitize(msg), message: "Failed to decrypt message" };
                     }
                   } else {
                     console.error("Invalid padding length");
-                    return { ...msg, message: "Failed to decrypt message" };
+                    return { ...DOMPurify.sanitize(msg), message: "Failed to decrypt message" };
                   }
               } else {
                   console.error("Decryption failed:", decryptionResult.status);
-                  return { ...msg, message: "Failed to decrypt message" };
+                  return { ...DOMPurify.sanitize(msg), message: "Failed to decrypt message" };
               }
           } else {
-              return msg; // Return the plaintext message if not encrypted
+              return DOMPurify.sanitize(msg); // Return the plaintext message if not encrypted
           }
       });
 
@@ -7666,15 +7663,15 @@ body {
               var msgtimestamp =  new Date().getTime();
               let decryptedMessage = message;
               if (message.startsWith("ENC:")) {
-                const decryptionResult = cryptico.decrypt(message.substring(4), userprivkey);
+                var decryptionResult = cryptico.decrypt(message.substring(4), userprivkey);
                 if (decryptionResult.status === "success") {
                   const messageParts = decryptionResult.plaintext.split("#*#*#");
                   if (messageParts.length === 2) {
                       const timestampAndPadding = messageParts[1];
                       msgtimestamp = timestampAndPadding.slice(0, 13);
                       const padding = timestampAndPadding.slice(13);
-                      if (padding.length === 16 && !isNaN(timestamp)) {
-                          decryptedMessage = messageParts[0];
+                      if (padding.length === 16 && !isNaN(msgtimestamp)) {
+                          decryptedMessage = DOMPurify.sanitize(messageParts[0]);
                       } else {
                           console.error("Invalid padding or timestamp length");
                           decryptedMessage = "Failed to decrypt message";
@@ -9747,7 +9744,7 @@ body {
     }
     async function getAPI(index) {
       await DDEcontract.methods.publicdata(index).call().then(function (data) {
-        data=JSON.parse(CryptoJS.AES.decrypt(DOMPurify.sanitize(data), AESkey).toString(CryptoJS.enc.Utf8));
+        data=JSON.parse(DOMPurify.sanitize(CryptoJS.AES.decrypt(DOMPurify.sanitize(data), AESkey).toString(CryptoJS.enc.Utf8)));
         if (data.length === 2) { //using public gateway
           pinataApiKey = data[0];
           pinataSecretApiKey = data[1];
