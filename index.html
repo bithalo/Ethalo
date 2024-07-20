@@ -7425,19 +7425,18 @@ body {
 
         messageButton.onclick = async function() {
           messageCountIndicator.style.display = 'none';
-          if (isStatusValid && isContractActive && isLoggedIn) {
-            messageButton.style.display = 'inline-flex';
-            await fetchMessages(listing.hash, theuser);
-          } else {
-            messageButton.style.display = 'none';
-          }
-
           if(theuser == listing.sender) {
             var recipientAddress = listing.recipient;
             var senderAddress = listing.sender;
           } else {
             var senderAddress = listing.recipient;
             var recipientAddress = listing.sender;
+          }
+          if (isStatusValid && isContractActive && isLoggedIn) {
+            messageButton.style.display = 'inline-flex';
+            await fetchMessages(listing.hash, recipientAddress);
+          } else {
+            messageButton.style.display = 'none';
           }
           const { supportsEncryption: recipientSupportsEncryption, publicKey: recipientPublicKey } = await userSupportsEncryption(recipientAddress);
           const { supportsEncryption: senderSupportsEncryption } = await userSupportsEncryption(senderAddress);
@@ -7454,7 +7453,7 @@ body {
               cancelButtonText: translateThis('Cancel'),
             }).then(async (result) => {
               if (result.isConfirmed) {
-               await handleSendMessage(listing.hash, recipientAddress, false, null, listing.sender, listing.recipient);
+               await handleSendMessage(listing.hash, senderAddress, recipientAddress, false, null);
               }
             });
           } else if (!recipientSupportsEncryption) {
@@ -7467,7 +7466,7 @@ body {
               cancelButtonText: translateThis('Cancel'),
             }).then(async (result) => {
               if (result.isConfirmed) {
-                await handleSendMessage(listing.hash, recipientAddress, false, null, listing.sender, listing.recipient);
+                await handleSendMessage(listing.hash, senderAddress, recipientAddress, false, null);
               }
             });
           } else if (!senderSupportsEncryption) {
@@ -7480,11 +7479,11 @@ body {
               cancelButtonText: translateThis('Cancel'),
             }).then(async (result) => {
               if (result.isConfirmed) {
-                await handleSendMessage(listing.hash, recipientAddress, recipientSupportsEncryption, recipientPublicKey, listing.sender, listing.recipient);
+                await handleSendMessage(listing.hash, senderAddress, recipientAddress, recipientSupportsEncryption, recipientPublicKey);
               }
             });
           } else {
-            await handleSendMessage(listing.hash, recipientAddress, true, recipientPublicKey, listing.sender, listing.recipient);
+            await handleSendMessage(listing.hash, senderAddress, recipientAddress, true, recipientPublicKey);
           }
         };
       }
@@ -7520,9 +7519,9 @@ body {
     }
 
    
-    async function handleSendMessage(hash, recipient, encrypt = false, recipientPublicKey = null, listingSender, listingRecipient) {
-      const existingMessages = await fetchMessages(hash, recipient);
-      const messagesContainer = createMessagePopup(existingMessages, listingSender, listingRecipient);      
+    async function handleSendMessage(hash, senderAddress, recipient, encrypt = false, recipientPublicKey = null) {
+      const existingMessages = await fetchMessages(hash, senderAddress);
+      const messagesContainer = createMessagePopup(existingMessages, senderAddress, recipient);      
 
       const messagePopup = document.querySelector('.popup-container');
       messagePopup.appendChild(messagesContainer);
@@ -7551,18 +7550,19 @@ body {
           }
           setActionActive(myaccounts+"sendMessage"+finalMessage, true);
           showLoader();
-          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, listingSender).call())) + 1;
-          const sendResult = await DDEcontract.methods.sendMessage(hash, listingSender, finalMessage).send({ from: myaccounts });
+          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, senderAddress).call())) + 1;
+          const sendResult = await DDEcontract.methods.sendMessage(hash, senderAddress, finalMessage).send({ from: myaccounts });
           if (sendResult) {
               const newMessage = {
                   message: storedMessage,
-                  sender: listingSender,
+                  sender: senderAddress,
                   timestamp: new Date().getTime(),
-                  index: mslen + ":" + listingSender
+                  index: (mslen - 1) + ":" + senderAddress
               };
               if (!existingMessages.some(msg => msg.timestamp === newMessage.timestamp && msg.message === newMessage.message)) {
                   existingMessages.push(newMessage);
                   localStorage.setItem(myaccounts + DDEaddy + hash + 'messages', JSON.stringify(existingMessages));
+                  localStorage.setItem(myaccounts + DDEaddy + hash + senderAddress + 'lastMessageIndex', mslen.toString());
               }
           }
           hideLoader();
