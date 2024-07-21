@@ -7531,9 +7531,9 @@ body {
       const sendButton = messagesContainer.querySelector('button');      
 
       sendButton.onclick = async () => {
+        const message = input.value;
+        let finalMessage = message;
         try {
-          const message = input.value;
-          let finalMessage = message;
           let storedMessage = message; // Message to store locally in plaintext
           const timestamp = new Date().getTime();
           const padding = Crypto.SHA256(timestamp).substring(0, 16);
