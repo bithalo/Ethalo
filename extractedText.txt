@@ -452,6 +452,7 @@
   "Don't show this again": true
 }
 {
+  "Send": true,
   "Login to see notifications": true,
   "You have no unread notifications": true,
   "Contract Images/files:":  true,

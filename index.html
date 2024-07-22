@@ -6144,8 +6144,11 @@ body {
     }
 
     function markAllNotificationsAsRead() {
-      const notifications = JSON.parse("{}");
-      localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", "{}");
+      var notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":unifiedNotifications") || "{}");
+      Object.keys(notifications).forEach(hash => {
+        notifications[hash].isRead = true;
+      });
+      localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", notifications);
       updateBellIcon(notifications);
     }
 
@@ -7425,12 +7428,14 @@ body {
 
         messageButton.onclick = async function() {
           messageCountIndicator.style.display = 'none';
+          var senderAddress;
+          var recipientAddress;
           if(theuser == listing.sender) {
-            var recipientAddress = listing.recipient;
-            var senderAddress = listing.sender;
+            recipientAddress = listing.recipient;
+            senderAddress = listing.sender;
           } else {
-            var senderAddress = listing.recipient;
-            var recipientAddress = listing.sender;
+            senderAddress = listing.recipient;
+            recipientAddress = listing.sender;
           }
           if (isStatusValid && isContractActive && isLoggedIn) {
             messageButton.style.display = 'inline-flex';
@@ -7598,24 +7603,35 @@ body {
                     const timestamp = timestampAndPadding.slice(0, 13);
                     const padding = timestampAndPadding.slice(13);
                     if (padding.length === 16 && !isNaN(timestamp)) {
-                      return { ...DOMPurify.sanitize(msg), message: DOMPurify.sanitize(messageParts[0]) }; // Only return the actual message part
+                      return { ...msg, message: DOMPurify.sanitize(messageParts[0]) }; // Only return the actual message part
                     } else {
                       console.error("Invalid padding or timestamp length");
-                      return { ...DOMPurify.sanitize(msg), message: "Failed to decrypt message" };
+                      return { ...msg, timestamp: new Date().getTime(), message: "Failed to decrypt message" };
                     }
                   } else {
                     console.error("Invalid padding length");
-                    return { ...DOMPurify.sanitize(msg), message: "Failed to decrypt message" };
+                    if(isNaN(msg.timestamp)) {
+                      return { ...msg, timestamp: new Date().getTime(), message: "Failed to decrypt message" };
+                    } else {
+                      return { ...msg, message: "Failed to decrypt message" };
+                    }
                   }
               } else {
                   console.error("Decryption failed:", decryptionResult.status);
-                  return { ...DOMPurify.sanitize(msg), message: "Failed to decrypt message" };
+                  if(isNaN(msg.timestamp)) {
+                    return { ...msg, timestamp: new Date().getTime(), message: "Failed to decrypt message" };
+                  } else {
+                    return { ...msg, message: "Failed to decrypt message" };
+                  }
               }
           } else {
-              return DOMPurify.sanitize(msg); // Return the plaintext message if not encrypted
+            if(isNaN(msg.timestamp)) {
+              return { ...msg, timestamp: new Date().getTime(), message: DOMPurify.sanitize(msg.message) };
+            } else {
+              return { ...msg, message: DOMPurify.sanitize(msg.message) }; // Return the plaintext message if not encrypted
+            }
           }
       });
-
       const popup = document.createElement('div');
       popup.className = 'message-popup';
       popup.innerHTML = `
@@ -7626,11 +7642,12 @@ body {
           <div class="message-body">
             <div class="message-body-inner">
               ${decryptedMessages.sort((a, b) => a.timestamp - b.timestamp).map(msg => {
-                  const isCurrentUser = msg.sender === myaccounts;
-                  const messageClass = isCurrentUser ? 'message-sender' : 'message-receiver';
-                  const displayName = isCurrentUser 
-                      ? (sender === myaccounts ? translateThis('Sender (You)') : translateThis('Recipient (You)')) 
-                      : (sender === msg.sender ? translateThis('Sender') : translateThis('Recipient'));
+                  var messageClass = 'message-sender';
+                  var displayName = translateThis('You');
+                  if(msg.sender != sender) {
+                    messageClass = 'message-receiver';
+                    displayName = translateThis('Counterparty');
+                  }
                   return `<p class="${messageClass}"><b>${displayName}:</b> ${msg.message}</p>`;
               }).join('')}
             </div>
@@ -7675,6 +7692,7 @@ body {
                       } else {
                           console.error("Invalid padding or timestamp length");
                           decryptedMessage = "Failed to decrypt message";
+                          msgtimestamp = new Date().getTime();
                       }
                   } else {
                       console.error("Invalid message format");
