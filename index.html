@@ -7553,7 +7553,7 @@ body {
           setActionActive(myaccounts+"sendMessage"+finalMessage, true);
           showLoader();
           var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, senderAddress).call())) + 1;
-          const sendResult = await DDEcontract.methods.sendMessage(hash, senderAddress, finalMessage).send({ from: myaccounts });
+          const sendResult = await DDEcontract.methods.sendMessage(hash, senderAddress, finalMessage).send({ from: myaccounts, ...gasOptions[gasSetting] });
           if (sendResult) {
               const newMessage = {
                   message: storedMessage,
