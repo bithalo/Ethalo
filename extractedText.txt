@@ -452,7 +452,6 @@
   "Don't show this again": true
 }
 {
-  "Send": true,
   "Login to see notifications": true,
   "You have no unread notifications": true,
   "Contract Images/files:":  true,
@@ -468,5 +467,48 @@
   "Time Update": true,
   "Escrow Update": true,
   "Notification on escrow": true,
-  "Changes detected in the offer details.": true
+  "Changes detected in the offer details.": true,
+  "Transaction Pending": true,
+  "Hash:": true,
+  "Increase Gas": true,
+  "Cancel Transaction": true,
+  "No pending transactions.": true,
+  "Adjust Transaction Gas": true,
+  "Gas Price (Gwei)": true,
+  "Gas Limit": true,
+  "Not enough funds": true,
+  "Your balance is too low to cover the gas fees for this transaction.": true,
+  "Confirm Transaction": true,
+  "Estimated gas cost:": true,
+  "Gas limit:": true,
+  "Gas price:": true,
+  "Total cost:": true,
+  "Submit": true,
+  "Cancel": true,
+  "Transaction Error": true,
+  "There was an error sending the transaction.": true,
+  "Your balance is too low to cover the gas fees for this cancellation.": true,
+  "Confirm Cancellation": true,
+  "Estimated gas cost for cancellation:": true,
+  "Increased gas price:": true,
+}
+{
+  "Send": true,
+  "New Private Offer": true,
+  "You have a new private offer": true,
+  "Title:": true,
+  "Location:": true,
+  "Contract Title:": true,
+  "Contract Location:": true,
+  "Please enter the contract title": true,
+  "New Escrow": true,
+  "You have a new escrow": true,
+}
+{
+  "Inappropriate Content Detected": true,
+  "The message contains inappropriate content. Please revise your message.": true,
+  "Moderation Error": true,
+  "There was an error moderating the image. Please try again later.": true,
+  "The uploaded image contains inappropriate content. Please upload a different image.": true,
+  "There was an error moderating the message. Please try again later.": true
 }

@@ -490,11 +490,10 @@ h2 {
   display: flex;
   justify-content: center;
   margin-top: 20px;
-  flex-wrap: wrap;
 }
 
 .button-container button {
-  margin: 0 10px 10px;
+  margin: 0 10px;
   padding: 10px;
   border-radius: 5px;
   /* border: none; */
@@ -662,7 +661,7 @@ h2 {
   font-size: 16px;
   font-weight: bold;
 }
-.btn-filled:hover, .withdraw-swal-wrapper .swal2-actions button:hover, .transaction-confirm-popup #confirm-btn:hover, #pending-transactions-dropdown .confirm-btn:hover {
+.btn-filled:hover, .withdraw-swal-wrapper .swal2-actions button:hover {
   background-color: transparent;
   color: #7066E0;
 }
@@ -670,7 +669,7 @@ h2 {
   background-color: #858585;
   border: 2px solid #858585;
 }
-.btn-gray:hover, .withdraw-swal-wrapper .swal2-actions button.swal2-cancel:hover, .transaction-confirm-popup #cancel-btn:hover, #pending-transactions-dropdown .cancel-btn:hover {
+.btn-gray:hover, .withdraw-swal-wrapper .swal2-actions button.swal2-cancel:hover {
   background-color: transparent;
   color: #858585;
 }
@@ -923,12 +922,6 @@ h2 {
 .offer-popup-wrapper p, .offers-list-box div {
   margin-bottom: 10px;
   font-size: 14px;
-}
-.offers-list-box listelement div img {
-  position: relative;
-  top: 7px;
-  margin-right: 8px;
-  border-radius: 50%;
 }
 .offer-popup-wrapper p {
   white-space: normal !important;
@@ -1498,6 +1491,11 @@ h2 {
   margin: 0;
   margin-bottom: 6px;
 }
+.notification-box-content-info p {
+  font-size: 14px;
+  line-height: 20px;
+  margin: 0;
+}
 #myoffers .tabcontent {
   display: block;
 }
@@ -1557,65 +1555,6 @@ h2 {
 .message-receiver {
   text-align: left;
   background-color: #D3E8EE;
-}
-.transaction-confirm-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border-radius: 4px;
-  z-index: 999;
-  padding: 20px;
-  box-shadow: 1px 1px 11px 3px #80808080;
-  max-width: 345px;
-  text-align: center;
-  width: 100%;
-}
-.transaction-confirm-popup .transaction-popup-heading {
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-.transaction-confirm-popup input {
-  width: 100%;
-  border: 1px solid #00000057;
-  height: 35px;
-  border-radius: 4px;
-  outline: none;
-  padding: 8px;
-}
-.transaction-confirm-popup button, #pending-transactions-dropdown button {
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
-  height: 32px;
-  min-width: 100px;
-  cursor: pointer;
-  border-radius: 0;
-  transition: all ease-in-out 0.6s;
-}
-.transaction-confirm-popup #confirm-btn, #pending-transactions-dropdown .confirm-btn {
-  background-color: #7066E0;
-  border: 1px solid #7066E0;
-  margin-right: 8px;
-}
-.transaction-confirm-popup #cancel-btn, #pending-transactions-dropdown .cancel-btn{
-  background-color: #858585;
-  border: 1px solid #858585;
-}
-#pending-transactions-dropdown .notification-box-content-info {
-  width: 100%;
-  text-align: center;
-  padding: 20px;
-  box-shadow: 1px 1px 11px 3px #80808080;
-}
-#pending-transactions-dropdown .notification-box-content-info p {
-  font-size: 14px;
-  line-height: 20px;
-  margin: 0;
-  margin-bottom: 10px;
 }
 
 @media screen and (max-width: 1600px) {
@@ -2300,10 +2239,10 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  width: 0; /* Minimize the modal's size */
-  height: 0; /* Minimize the modal's size */
-  overflow: visible; /* Allow the child elements to be shown */
-  display: none; /* Initially hidden */
+          width: 0; /* Minimize the modal's size */
+          height: 0; /* Minimize the modal's size */
+          overflow: visible; /* Allow the child elements to be shown */
+          display: none; /* Initially hidden */
   z-index: 1500;
 }
 .loader-content {
@@ -2333,10 +2272,10 @@ body {
 }
 @keyframes spin {
   0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+            100% { transform: rotate(360deg); }
 }
 .loader-minimized {
-  display: none; /* Initially hidden */
+          display: none; /* Initially hidden */
   position: fixed;
   bottom: 10px;
   right: 10px;
@@ -2438,15 +2377,6 @@ body {
     display: none; /* Initially hidden */
   }
 
-  .loader-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1001; /* High z-index to overlay on top of other content */
-    display: none; /* Initially hidden */
-  }
-
   .message-header {
     display: flex;
     justify-content: space-between;
@@ -2480,35 +2410,6 @@ body {
     border-radius: 5px;
     cursor: pointer;
   }
-
-  .pending-transactions-indicator {
-  position: fixed;
-  top: 20%;
-  right: 20px;
-  background-color: #dc3545;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 50px;
-  cursor: pointer;
-  z-index: 1500;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.pending-transactions-dropdown {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  background-color: white;
-  color: black;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  width: 320px;
-  max-height: 400px;
-  overflow-y: auto;
-  display: none;
-}
 
 </style>
 </head>
@@ -2554,21 +2455,13 @@ body {
     <div id="loader-modal" class="loader-modal" style="display: none;">
       <div id="loader-content" class="loader-content">
         <div class="loader"></div>
-        <p id="loader-text" t-id ="55">Waiting for confirmation...</p>
-        <button onclick="minimizeLoader()" t-id="58" class="btn-filled">Minimize</button>
+        <p id="loader-text">Waiting for confirmation...</p>
+        <button onclick="minimizeLoader()" class="btn-filled">Minimize</button>
       </div>
-      <div id="loader-minimized" t-id="56" class="loader-minimized" style="display: none;" onclick="maximizeLoader()">
+      <div id="loader-minimized" class="loader-minimized" style="display: none;" onclick="maximizeLoader()">
         Transaction in progress...
       </div>
     </div>
-
-    <div id="pending-transactions-indicator" t-id="57" class="pending-transactions-indicator" style="display: none;" onclick="togglePendingTransactionsDropdown()">
-      Pending Transactions
-      <div id="pending-transactions-dropdown" class="pending-transactions-dropdown" style="display: none;">
-          <!-- Dynamic content for pending transactions will be loaded here -->
-      </div>
-    </div>
-
     <!-- End: Loader-Modal -->
     <div class="sidebar-background">
     </div>
@@ -2867,9 +2760,6 @@ body {
       const selectedFlagImg = document.getElementById("selectedFlag");
       selectedFlagImg.src = languageSelect.options[languageSelect.selectedIndex].getElementsByTagName('img')[0].src;
       translateDocument(languageSelect.options[languageSelect.selectedIndex].value);
-      if(myaccounts == ''){
-        updateOffersContainer();
-      }
       await loadUser();
       await populateListings();
     });
@@ -3059,303 +2949,6 @@ body {
       document.getElementById('loader-minimized').style.display = 'none';
     }
 
-    function togglePendingTransactionsDropdown() {
-      const dropdown = document.getElementById('pending-transactions-dropdown');
-      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-      updatePendingTransactionsUI();
-    }
-
-    function showPendingTransactionsIndicator() {
-      const indicator = document.getElementById('pending-transactions-indicator');
-      indicator.style.display = 'block';
-    }
-
-    function updatePendingTransactionsUI() {
-      const dropdown = document.getElementById('pending-transactions-dropdown');
-      const indicator = document.getElementById('pending-transactions-indicator');
-      dropdown.innerHTML = '';
-      const pendingTransactions = getPendingTransactions();
-
-      if (pendingTransactions.length > 0) {
-        indicator.style.display = 'block';
-        pendingTransactions.forEach(txHash => {
-          const truncatedHash = truncateHash(txHash);
-          const transactionDiv = document.createElement('div');
-          transactionDiv.className = 'notification-box-content';
-          transactionDiv.innerHTML = `
-            <div class="notification-box-content-info">
-              <h6>${translateThis("Transaction Pending")}</h6>
-              <p>${translateThis("Hash:")} ${truncatedHash} <a href="https://sepolia.etherscan.io/tx/${txHash}" target="_blank">&#128279;</a></p>
-              <button class="confirm-btn" onclick="increaseGas('${txHash}')">${translateThis("Increase Gas")}</button>
-              <button class="cancel-btn" onclick="cancelTransaction('${txHash}')">${translateThis("Cancel Transaction")}</button>
-            </div>
-            `;
-          dropdown.appendChild(transactionDiv);
-        });
-      } else {
-        indicator.style.display = 'none';
-        dropdown.innerHTML = '<div class="notification-empty">' + translateThis("No pending transactions.") + '</div>';
-      }
-    }
-
-    function truncateHash(hash) {
-      if (hash.length <= 12) return hash;
-      const start = hash.substring(0, 6);
-      const end = hash.substring(hash.length - 6);
-      return `${start}...${end}`;
-    }
-
-    async function increaseGas(txHash) {
-      const originalTx =  JSON.parse(DOMPurify.sanitize(JSON.stringify(await web3.eth.getTransaction(txHash))));
-      if (!originalTx) {
-        removeTransactionHash(txHash);
-        return;
-      }
-
-      if (originalTx.blockNumber) {
-        return;
-      }
-
-      const currentGasPrice = DOMPurify.sanitize(await web3.eth.getGasPrice());
-      const nonce = originalTx.nonce;
-      const gasLimit = originalTx.gas;
-
-      const { value: formValues } = await Swal.fire({
-        title: translateThis("Adjust Transaction Gas"),
-        html: `<input id="swal-input1" class="swal2-input" value="${web3.utils.fromWei(currentGasPrice, 'gwei')}" placeholder=${translateThis("Gas Price (Gwei)")}>` +
-          `<input id="swal-input2" class="swal2-input" value="${gasLimit}" placeholder=${translateThis("Gas Limit")}>`,
-        focusConfirm: false,
-        preConfirm: () => {
-          return [
-            document.getElementById('swal-input1').value,
-            document.getElementById('swal-input2').value
-          ]
-        }
-      });
-
-      if (formValues) {
-        const newGasPrice = web3.utils.toWei(formValues[0], 'gwei');
-        const newGasLimit = formValues[1];
-        const estimatedCost = web3.utils.toBN(newGasPrice).mul(web3.utils.toBN(newGasLimit));
-
-        const balance = DOMPurify.sanitize(await web3.eth.getBalance(originalTx.from));
-        if (web3.utils.toBN(balance).lt(estimatedCost)) {
-          await Swal.fire(`${translateThis('Not enough funds')}`, `${translateThis('Your balance is too low to cover the gas fees for this transaction.')}`, 'error');
-          return;
-        }
-
-        const confirmation = await Swal.fire({
-          title: translateThis('Confirm Transaction'),
-          html: `${translateThis("Estimated gas cost:")} ${web3.utils.fromWei(estimatedCost.toString(), 'ether')} ETH<br>` +
-              `${translateThis("Gas limit:")} ${newGasLimit}<br>` +
-              `${translateThis("Gas price:")} ${web3.utils.fromWei(newGasPrice, 'gwei')} Gwei<br>` +
-              `${translateThis("Total cost:")} ${web3.utils.fromWei(estimatedCost.toString(), 'ether')} ETH`,
-          showCancelButton: true,
-          confirmButtonText: translateThis('Submit'),
-          cancelButtonText: translateThis('Cancel'),
-        });
-
-        if (confirmation.isConfirmed) {
-          try {
-            const newTx = {
-              from: originalTx.from,
-              to: originalTx.to,
-              value: originalTx.value,
-              data: originalTx.input,
-              gas: newGasLimit,
-              gasPrice: newGasPrice,
-              nonce: nonce
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(newTx, accountprivkey);
-            const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-            .on('transactionHash', function(hash){
-              const sanitizedHash = DOMPurify.sanitize(hash);
-              console.log("Transaction Updated Hash", sanitizedHash);
-              updatePendingTransactionHash(txHash, sanitizedHash);
-              currentTxHash = sanitizedHash;
-              removeTransactionHash(txHash);
-            });
-            console.log('Transaction sent with new gas settings, txHash:', receipt.transactionHash);
-          } catch (error) {
-            console.error('Error sending transaction:', error);
-            await Swal.fire(`${translateThis('Transaction Error')}`, `${translateThis('There was an error sending the transaction.')}`, 'error');
-          }
-        }
-      }
-    }
-
-    function updatePendingTransactionHash(oldHash, newHash) {
-      let pendingTransactions = getPendingTransactions();
-      const index = pendingTransactions.indexOf(oldHash);
-      if (index !== -1) {
-        pendingTransactions[index] = newHash;
-        localStorage.setItem(myaccounts + DDEaddy + 'pendingTransactions', JSON.stringify(pendingTransactions));
-        updatePendingTransactionsUI();
-      }
-    }
-
-    async function cancelTransaction(txHash) {
-      const originalTx = JSON.parse(DOMPurify.sanitize(JSON.stringify(await web3.eth.getTransaction(txHash))));
-      if (!originalTx) {
-        return;
-      }
-
-      if (originalTx.blockNumber) {
-        console.log('Transaction is already mined and cannot be cancelled.');
-        return;
-      }
-
-      const currentGasPrice = DOMPurify.sanitize(await web3.eth.getGasPrice());
-      const increasedGasPrice = web3.utils.toBN(currentGasPrice).mul(web3.utils.toBN(2)); // Increase gas price by 2x for faster cancellation
-      const gasLimit = originalTx.gas;
-      const estimatedCost = web3.utils.toBN(increasedGasPrice).mul(web3.utils.toBN(gasLimit));
-
-      const balance = DOMPurify.sanitize(await web3.eth.getBalance(originalTx.from));
-      if (web3.utils.toBN(balance).lt(estimatedCost)) {
-        await Swal.fire(`${translateThis('Not enough funds')}`, `${translateThis('Your balance is too low to cover the gas fees for this cancellation.')}`, 'error');
-        return;
-      }
-
-      const confirmation = await Swal.fire({
-        title: translateThis('Confirm Cancellation'),
-        html: `${translateThis("Estimated gas cost for cancellation:")} ${web3.utils.fromWei(estimatedCost.toString(), 'ether')} ETH<br>` +
-            `${translateThis("Gas limit:")} ${gasLimit}<br>` +
-            `${translateThis("Increased gas price:")} ${web3.utils.fromWei(increasedGasPrice.toString(), 'gwei')} Gwei<br>` +
-            `${translateThis("Total cost:")} ${web3.utils.fromWei(estimatedCost.toString(), 'ether')} ETH`,
-        showCancelButton: true,
-        confirmButtonText: translateThis('Confirm Cancellation'),
-        cancelButtonText: translateThis('Cancel'),
-      });
-
-      if (confirmation.isConfirmed) {
-        try {  
-          const cancelTx = {
-            from: originalTx.from,
-            to: originalTx.from, // Sending to self
-            value: '0',
-            gas: gasLimit,
-            gasPrice: increasedGasPrice.toString(),
-            nonce: originalTx.nonce
-            };
-
-            const signedTx = await web3.eth.accounts.signTransaction(cancelTx, accountprivkey);
-            web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-            .on('transactionHash', function(newHash){
-              const sanitizedHash = DOMPurify.sanitize(newHash);
-              updatePendingTransactionHash(txHash, sanitizedHash);
-              currentTxHash = sanitizedHash;
-              removeTransactionHash(txHash);
-            });
-        } catch (error) {
-          console.error('Error sending transaction:', error);
-          await Swal.fire(`${translateThis('Transaction Error')}`, `${translateThis('There was an error sending the transaction.')}`, 'error');
-        }
-      }
-    }
-
-    function storeTransactionHash(hash) {
-      const sanitizedHash = DOMPurify.sanitize(hash);
-      if(accountprivkey !== ""){
-        pendingTransactions.push(sanitizedHash);
-        localStorage.setItem(myaccounts + DDEaddy + 'pendingTransactions', JSON.stringify(pendingTransactions));
-      }
-    }
-
-    function getPendingTransactions() {
-      return JSON.parse(localStorage.getItem(myaccounts + DDEaddy + 'pendingTransactions') || '[]');
-    }
-
-    async function checkTransactionStatus() {
-      let pendingTransactions = getPendingTransactions();
-      let updatedTransactions = [];
-
-      for (let hash of pendingTransactions) {
-        const receipt = JSON.parse(DOMPurify.sanitize(JSON.stringify(await web3.eth.getTransactionReceipt(hash))));
-        if (!receipt) {
-          const transaction = JSON.parse(DOMPurify.sanitize(JSON.stringify(await web3.eth.getTransaction(hash))));
-          if (transaction === null) {
-            console.log(`Transaction with hash ${hash} not found, likely dropped or replaced.`);
-            removeTransactionHash(hash);
-            showTransactionManagementUI();
-          } else {
-            showTransactionManagementUI();
-            updatedTransactions.push(hash); 
-            currentTxHash = hash;
-          }
-        } else {
-          console.log(`Transaction with hash ${hash} is confirmed or failed.`);
-          removeTransactionHash(hash);
-        }
-      }
-      localStorage.setItem(myaccounts + DDEaddy + 'pendingTransactions', JSON.stringify(updatedTransactions));
-    }
-
-    function showTransactionManagementUI() {
-      const pendingTransactions = getPendingTransactions();
-      const dropdown = document.getElementById('pending-transactions-dropdown');
-      const indicator = document.getElementById('pending-transactions-indicator');
-      if (pendingTransactions.length > 0) {
-        showPendingTransactionsIndicator();
-      } else {
-        indicator.style.display = 'none'; // Hide the indicator when there are no pending transactions
-        dropdown.innerHTML = '<div class="notification-empty">' + translateThis("No pending transactions.") + '</div>';
-      }
-    }
-
-    function removeTransactionHash(hash) {
-      let pendingTransactions = getPendingTransactions();
-      const index = pendingTransactions.indexOf(hash);
-      if (index !== -1) {
-        pendingTransactions.splice(index, 1);
-        localStorage.setItem(myaccounts + DDEaddy + 'pendingTransactions', JSON.stringify(pendingTransactions));
-        updatePendingTransactionsUI();
-      }
-    }
-
-    async function waitForTransactionConfirmation(txHash) {
-      currentTxHash = txHash;
-      const indicator = document.getElementById('pending-transactions-indicator');
-      const dropdown = document.getElementById('pending-transactions-dropdown');
-
-      return new Promise((resolve, reject) => {
-        const interval = setInterval(async () => {
-          const receipt = JSON.parse(DOMPurify.sanitize(JSON.stringify(await web3.eth.getTransactionReceipt(currentTxHash))));
-          if (receipt) {
-            clearInterval(interval);
-            indicator.style.display = 'none'; // Hide the indicator when there are no pending transactions
-            dropdown.innerHTML = '<div class="notification-empty">' + translateThis("No pending transactions.") + '</div>';
-            if (receipt.status) {
-              removeTransactionHash(currentTxHash);
-              resolve(currentTxHash);
-            } else {
-              reject(new Error('Transaction failed'));
-            }
-          } else {
-            const transaction = JSON.parse(DOMPurify.sanitize(JSON.stringify(await web3.eth.getTransaction(currentTxHash))));
-            if (transaction === null) {
-              clearInterval(interval);
-              removeTransactionHash(currentTxHash);
-              reject(new Error('Transaction not found, likely dropped or replaced.'));
-            }
-          }
-        }, 5000); // Poll every 5 seconds
-      });
-    }
-
-    async function sendTransaction(method, options) {
-      return new Promise((resolve, reject) => {
-        method.send(options)
-          .on('transactionHash', function(hash) {
-            storeTransactionHash(hash);
-            resolve(hash); // Resolve the promise with the transaction hash
-          })
-          .on('error', function(error) {
-            reject(error); // Reject the promise if there's an error
-          });
-      });
-    }
-
     // Function to open the IndexedDB database
     async function openDatabase() {
       return new Promise(function(resolve, reject) {
@@ -3527,8 +3120,6 @@ body {
     var isFavoritesShown = false;
     var locked = false;
     var activeActions = {};
-    let pendingTransactions = [];
-    var currentTxHash = null;
     const statusDescriptions = {
       "0": "",
       "1": "",
@@ -3615,8 +3206,8 @@ body {
       document.getElementById("account").innerHTML = translateThis("Not connected.");
       document.getElementById("loginButton").style.display = 'block';
       document.getElementById("myContactInfo").value = '';
-      document.getElementById("myoffers").innerHTML = '<p>Please login to view offers and contracts.</p>';
-      document.getElementById("mycontracts").innerHTML = '<p>Please login to view offers and contracts.</p>';
+      document.getElementById("myoffers").innerHTML = ""; // clear the container first
+      document.getElementById("mycontracts").innerHTML = ""; // clear the container first
       document.getElementById('publicemail').innerHTML = "";
       document.getElementById('myPasswordInput').value = "";
       document.getElementById("myPasswordInput").disabled = true;
@@ -4132,7 +3723,6 @@ body {
         await waitLock();
         document.getElementById("loadingStatus").innerHTML = loader;
         currentViewContext = '';
-        currentPage = 1;
         marketOffers = {'indices':[], 'results':[]};
         locked = true;
         await loadMarkets(0, maxContextLoad[0]);
@@ -4481,7 +4071,7 @@ body {
     }
 
     async function modifyCustodian() {
-      const dataLength = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 4).call());
+      const dataLength = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(myaccounts, 3).call());
       let custodians = [];
       let custodianOptions = {};
 
@@ -4525,12 +4115,7 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == ""){
-              await DDEcontract.methods.authorizeCustodian(result.value, false, false).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.authorizeCustodian(result.value, false, false), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.authorizeCustodian(result.value, false).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             Swal.fire(translateThis("Cosigner removal successful."));
           } catch (e) {
@@ -4573,12 +4158,7 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == ""){
-              await DDEcontract.methods.authorizeCustodian(result.value, true, false).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else{
-              const txHash = sendTransaction(DDEcontract.methods.authorizeCustodian(result.value, true, false), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.authorizeCustodian(result.value, true, false).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             Swal.fire(translateThis("Cosigner designation successful. Now you will be asked to authorize the cosigner for contract clearance."));
           } catch (e) {
@@ -4599,12 +4179,7 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.authorizeContract(result.value, "0x", true).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = sendTransaction(DDEcontract.methods.authorizeContract(result.value, "0x", true), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.authorizeContract(result.value, "0x", true).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             Swal.fire(translateThis("Success!"));
           } catch (e) {
@@ -4823,12 +4398,7 @@ body {
             }
           }
         showLoader();
-        if(accountprivkey == "") {
-          await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-        } else {
-          const txHash = await sendTransaction(DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)), { "from": myaccounts, ...gasOptions[gasSetting] });
-          await waitForTransactionConfirmation(txHash);
-        }
+        await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({ "from": myaccounts, ...gasOptions[gasSetting] });
         hideLoader();
         await Swal.fire(translateThis("Data added!"));
       } catch (error) {
@@ -4931,12 +4501,7 @@ body {
                 }
               }
               showLoader();
-              if(accountprivkey == "") {
-                await DDEcontract.methods.changeAffiliate(affiliate).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-              } else {
-                const txHash = await sendTransaction(DDEcontract.methods.changeAffiliate(affiliate), { "from": myaccounts, ...gasOptions[gasSetting] });
-                await waitForTransactionConfirmation(txHash);
-              }
+              await DDEcontract.methods.changeAffiliate(affiliate).send({ "from": myaccounts, ...gasOptions[gasSetting] });
               hideLoader();
               Swal.fire(translateThis("Success!"));
               referral = affiliate;
@@ -4983,12 +4548,7 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.changeCustomFee(value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.changeCustomFee(value), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.changeCustomFee(value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             Swal.fire(translateThis("Success!"));
           } catch (e) {
@@ -5184,51 +4744,6 @@ body {
       }
       return result;
     };
-
-    var sightengineApiUser = '596064440';
-    var sightengineApiSecret = 'ikEQE32VBYAGeSNiUCsTfFoWFsn8vBwY';
-
-    async function moderateImage(file) {
-      const url = 'https://api.sightengine.com/1.0/check.json';
-      const formData = new FormData();
-      formData.append('media', file);
-      formData.append('models', 'nudity-2.1,weapon,alcohol,recreational_drug,medical,properties,type,quality,celebrities,offensive,faces,scam,text-content,face-attributes,gore-2.0,text,qr-content,tobacco,genai,violence,self-harm,money,gambling');
-      formData.append('api_user', sightengineApiUser);
-      formData.append('api_secret', sightengineApiSecret);
-
-      try {
-        const response = await axios.post(url, formData, {
-          headers: formData.getHeaders ? formData.getHeaders() : { 'Content-Type': 'multipart/form-data' }
-        });
-        return response.data;
-      } catch (error) {
-        console.error("Error moderating image:", error);
-        return null;
-      }
-    }
-
-    async function moderateText(text) {
-      const url = 'https://api.sightengine.com/1.0/text/check.json';
-      const formData = new FormData();
-      formData.append('text', text);
-      formData.append('lang', 'en');
-      formData.append('models', 'general,self-harm');
-      formData.append('mode', 'ml');
-      formData.append('api_user', sightengineApiUser);
-      formData.append('api_secret', sightengineApiSecret);
-
-      try {
-        const response = await axios.post(url, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        return response.data;
-      } catch (error) {
-        console.error("Error moderating text:", error);
-        return null;
-      }
-    }
 
     async function checkMarketUpdate() {
       const timethis = 900000; // 15 minutes in milliseconds
@@ -5779,30 +5294,22 @@ body {
               jsondata.image = [''];
               jsondata.message = DOMPurify.sanitize(text);
               jsondata.contact = '';
-              jsondata.title = '';
-              jsondata.location = '';
             } else {
               var myimg = Array.isArray(messageData.image) ? messageData.image : [''];
               storeFile(Crypto.SHA256(JSON.stringify(myimg)), myimg);
               jsondata.image = Crypto.SHA256(JSON.stringify(myimg));
               jsondata.message = messageData.message;
               jsondata.contact = messageData.contact;
-              jsondata.title = messageData.title;
-              jsondata.location = messageData.location;
             }
           } catch (e) {
             console.log("Error loading data");
             jsondata.image = [''];
             jsondata.message = DOMPurify.sanitize(text);
             jsondata.contact = '';
-            jsondata.title = '';
-            jsondata.location = '';
           }
         } else {
           jsondata.image = [''];
           jsondata.message = '';
-          jsondata.title = '';
-          jsondata.location = '';
         }
         jsondata.hash = hash;
       });
@@ -5868,21 +5375,10 @@ body {
           }
           const svgString = jdenticon.toSvg(offerHash, 25);
           const base64String = btoa(svgString);
-          let dataUrl = `data:image/svg+xml;base64,${base64String}`;
+          const dataUrl = `data:image/svg+xml;base64,${base64String}`;
           var offerHashDisp = offerHash;
           if(window.innerWidth < 550) {
             offerHashDisp = offerHashDisp.substring(0, 32) + '...';
-          }
-          let myimg = await getFile(offerData.image);
-          if (myimg && myimg.length > 0) {
-            const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
-            for (let i = 0; i < myimg.length; i++) {
-              const mimeTypeMatch = myimg[i].match(/^data:(.*?);/);
-              if (mimeTypeMatch && imageMimeTypes.includes(mimeTypeMatch[1].toLowerCase())) {
-                dataUrl = myimg[i];
-                break;
-              }
-            }
           }
           li.innerHTML = `
             <div><bdo>` + translateThis('Order hash:') + `</bdo> <img src="${dataUrl}" width="25" height="25"></img> ${offerHashDisp}</div>
@@ -5891,7 +5387,6 @@ body {
             <div><bdo>` + translateThis('Amount:') + `</bdo> ${displayDecimals(offerData.token, offerData.amount)}</div>
             <div><bdo>` + translateThis('Quantity:') + `</bdo> ${parseInt(offerData.quantity[0])}` + translateThis('(Total)') + ` - ${parseInt(offerData.quantity[1])}` + translateThis('(Maximum)') + `</div>
             <div><bdo>` + translateThis('Time Limit:') + `</bdo> ${parseInt(offerData.timelimit[0]) / (60 * 60 * 24 * 7)} ` + translateThis('weeks') + `</div>
-            ${offerData.title ? `<div><bdo>` + translateThis('Title:') + `</bdo> ${offerData.title}</div>` : ''}
             <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData.message.slice(0, 20)}...</div><br>
           `;
           myhash = web3.utils.keccak256(li.innerHTML);
@@ -5977,23 +5472,10 @@ body {
           const counterpartyLabel2 = counterpartyAddress2;
           const svgString2 = jdenticon.toSvg(offerHash2, 25);
           const base64String2 = btoa(svgString2);
-          let dataUrl2 = `data:image/svg+xml;base64,${base64String2}`;
+          const dataUrl2 = `data:image/svg+xml;base64,${base64String2}`;
           var offerHashDisp2 = offerHash2;
           if(window.innerWidth < 550) {
             offerHashDisp2 = offerHashDisp2.substring(0, 32) + '...';
-          }
-
-          let myimg = await getFile(offerData2.image);
-
-          if (myimg && myimg.length > 0) {
-            const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
-            for (let i = 0; i < myimg.length; i++) {
-              const mimeTypeMatch = myimg[i].match(/^data:(.*?);/);
-              if (mimeTypeMatch && imageMimeTypes.includes(mimeTypeMatch[1].toLowerCase())) {
-                dataUrl2 = myimg[i];
-                break;
-              }
-            }
           }
           li2.innerHTML = `
             <div><bdo>` + translateThis('Order hash:') + `</bdo> <img src="${dataUrl2}" width="25" height="25"></img> ${offerHashDisp2}</div>
@@ -6002,7 +5484,6 @@ body {
             <div><bdo>` + translateThis('Amount:') + `</bdo> ${displayDecimals(offerData2.token, offerData2.amount)}</div>
             <div><bdo>` + translateThis('Quantity:') + `</bdo> ${parseInt(offerData2.quantity[0])}</div>
             <div><bdo>` + translateThis('Time Limit:') + `</bdo> ${parseInt(offerData2.timelimit[0]) / (60 * 60 * 24 * 7)} ` + translateThis('weeks') + `</div>
-            ${offerData2.title ? `<div><bdo>` + translateThis('Title:') + `</bdo> ${offerData2.title}</div>` : ''}
             <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData2.message.slice(0, 20)}...</div><br>
           `;
           myhash = web3.utils.keccak256(li2.innerHTML);
@@ -6032,9 +5513,6 @@ body {
               notify = 1;
             }
           } else {
-            if((offerData2.status[0] == 0 && offerData2.status[1] == 1) || (offerData2.status[0] == 1 && offerData2.status[1] == 0)) {
-              offerData2.newPrivateOffer = true;
-            }
             notifications[offerHash2] = myhash;
             notify = 1;
             updateNotifications(notifications[offerHash2], myhash, offerHash2, offerData2, mode);
@@ -6157,7 +5635,7 @@ body {
           const counterpartyLabel3 = counterpartyAddress3;
           const svgString3 = jdenticon.toSvg(offerHash3, 25);
           const base64String3 = btoa(svgString3);
-          let dataUrl3 = `data:image/svg+xml;base64,${base64String3}`;
+          const dataUrl3 = `data:image/svg+xml;base64,${base64String3}`;
 
           const currentBlockNumber = await web3.eth.getBlockNumber();
           const currentBlock = await web3.eth.getBlock(currentBlockNumber);
@@ -6166,19 +5644,6 @@ body {
           var offerHashDisp3 = offerHash3;
           if(window.innerWidth < 550) {
             offerHashDisp3 = offerHashDisp3.substring(0, 32) + '...';
-          }
-
-          let myimg = await getFile(offerData3.image);
-
-          if (myimg && myimg.length > 0) {
-            const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
-            for (let i = 0; i < myimg.length; i++) {
-              const mimeTypeMatch = myimg[i].match(/^data:(.*?);/);
-              if (mimeTypeMatch && imageMimeTypes.includes(mimeTypeMatch[1].toLowerCase())) {
-                dataUrl3 = myimg[i];
-                break;
-              }
-            }
           }
           li3.innerHTML = `
             <div><bdo>` + translateThis('Order hash:') + `</bdo> <img src="${dataUrl3}" width="25" height="25"></img> ${offerHashDisp3}</div>
@@ -6270,12 +5735,9 @@ body {
               notify = 1;              
             }
           } else {
-            if(offerData3.escrowInfo == "") {
-              offerData3.newContract = true;
-            }
             notifications[offerHash3] = myhash;
             notify = 1;
-            updateNotifications(notifications[offerHash3], myhash, offerHash3, offerData3, 4);
+            updateNotifications(notifications[offerHash3], myhash, offerHash3, offerHash3, 4);
           }          
           li3.onclick = function() {
             document.getElementById("contractsButton").style.backgroundColor = "#f2f2f2";
@@ -6504,7 +5966,7 @@ body {
                   <div class="token">` + '<bdo class="theText">' + translateThis("Currency:") + '</bdo>' + ` ${tokennames[offer.token]}</div>
                   <div class="amount">` + '<bdo class="theText">' + translateThis("Amount:") + '</bdo>'  + ` ${displayDecimals(offer.token, offer.amount)}</div>
                 </div>
-                <div class="message">` + '<bdo class="theText">' + translateThis("Details:") + '</bdo>' + ` ${offer.title ? offer.title : offer.message.slice(0, 20) + (offer.message.length > 20 ? "..." : "")}</div>
+                <div class="message">` + '<bdo class="theText">' + translateThis("Details:") + '</bdo>' + ` ${offer.message.slice(0, 20) + (offer.message.length > 20 ? "..." : "")}</div>
             </div>
         `;
 
@@ -6536,11 +5998,9 @@ body {
         var notifications = JSON.parse(localStorage.getItem(myaccounts + DDEaddy + ":unifiedNotifications")) || {};
         var oldOfferData = notifications[offerHash] ? notifications[offerHash].listing : null;
 
-        if (oldHash !== newHash || newOfferData.newMessage == true || newOfferData.newPrivateOffer == true || newOfferData.newContract == true) {
+        if (oldHash !== newHash || newOfferData.newMessage == true) {
           let message = generateNotificationMessage(oldOfferData, newOfferData);
           newOfferData.newMessage = false;
-          newOfferData.newPrivateOffer = false;
-          newOfferData.newContract = false;
           notifications[offerHash] = {
             isRead: false,
             message: message,
@@ -6560,16 +6020,7 @@ body {
     }
 
     function generateNotificationMessage(oldOfferData, newOfferData) {
-      if (!oldOfferData){
-        if(newOfferData.newPrivateOffer){
-          return [translateThis("New Private Offer"), translateThis("You have a new private offer")];
-        } else if(newOfferData.newContract) {
-          return [translateThis("New Escrow"), translateThis("You have a new escrow")];
-        } else {
-          return [translateThis("New Offer"), translateThis("A new offer has been posted.")];
-        }
-      }
-      
+      if (!oldOfferData) return [translateThis("New Offer"), translateThis("A new offer has been posted.")];
 
       let title = translateThis("Contract Update");
       let details = [];
@@ -6583,7 +6034,7 @@ body {
       // Check for changes in the status
       if (oldOfferData.status.join(',') !== newOfferData.status.join(',')) {
         let statusKey = newOfferData.status.join(',');
-        let statusMessage = translateThis(combinedStatusDescriptions[statusKey]) || translateThis("Status updated");
+        let statusMessage = combinedStatusDescriptions[statusKey] || "Status updated";
         title = translateThis("Notification on Contract");
         details.push(translateThis(statusMessage));
       }
@@ -6697,7 +6148,7 @@ body {
       Object.keys(notifications).forEach(hash => {
         notifications[hash].isRead = true;
       });
-      localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", JSON.stringify(notifications));
+      localStorage.setItem(myaccounts + DDEaddy + ":unifiedNotifications", notifications);
       updateBellIcon(notifications);
     }
 
@@ -6974,8 +6425,7 @@ body {
       if(mode == 4 && listing.sender != myaccounts && listing.recipient != myaccounts) {
         theuser = listing.originalUser;
       }
-      notifyFavorites = localStorage.getItem(myaccounts + DDEaddy + ":notifyFavorites");
-      if(notifyFavorites === "0" && mode == 0 && myaccounts != "") {
+      if(notifyFavorites == "0" && mode == 0) {
         await Swal.fire({
           icon: 'info',
           title: translateThis('Welcome'),
@@ -7047,8 +6497,6 @@ body {
               listing.image = Crypto.SHA256(JSON.stringify(myimg));
               listing.message = messageData.message;
               listing.contact = messageData.contact;
-              listing.title = messageData.title;
-              listing.location = messageData.location;
             } catch (e) {
               console.log(e);
               console.log("Decryption failed");
@@ -7372,19 +6820,8 @@ body {
       const timelimit = document.createElement('p');
       timelimit.innerHTML = "<bdo>" + translateThis('Time limit:') + '</bdo> ' + Math.floor(parseInt(listing.timelimit[0]) / (60 * 60 * 24 * 7)) + ' ' + "" + translateThis('weeks') + "";
 
-      const title = document.createElement('p');
-      if (typeof listing.title !== 'undefined') {
-        title.innerHTML = '<bdo>' + translateThis('Title:') + '</bdo>' + listing.title;
-      }
-
       const message = document.createElement('p');
       message.innerHTML = '<bdo>' + translateThis('Details:') + '</bdo>' + listing.message;
-
-      const location = document.createElement('p');
-      if (typeof listing.location !== 'undefined') {
-        location.innerHTML = '<bdo>' + translateThis('Location:') + '</bdo>' + listing.location;
-      }
-
       const message2 = document.createElement('p');
       if (typeof listing.contact !== 'undefined') {
         message2.innerHTML = '<bdo>' + translateThis('Contact information:') + '</bdo>' + listing.contact;
@@ -7522,12 +6959,7 @@ body {
                       }
                     }
                     showLoader();
-                    if(accountprivkey == "") {
-                      await DDEcontract.methods.expireEscrow(listing.hash, theuser).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-                    } else {
-                      const txHash = await sendTransaction(DDEcontract.methods.expireEscrow(listing.hash, theuser), { "from": myaccounts, ...gasOptions[gasSetting] });
-                      await waitForTransactionConfirmation(txHash);
-                    }
+                    await DDEcontract.methods.expireEscrow(listing.hash, theuser).send({ "from": myaccounts, ...gasOptions[gasSetting] });
                     hideLoader();
                     await Swal.fire(translateThis("Transaction result registered!"));
                     popupContainer.remove();
@@ -7561,7 +6993,6 @@ body {
           if(listing.timelimit[1] != 0 && skipthis != 1) {
             if(theuser != listing.sender) {
               const acceptTime = document.createElement('button');
-              acceptTime.classList.add('btn-gray');
               acceptTime.innerHTML = translateThis('Accept Time Extension Request');
               acceptTime.id = 'acceptTime';
               acceptTime.onclick = async function() {
@@ -7575,12 +7006,7 @@ body {
                     }
                   }
                   showLoader();
-                  if(accountprivkey == "") {
-                    await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[1]).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-                  } else {
-                    const txHash = await sendTransaction(DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[1]), { "from": myaccounts, ...gasOptions[gasSetting] });
-                    await waitForTransactionConfirmation(txHash);
-                  }
+                  await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[1]).send({ "from": myaccounts, ...gasOptions[gasSetting] });
                   hideLoader();
                   await Swal.fire(translateThis("Time extended!"));
                   await loadUser();
@@ -7599,7 +7025,6 @@ body {
           if(listing.timelimit[2] != 0 && skipthis != 1) {
             if(theuser == listing.sender) {
               const acceptTime = document.createElement('button');
-              acceptTime.classList.add('btn-gray');
               acceptTime.innerHTML = translateThis('Accept Time Extension Request');
               acceptTime.id = 'acceptTime';
               acceptTime.onclick = async function() {
@@ -7613,12 +7038,7 @@ body {
                     }
                   }
                   showLoader();
-                  if(accountprivkey == "") {
-                    await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[2]).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-                  } else {
-                    const txHash = await sendTransaction(DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[2]), { "from": myaccounts, ...gasOptions[gasSetting] });
-                    await waitForTransactionConfirmation(txHash);
-                  }
+                  await DDEcontract.methods.requestExtension(listing.hash, theuser, listing.timelimit[2]).send({ "from": myaccounts, ...gasOptions[gasSetting] });
                   hideLoader();
                   await Swal.fire(translateThis("Time extended!"));
                   await loadUser();
@@ -7641,25 +7061,24 @@ body {
           extendTime.onclick = async function() {
             try {
               const dialog = document.createElement("div");
-              dialog.classList.add('transaction-confirm-popup');
               dialog.innerHTML = `
-                <div class="transaction-popup-heading">` + translateThis('Please enter the number of days you wish to extend:') + `<br></div>
+                <div>` + translateThis('Please enter the number of days you wish to extend:') + `<br></div>
                   <input id="new-time" type="number" min="1"></input><br><br>
                 <div>
-                  <button id="confirm-btn">` + translateThis('Confirm') + `</button>
+                  <button id="confirm-btn">` + translateThis('Confirm') + `</button>&nbsp;&nbsp;
                   <button id="cancel-btn">` + translateThis('Cancel') + `</button>
-                </div>  
+                </div>
               `;
-              // dialog.style.display = "block";
-              // dialog.style.position = "fixed";
-              // dialog.style.zIndex = 999;
-              // dialog.style.backgroundColor = "white";
-              // dialog.style.padding = "20px";
-              // dialog.style.borderRadius = "10px";
-              // dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
-              // dialog.style.top = "50%";
-              // dialog.style.left = "50%";
-              // dialog.style.transform = "translate(-50%, -50%)";
+              dialog.style.display = "block";
+              dialog.style.position = "fixed";
+              dialog.style.zIndex = 999;
+              dialog.style.backgroundColor = "white";
+              dialog.style.padding = "20px";
+              dialog.style.borderRadius = "10px";
+              dialog.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+              dialog.style.top = "50%";
+              dialog.style.left = "50%";
+              dialog.style.transform = "translate(-50%, -50%)";
 
               document.body.appendChild(dialog);
 
@@ -7681,12 +7100,7 @@ body {
                   }
                 }
                 showLoader();
-                if(accountprivkey == "") {
-                  await DDEcontract.methods.requestExtension(listing.hash, theuser, newtime).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-                } else {
-                  const txHash = await sendTransaction(DDEcontract.methods.requestExtension(listing.hash, theuser, newtime), { "from": myaccounts, ...gasOptions[gasSetting] });
-                  await waitForTransactionConfirmation(txHash);
-                }
+                await DDEcontract.methods.requestExtension(listing.hash, theuser, newtime).send({ "from": myaccounts, ...gasOptions[gasSetting] });
                 hideLoader();
                 await Swal.fire(translateThis("Time extension requested!"));
                 await loadUser();
@@ -7727,12 +7141,7 @@ body {
                 }
               }
               showLoader();
-              if(accountprivkey == "") {
-                await DDEcontract.methods.cancelEscrow(listing.hash, theuser).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-              } else {
-                const txHash = await sendTransaction(DDEcontract.methods.cancelEscrow(listing.hash, theuser), { "from": myaccounts, ...gasOptions[gasSetting] });
-                await waitForTransactionConfirmation(txHash);
-              }
+              await DDEcontract.methods.cancelEscrow(listing.hash, theuser).send({ "from": myaccounts, ...gasOptions[gasSetting] });
               hideLoader();
               if (listing.status[1] == 1) {
                 await Swal.fire(translateThis("Contract cancellation request sent!"));
@@ -7776,12 +7185,7 @@ body {
                     }
               }
               showLoader();
-              if(accountprivkey == "") {
-                await DDEcontract.methods.completeEscrow(listing.hash, theuser).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-              } else {
-                const txHash = await sendTransaction(DDEcontract.methods.completeEscrow(listing.hash, theuser), { "from": myaccounts, ...gasOptions[gasSetting] });
-                await waitForTransactionConfirmation(txHash);
-              }
+              await DDEcontract.methods.completeEscrow(listing.hash, theuser).send({ "from": myaccounts, ...gasOptions[gasSetting] });
               hideLoader();
               if (listing.status[1] == 1) {
                 await Swal.fire(translateThis("Contract completion request sent!"));
@@ -7826,10 +7230,8 @@ body {
         extra.innerHTML = '<br><bdo>' + translateThis('Notifications:') + '</bdo><br>' + listing.escrowInfo;
         details.appendChild(extra)
       }
-      details.appendChild(title);
       message.style.whiteSpace = 'normal';
       details.appendChild(message);
-      details.appendChild(location);
       details.appendChild(message2);
 
       const topBar = document.createElement('div');
@@ -7980,7 +7382,6 @@ body {
       messageButton.classList.add('message-button');
       messageButton.style.fontSize = "20px";
       messageButton.style.marginLeft = "10px";
-      // messageButton.style.display = "none";
 
       const messageCountIndicator = document.createElement('span');
       messageCountIndicator.classList.add('message-count-indicator');
@@ -8025,47 +7426,23 @@ body {
         const isContractActive = (listing.status[0] < 4 && listing.status[1] < 4);
         const isLoggedIn = (myaccounts !== "");
 
-        var senderAddress;
-        var recipientAddress;
-        if(theuser == listing.sender) {
-          recipientAddress = listing.recipient;
-          senderAddress = listing.sender;
-        } else {
-          senderAddress = listing.recipient;
-          recipientAddress = listing.sender;
-        }
-
-        if (isStatusValid && isParticipant && isContractActive && isLoggedIn) {
-          messageButton.style.display = 'inline-flex';
-          const lastMessageIndex = localStorage.getItem(myaccounts + DDEaddy + listing.hash + 'lastMessageIndex') || 0;
-          const loaderPopup = document.createElement('div');
-          loaderPopup.className = 'loader-popup';
-          loaderPopup.innerHTML = loader;
-          const messagePopup = document.querySelector('.popup-container');
-          messagePopup.appendChild(loaderPopup);
-          loaderPopup.style.display = 'block';
-          await fetchMessages(listing.hash, recipientAddress, lastMessageIndex);
-          loaderPopup.remove();
-        } else {
-          messageButton.style.display = 'none';
-        }
-
         messageButton.onclick = async function() {
-          // var senderAddress;
-          // var recipientAddress;
-          // if(theuser == listing.sender) {
-          //   recipientAddress = listing.recipient;
-          //   senderAddress = listing.sender;
-          // } else {
-          //   senderAddress = listing.recipient;
-          //   recipientAddress = listing.sender;
-          // }
-
-          // if (isStatusValid && isParticipant && isContractActive && isLoggedIn) {
-          //   const lastMessageIndex = localStorage.getItem(myaccounts + DDEaddy + listing.hash + 'lastMessageIndex') || 0;
-          //   await fetchMessages(listing.hash, recipientAddress, lastMessageIndex);
-          // }
-
+          messageCountIndicator.style.display = 'none';
+          var senderAddress;
+          var recipientAddress;
+          if(theuser == listing.sender) {
+            recipientAddress = listing.recipient;
+            senderAddress = listing.sender;
+          } else {
+            senderAddress = listing.recipient;
+            recipientAddress = listing.sender;
+          }
+          if (isStatusValid && isContractActive && isLoggedIn) {
+            messageButton.style.display = 'inline-flex';
+            await fetchMessages(listing.hash, recipientAddress);
+          } else {
+            messageButton.style.display = 'none';
+          }
           const { supportsEncryption: recipientSupportsEncryption, publicKey: recipientPublicKey } = await userSupportsEncryption(recipientAddress);
           const { supportsEncryption: senderSupportsEncryption } = await userSupportsEncryption(senderAddress);
           if(!isParticipant) {
@@ -8081,7 +7458,7 @@ body {
               cancelButtonText: translateThis('Cancel'),
             }).then(async (result) => {
               if (result.isConfirmed) {
-                await handleSendMessage(listing.hash, senderAddress, recipientAddress, false, null);
+               await handleSendMessage(listing.hash, senderAddress, recipientAddress, false, null);
               }
             });
           } else if (!recipientSupportsEncryption) {
@@ -8146,54 +7523,21 @@ body {
       }
     }
 
-
+   
     async function handleSendMessage(hash, senderAddress, recipient, encrypt = false, recipientPublicKey = null) {
-      
-      const loaderPopup = document.createElement('div');
-      loaderPopup.className = 'loader-popup';
-      loaderPopup.innerHTML = loader;
-      const messagePopup = document.querySelector('.popup-container');
-      messagePopup.appendChild(loaderPopup);
-      loaderPopup.style.display = 'block';
-
       const existingMessages = await fetchMessages(hash, senderAddress);
-      loaderPopup.remove();
       const messagesContainer = createMessagePopup(existingMessages, senderAddress, recipient);      
 
-      // const messagePopup = document.querySelector('.popup-container');
+      const messagePopup = document.querySelector('.popup-container');
       messagePopup.appendChild(messagesContainer);
       messagesContainer.style.display = 'block';
 
       const input = messagesContainer.querySelector('textarea');
-      const sendButton = messagesContainer.querySelector('button');
+      const sendButton = messagesContainer.querySelector('button');      
 
       sendButton.onclick = async () => {
         const message = input.value;
         let finalMessage = message;
-        var sendResult;
-
-        // Moderate the text message
-        messagePopup.appendChild(loaderPopup);
-        loaderPopup.style.display = 'block';
-        const moderationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(await moderateText(message))));
-        loaderPopup.style.display = 'none';
-
-        if (moderationResult === null) {
-          await Swal.fire({
-            icon: 'error',
-            title: translateThis('Moderation Error'),
-            text: translateThis('There was an error moderating the message. Please try again later.'),
-          });
-          return;
-        }
-        if (moderationResult && (moderationResult.moderation_classes.sexual > 0.01 || moderationResult.moderation_classes.discriminatory > 0.01 || moderationResult.moderation_classes.insulting > 0.01 || moderationResult.moderation_classes.violent > 0.01 || moderationResult.moderation_classes.toxic > 0.01 || moderationResult.moderation_classes.self_harm > 0.01)) {
-          await Swal.fire({
-            icon: 'error',
-            title: translateThis('Inappropriate Content Detected'),
-            text: translateThis('The message contains inappropriate content. Please revise your message.'),
-          });
-          return;
-        }
         try {
           let storedMessage = message; // Message to store locally in plaintext
           const timestamp = new Date().getTime();
@@ -8207,29 +7551,15 @@ body {
             storedMessage = "ENC:" + cryptico.encrypt(message + "#*#*#" + timestamp + padding, userpubkey).cipher;
           }
           setActionActive(myaccounts+"sendMessage"+finalMessage, true);
-          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, senderAddress).call())) + 1;
-
-          if(accountprivkey != "") {
-            const gasEstimate = 150000;
-            var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
-            if(!res) {
-              return;
-            }
-          }
-
           showLoader();
-          if(accountprivkey == ""){
-            sendResult = await DDEcontract.methods.sendMessage(hash, senderAddress, finalMessage).send({ from: myaccounts, ...gasOptions[gasSetting]});
-          } else {
-            const txHash = await sendTransaction(DDEcontract.methods.sendMessage(hash, senderAddress, finalMessage), { from: myaccounts, ...gasOptions[gasSetting]});
-            sendResult = await waitForTransactionConfirmation(txHash);
-          }
+          var mslen = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(hash, senderAddress).call())) + 1;
+          const sendResult = await DDEcontract.methods.sendMessage(hash, senderAddress, finalMessage).send({ from: myaccounts, ...gasOptions[gasSetting] });
           if (sendResult) {
               const newMessage = {
-                message: storedMessage,
-                sender: senderAddress,
-                timestamp: timestamp,
-                index: (mslen - 1) + ":" + senderAddress
+                  message: storedMessage,
+                  sender: senderAddress,
+                  timestamp: timestamp,
+                  index: (mslen - 1) + ":" + senderAddress
               };
               if (!existingMessages.some(msg => msg.timestamp === newMessage.timestamp && msg.message === newMessage.message)) {
                   existingMessages.push(newMessage);
@@ -8238,7 +7568,6 @@ body {
               }
           }
           hideLoader();
-          setActionActive('sendMessage', false);
           Swal.fire({
             icon: 'success',
             title: translateThis('Message Sent'),
@@ -8247,9 +7576,6 @@ body {
 
           input.value = '';
           messagesContainer.remove();
-          const indicator = document.querySelector('.message-count-indicator');
-          indicator.style.display = 'none';
-          indicator.textContent = '';
         } catch (error) {
           hideLoader();
           console.error(error);
@@ -8291,12 +7617,12 @@ body {
                     }
                   }
               } else {
-                console.error("Decryption failed:", decryptionResult.status);
-                if(isNaN(msg.timestamp)) {
-                  return { ...msg, timestamp: new Date().getTime(), message: "Failed to decrypt message" };
-                } else {
-                  return { ...msg, message: "Failed to decrypt message" };
-                }
+                  console.error("Decryption failed:", decryptionResult.status);
+                  if(isNaN(msg.timestamp)) {
+                    return { ...msg, timestamp: new Date().getTime(), message: "Failed to decrypt message" };
+                  } else {
+                    return { ...msg, message: "Failed to decrypt message" };
+                  }
               }
           } else {
             if(isNaN(msg.timestamp)) {
@@ -8306,7 +7632,6 @@ body {
             }
           }
       });
-
       const popup = document.createElement('div');
       popup.className = 'message-popup';
       popup.innerHTML = `
@@ -8317,13 +7642,13 @@ body {
           <div class="message-body">
             <div class="message-body-inner">
               ${decryptedMessages.sort((a, b) => a.timestamp - b.timestamp).map(msg => {
-                var messageClass = 'message-sender';
-                var displayName = translateThis('You');
-                if(msg.sender != sender) {
-                  messageClass = 'message-receiver';
-                  displayName = translateThis('Counterparty');
-                }
-                return `<p class="${messageClass}"><b>${displayName}:</b> ${msg.message}</p>`;
+                  var messageClass = 'message-sender';
+                  var displayName = translateThis('You');
+                  if(msg.sender != sender) {
+                    messageClass = 'message-receiver';
+                    displayName = translateThis('Counterparty');
+                  }
+                  return `<p class="${messageClass}"><b>${displayName}:</b> ${msg.message}</p>`;
               }).join('')}
             </div>
             <textarea placeholder="${translateThis('Type your message here...')}"></textarea>
@@ -8334,13 +7659,11 @@ body {
       // Close button functionality
       popup.querySelector('.close-btn').onclick = function() {
           popup.remove();
-          const indicator = document.querySelector('.message-count-indicator');
-          indicator.style.display = 'none';
-          indicator.textContent = '';
       };
 
       return popup;
     }
+
 
     async function fetchMessages(hash, user) {
       var startIndex = localStorage.getItem(myaccounts + DDEaddy + hash + user + 'lastMessageIndex') || 0;
@@ -8362,13 +7685,14 @@ body {
                   const messageParts = decryptionResult.plaintext.split("#*#*#");
                   if (messageParts.length === 2) {
                       const timestampAndPadding = messageParts[1];
-                      msgtimestamp = DOMPurify.sanitize(timestampAndPadding.slice(0, 13));
+                      msgtimestamp = timestampAndPadding.slice(0, 13);
                       const padding = timestampAndPadding.slice(13);
                       if (padding.length === 16 && !isNaN(msgtimestamp)) {
                           decryptedMessage = DOMPurify.sanitize(messageParts[0]);
                       } else {
                           console.error("Invalid padding or timestamp length");
                           decryptedMessage = "Failed to decrypt message";
+                          msgtimestamp = new Date().getTime();
                       }
                   } else {
                       console.error("Invalid message format");
@@ -8377,7 +7701,6 @@ body {
                 } else {
                     console.error("Decryption failed:", decryptionResult.status);
                     decryptedMessage = "Failed to decrypt message";
-                    msgtimestamp = new Date().getTime();
                 }
               }
               if (!storedMessages.some(msg => msg.index === index+":"+user)) {
@@ -8559,12 +7882,7 @@ body {
             }
             setActionActive(myaccounts+"depositWETH"+value, true);
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.depositWETH().send({ "from": myaccounts, "value": value, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.depositWETH(), { "from": myaccounts, "value": value, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.depositWETH().send({ "from": myaccounts, "value": value, ...gasOptions[gasSetting] });
             hideLoader();
             await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
@@ -8591,12 +7909,7 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.deposit(tokenAddress, value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.deposit(tokenAddress, value), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.deposit(tokenAddress, value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             await Swal.fire(translateThis("Deposit success!"));
             await loadUser();
@@ -8620,12 +7933,7 @@ body {
         var allowance = DOMPurify.sanitize(await tokenContract.methods.allowance(myaccounts, DDEaddy).call());
         if (web3.utils.toBN(allowance).lt(web3.utils.toBN(value))) {
           await Swal.fire(translateThis("Waiting for approval..."));
-          if( accountprivkey == ""){
-            await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions[gasSetting]});
-          } else {
-            const txHash = await sendTransaction(tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))), {"from":myaccounts,...gasOptions[gasSetting]});
-            await waitForTransactionConfirmation(txHash);
-          }
+          await tokenContract.methods.approve(DDEaddy, web3.utils.toHex(web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)))).send({"from":myaccounts,...gasOptions[gasSetting]});
         }
       }
     }
@@ -8701,12 +8009,7 @@ body {
           setActionActive(myaccounts+"withdraw"+tokenAddress+value, true);
           if(accountprivkey == "") {
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.withdraw(tokenAddress, value, destination), {"from":myaccounts,...gasOptions[gasSetting]});
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
             hideLoader();
           } else {
             if(web3.utils.toBN(value).lte(web3.utils.toBN(balances[tokenAddress].amount))) {
@@ -8715,13 +8018,8 @@ body {
               if(!res) {
                 return;
               }
-              showLoader();
-              if(accountprivkey == "") {
-                await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
-              } else {
-                const txHash = await sendTransaction(DDEcontract.methods.withdraw(tokenAddress, value, destination), {"from":myaccounts,...gasOptions[gasSetting]});
-                await waitForTransactionConfirmation(txHash);
-              }
+              showLoader();              
+              await DDEcontract.methods.withdraw(tokenAddress, value, destination).send({"from":myaccounts,...gasOptions[gasSetting]});
               hideLoader();
             } else {
               const gasEstimate = 120000;
@@ -8744,12 +8042,7 @@ body {
                 myval = difference.toString();
               }
               showLoader();
-              if(accountprivkey == "") {
-                await DDEcontract.methods.depositAndWithdrawal(tokenAddress, difference.toString(), tokenAddress, value, destination).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-              } else {
-                const txHash = await sendTransaction(DDEcontract.methods.depositAndWithdrawal(tokenAddress, difference.toString(), tokenAddress, value, destination), {"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                await waitForTransactionConfirmation(txHash);
-              }
+              await DDEcontract.methods.depositAndWithdrawal(tokenAddress, difference.toString(), tokenAddress, value, destination).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
               hideLoader();
             }
           }
@@ -8998,19 +8291,11 @@ body {
                 <label for="timeLimit">` + translateThis('Time Limit (in weeks):') + `</label>
                 <input type="number" id="timeLimit" min="1" value="4">
                 <p id="timeLimitWarning" style="display:none;">` + translateThis('Notice: Fast expiration times can cause users to lose funds if they lose access to their computers. The default time of one month or longer is recommended for this reason.') + `</p>
-              </div> 
-              <div class="input-wrapper-content">
-                <label for="contractTitle">` + translateThis('Contract Title:') + `</label>
-                <input type="text" id="contractTitle">
-              </div>
+              </div>  
               <div class="input-wrapper-content">
                 <label for="contractDetails">` + translateThis('Contract Details:') + `</label>
                 <textarea id="contractDetails"></textarea>
               </div>
-              <div class="input-wrapper-content">
-                <label for="contractLocation">` + translateThis('Contract Location:') + `</label>
-                <input type="text" id="contractLocation">
-              </div> 
               <div class="input-wrapper-content">
                   <label for="contractImage">` + translateThis('Contract Images/files:') + `</label>
                   <input type="file" id="contractImage" multiple">
@@ -9163,63 +8448,39 @@ body {
                   continue;
               }
 
-          // Check if the file type is valid
-          if (validImageTypes.includes(fileType) || validTextType.includes(fileType) || isValidDoc || validDocTypes.includes(fileType) || isZipFile) {
-            if (validImageTypes.includes(fileType)) {
-              const loaderPopup = document.createElement('div');
-              loaderPopup.className = 'loader-popup';
-              loaderPopup.innerHTML = loader;
-              form.appendChild(loaderPopup);
-              loaderPopup.style.display = 'block';
-              const moderationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(await moderateImage(file))));
-              loaderPopup.style.display = 'none';
-              if (moderationResult === null) {
-                await Swal.fire({
-                  icon: 'error',
-                  title: translateThis('Moderation Error'),
-                  text: translateThis('There was an error moderating the image. Please try again later.'),
-                });
-                continue;
-              }
-              if (moderationResult && (moderationResult.nudity.sexual_activity > 0.01 || moderationResult.nudity.sexual_display > 0.01 || moderationResult.nudity.erotica > 0.01 || moderationResult.nudity.very_suggestive > 0.01 || moderationResult.nudity.suggestive > 0.01 || moderationResult.nudity.mildly_suggestive > 0.03 || moderationResult.weapon.classes.firearm > 0.01 || moderationResult.alcohol.prob > 0.01 || moderationResult.recreational_drug.prob > 0.01 || moderationResult.offensive.prob > 0.01 || moderationResult.gore.prob > 0.01)) {
-                await Swal.fire({
-                  icon: 'error',
-                  title: translateThis('Inappropriate Content Detected'),
-                  text: translateThis('The uploaded image contains inappropriate content. Please upload a different image.'),
-                });
-                continue;
+              // Check if the file type is valid
+              if (validImageTypes.includes(fileType) || validTextType.includes(fileType) || isValidDoc || validDocTypes.includes(fileType) || isZipFile) {
+                  if (validImageTypes.includes(fileType)) {
+                      const myimage = await resizeImage(file);
+                      if (myimage) {
+                          image.push(myimage);
+                          selectedFiles.push(file);
+                      } else {
+                          console.warn(`File ${file.name} is not a valid image`);
+                      }
+                  } else {
+                      const base64File = await readFileAsDataURL(file);
+                      image.push(base64File);
+                      selectedFiles.push(file);
+                      if (!validTextType.includes(fileType)) {
+                          await Swal.fire({
+                              icon: 'warning',
+                              title: translateThis('Security Warning'),
+                              text: translateThis('Text file attachments are preferred due to security reasons. You are uploading a DOC/PDF/ZIP file. Please make sure you trust any files being sent before proceeding.'),
+                          });
+                      }
+                  }
               } else {
-                const myimage = await resizeImage(file);
-                if (myimage) {
-                  image.push(myimage);
-                  selectedFiles.push(file);
-                } else {
-                  console.warn(`File ${file.name} is not a valid image`);
-                }
+                  // Handle unsupported file types
+                  await Swal.fire({
+                      icon: 'error',
+                      title: translateThis('Unsupported File Type'),
+                      text: translateThis('Only image, text, and specific document files are allowed. Please select a different file.'),
+                  });
               }
-            } else {
-              const base64File = await readFileAsDataURL(file);
-              image.push(base64File);
-              selectedFiles.push(file);
-              if (!validTextType.includes(fileType)) {
-                await Swal.fire({
-                  icon: 'warning',
-                  title: translateThis('Security Warning'),
-                  text: translateThis('Text file attachments are preferred due to security reasons. You are uploading a DOC/PDF/ZIP file. Please make sure you trust any files being sent before proceeding.'),
-                });
-              }
-            }
-          } else {
-            // Handle unsupported file types
-            await Swal.fire({
-              icon: 'error',
-              title: translateThis('Unsupported File Type'),
-              text: translateThis('Only image, text, and specific document files are allowed. Please select a different file.'),
-            });
           }
-        }
 
-        updateFilesDisplay();
+          updateFilesDisplay();
       });
 
       function updateFilesDisplay() {
@@ -9414,15 +8675,7 @@ body {
           var depositRecipient = document.getElementById("recipient-deposit-input").value;
           var timeLimit = document.getElementById("timeLimit").value;
           var contactinfo = document.getElementById("contactInfo").value;
-          var title = document.getElementById("contractTitle").value;
-          var location = document.getElementById("contractLocation").value;
-          var message = JSON.stringify({
-            message: document.getElementById("contractDetails").value,
-            contact: contactinfo,
-            image: image,
-            title: title,
-            location: location
-          });
+          var message = JSON.stringify({message: document.getElementById("contractDetails").value, contact: contactinfo, image: image});
           if (contactinfo != '') {
             document.getElementById("myContactInfo").value = contactinfo;
             await saveContactInfo(contactinfo);
@@ -9451,10 +8704,6 @@ body {
           }
           if (document.getElementById("contractDetails").value === "") {
             await Swal.fire(translateThis("Please enter the description"));
-            return false;
-          }
-          if (title === "") {
-            await Swal.fire(translateThis("Please enter the contract title"));
             return false;
           }
           var sender2 = (senderReceiver === "receiver" ? sender : recipient);
@@ -9652,14 +8901,8 @@ body {
                   return;
                 }
                 showLoader();
-                if(accountprivkey == ""){
-                  await DDEcontract.methods.createContract(
-                   [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,...gasOptions[gasSetting]});
-                } else {
-                  const txHash = await sendTransaction(DDEcontract.methods.createContract(
-                    [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms), {"from":myaccounts,...gasOptions[gasSetting]});
-                  await waitForTransactionConfirmation(txHash);
-                }
+                await DDEcontract.methods.createContract(
+                  [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,...gasOptions[gasSetting]});
                   hideLoader();
               } else {
                 const gasEstimate = 750000;
@@ -9682,12 +8925,7 @@ body {
                   myval = difference.toString();
                 }
                 showLoader();
-                if(accountprivkey == "") {
-                  await DDEcontract.methods.depositAndCreateContract(data.token, difference.toString(), [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                } else {
-                  const txHash = await sendTransaction(DDEcontract.methods.depositAndCreateContract(data.token, difference.toString(), [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms), {"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                  await waitForTransactionConfirmation(txHash);
-                }
+                await DDEcontract.methods.depositAndCreateContract(data.token, difference.toString(), [data.sender, data.recipient, data.token, "0x0000000000000000000000000000000000000000", data.amount.toString(), data.depositSender.toString(), data.depositRecipient.toString(), [data.quantity[0].toString(), data.quantity[1].toString()], "0", [data.timelimit.toString(), expiration.toString(), "0"], [style.toString(), "0"], data.message], data2.referred, myterms).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
                 hideLoader();
               }
             }
@@ -10041,12 +9279,7 @@ body {
                       return;
                     }
                     showLoader();
-                    if(accountprivkey == "") {
-                      await DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,...gasOptions[gasSetting]});
-                    } else {
-                      const txHash = await sendTransaction(DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral), {"from":myaccounts,...gasOptions[gasSetting]});
-                      await waitForTransactionConfirmation(txHash);
-                    }
+                    await DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,...gasOptions[gasSetting]});
                     hideLoader();
                   } else {
                     const gasEstimate = 550000;
@@ -10067,12 +9300,7 @@ body {
                       myval = difference.toString();
                     }
                     showLoader();
-                    if(accountprivkey == "") {
-                      await DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                    } else {
-                      const txHash = await sendTransaction(DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral), {"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                      await waitForTransactionConfirmation(txHash);
-                    }
+                    await DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
                     hideLoader();
                   }
                 }
@@ -10187,12 +9415,7 @@ body {
                   return;
                 }
                 showLoader();
-                if(accountprivkey == "") {
-                  await DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,...gasOptions[gasSetting]});
-                } else {
-                  const txHash = await sendTransaction(DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral), {"from":myaccounts,...gasOptions[gasSetting]});
-                  await waitForTransactionConfirmation(txHash);
-                }
+                await DDEcontract.methods.acceptOffer(mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,...gasOptions[gasSetting]});
                 hideLoader();
               } else {
                 const gasEstimate = 550000;
@@ -10215,12 +9438,7 @@ body {
                   myval = difference.toString();
                 }
                 showLoader();
-                if(accountprivkey == "") {
-                  await DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                } else {
-                  const txHash = await sendTransaction(DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral), {"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
-                  await waitForTransactionConfirmation(txHash);
-                }
+                await DDEcontract.methods.depositAndAcceptOffer(mylisting.token, difference.toString(), mylisting.hash, quantity.toString(), accepttimelimit.toString(), referral).send({"from":myaccounts,"value":myval,...gasOptions[gasSetting]});
                 hideLoader();
               }
             }
@@ -10310,18 +9528,10 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.cancelPrivateOffer(
-                listing.hash,
-                myaccounts
-              ).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.cancelPrivateOffer(
-                listing.hash,
-                myaccounts
-            ), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.cancelPrivateOffer(
+              listing.hash,
+              myaccounts
+            ).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             await Swal.fire(translateThis("Contract removed!"));
             await loadUser();
@@ -10346,18 +9556,10 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.removeMarketOffer(
-                listing.hash,
-                myaccounts
-              ).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.removeMarketOffer(
-                listing.hash,
-                myaccounts
-              ), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.removeMarketOffer(
+              listing.hash,
+              myaccounts
+            ).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             await Swal.fire(translateThis("Contract removed!"));
             await loadUser();
@@ -10370,18 +9572,10 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.cancelPrivateOffer(
-                listing.hash,
-                myaccounts
-              ).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.cancelPrivateOffer(
-                listing.hash,
-                myaccounts
-              ), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash)
-            }
+            await DDEcontract.methods.cancelPrivateOffer(
+              listing.hash,
+              myaccounts
+            ).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             await Swal.fire(translateThis("Contract removed!"));
             await loadUser();
@@ -10472,19 +9666,11 @@ body {
             }
           }
           showLoader();
-          if(accountprivkey == "") {
-            await DDEcontract.methods.updateQuantity(
-              listing.hash,
-              [quantity.toString(), quantity1.toString()]
-              ).send({"from":myaccounts,...gasOptions[gasSetting]});
-          } else {
-          const txHash = await sendTransaction(DDEcontract.methods.updateQuantity(
+          await DDEcontract.methods.updateQuantity(
             listing.hash,
             [quantity.toString(), quantity1.toString()]
-              ), {"from":myaccounts,...gasOptions[gasSetting]});
-            await waitForTransactionConfirmation(txHash);
-          }
-          hideLoader();
+              ).send({"from":myaccounts,...gasOptions[gasSetting]});
+            hideLoader();
           dialog.remove();
           await Swal.fire(translateThis("Quantity updated!"));
           await loadUser();
@@ -10530,12 +9716,7 @@ body {
               }
             }
             showLoader();
-            if(accountprivkey == "") {
-              await DDEcontract.methods.changeReferralFee(listing.hash, value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-            } else {
-              const txHash = await sendTransaction(DDEcontract.methods.changeReferralFee(listing.hash, value), { "from": myaccounts, ...gasOptions[gasSetting] });
-              await waitForTransactionConfirmation(txHash);
-            }
+            await DDEcontract.methods.changeReferralFee(listing.hash, value).send({ "from": myaccounts, ...gasOptions[gasSetting] });
             hideLoader();
             Swal.fire(translateThis("Success!"));
             await loadUser();
@@ -10551,12 +9732,7 @@ body {
     }
 
     async function postData(myuserdata) {
-      if(accountprivkey === "") {
-        await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions[gasSetting]});
-      } else {
-        const txHash = await sendTransaction(DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)), {"from":myaccounts,...gasOptions[gasSetting]});
-        await waitForTransactionConfirmation(txHash);
-      }
+      await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({"from":myaccounts,...gasOptions[gasSetting]});
       await Swal.fire(translateThis("Data added!"));
     }
 
@@ -10573,12 +9749,7 @@ body {
           }
         }
         showLoader();
-        if(accountprivkey == "") {
-          await DDEcontract.methods.adddata(data).send({ "from": myaccounts, ...gasOptions[gasSetting] });
-        } else {
-          const txHash = await sendTransaction(DDEcontract.methods.adddata(data), { "from": myaccounts, ...gasOptions[gasSetting] });
-          await waitForTransactionConfirmation(txHash);
-        }
+        await DDEcontract.methods.adddata(data).send({ "from": myaccounts, ...gasOptions[gasSetting] });
         hideLoader();
         await Swal.fire(translateThis("Data added!"));
       } catch (error) {
@@ -10612,11 +9783,6 @@ body {
           }
         }
       });
-    }
-
-    function updateOffersContainer() {
-      document.getElementById("myoffers").innerHTML = '<p>' + translateThis('Please login to view offers and contracts.') + '</p>';
-      document.getElementById("mycontracts"). innerHTML = '<p>' + translateThis('Please login to view offers and contracts.') + '</p>';
     }
 
     window.addEventListener("load", async function() {
@@ -10669,11 +9835,11 @@ body {
           document.head.insertAdjacentHTML("beforeend", "<style>.main.markets::after { content: ''; background: url('') center no-repeat; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.25; z-index: -1; }</style>");
         }
       });
-
+      document.getElementById("myoffers").innerHTML = '<p>Please login to view offers and contracts.</p>';
+      document.getElementById("mycontracts"). innerHTML = '<p>Please login to view offers and contracts.</p>';
     });
     //End Dark/Light Mode
     setInterval(loadUser, 90000);
-    setInterval(checkTransactionStatus, 30000);
     document.getElementById("loadingStatus").innerHTML = loader;
     locked = true;
     loadMarkets(0, maxContextLoad[0]).then(() => {
