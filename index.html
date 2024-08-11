@@ -8186,7 +8186,7 @@ body {
           });
           return;
         }
-        if (moderationResult && (moderationResult.moderation_classes.sexual > 0.01 || moderationResult.moderation_classes.discriminatory > 0.01 || moderationResult.moderation_classes.insulting > 0.01 || moderationResult.moderation_classes.violent > 0.01 || moderationResult.moderation_classes.toxic > 0.01 || moderationResult.moderation_classes.self_harm > 0.01)) {
+        if (moderationResult && (moderationResult.moderation_classes.sexual > 0.75 || moderationResult.moderation_classes.discriminatory > 0.75 || moderationResult.moderation_classes.insulting > 0.75 || moderationResult.moderation_classes.violent > 0.75 || moderationResult.moderation_classes.toxic > 0.75 || moderationResult.moderation_classes.self_harm > 0.75)) {
           await Swal.fire({
             icon: 'error',
             title: translateThis('Inappropriate Content Detected'),
@@ -9181,7 +9181,7 @@ body {
                 });
                 continue;
               }
-              if (moderationResult && (moderationResult.nudity.sexual_activity > 0.01 || moderationResult.nudity.sexual_display > 0.01 || moderationResult.nudity.erotica > 0.01 || moderationResult.nudity.very_suggestive > 0.01 || moderationResult.nudity.suggestive > 0.01 || moderationResult.nudity.mildly_suggestive > 0.03 || moderationResult.weapon.classes.firearm > 0.01 || moderationResult.alcohol.prob > 0.01 || moderationResult.recreational_drug.prob > 0.01 || moderationResult.offensive.prob > 0.01 || moderationResult.gore.prob > 0.01)) {
+              if (moderationResult && (moderationResult.nudity.sexual_activity > 0.75 || moderationResult.nudity.sexual_display > 0.75 || moderationResult.nudity.erotica > 0.75 || moderationResult.nudity.very_suggestive > 0.75 || moderationResult.nudity.suggestive > 0.75 || moderationResult.nudity.mildly_suggestive > 0.95 || moderationResult.weapon.classes.firearm > 0.75 || moderationResult.recreational_drug.prob > 0.75 || moderationResult.offensive.prob > 0.75 || moderationResult.gore.prob > 0.75)) {
                 await Swal.fire({
                   icon: 'error',
                   title: translateThis('Inappropriate Content Detected'),
