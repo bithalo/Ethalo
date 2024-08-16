@@ -9631,11 +9631,11 @@ body {
             if(returnThis2) {
               return;
             }
-            if(DOMPurify.sanitize(await DDEcontract.methods.initialized(cHash).call()) == "true") {
-              await Swal.fire(translateThis("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again."));
-              popupContainer.remove();
-              return;
-            }
+            //if(DOMPurify.sanitize(await DDEcontract.methods.initialized(cHash).call()) == "true") {
+            //  await Swal.fire(translateThis("Duplicate contract detected! This contract has already been created in the past. Please modify the description slightly so it may be submitted again."));
+            //  popupContainer.remove();
+            //  return;
+            //}
             setActionActive(myaccounts+"createContract"+cHash, true);
             // Call solidity function to create contract
             if(accountprivkey == "") {

@@ -34,7 +34,7 @@ contract TwoPartyEscrow {
     bytes32[] public markets;
     uint public marketslength;
     mapping(bytes32 => Contract) public contracts;
-    mapping(bytes32 => bool) public initialized;
+    mapping(bytes32 => bool) private initialized;
     mapping(bytes32 => uint) public userMarketID;
     mapping(address => bytes32[]) public openOffers;
     mapping(address => bytes32[]) public privateOffers;
@@ -221,6 +221,7 @@ contract TwoPartyEscrow {
                 markets.push(0x0);
             }
             markets[marketslength] = hash;
+            privateOffers[address(0)].push(hash);
             userMarketID[hash] = marketslength;
             marketslength += 1;
             openOffers[msg.sender].push(hash);
