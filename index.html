@@ -5289,7 +5289,8 @@ body {
         moderationResult.violence?.prob > 0.75 || 
         moderationResult.self_harm?.prob > 0.75 || 
         //moderationResult.money?.prob > 0.75 || 
-        //moderationResult.gambling?.prob > 0.75) ||
+        //moderationResult.gambling?.prob > 0.75 ||
+        )
         (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
         (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
         (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen credit card'))) ||
