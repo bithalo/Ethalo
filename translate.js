@@ -528,6 +528,7 @@ languages['ar']={
   "There was an error moderating the image. Please try again later.": "حدث خطأ أثناء الإشراف على الصورة. يرجى المحاولة مرة أخرى لاحقًا.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "تحتوي الصورة المرفوعة على محتوى غير لائق. يرجى تحميل صورة مختلفة.",
   "There was an error moderating the message. Please try again later.": "حدث خطأ أثناء الإشراف على الرسالة. يرجى المحاولة مرة أخرى لاحقًا.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "تم الإبلاغ عن عنوانك أو وصفك على أنه غير لائق. يرجى المحاولة مرة أخرى بعنوان أو وصف مختلف.",
 };
 
 
@@ -1059,6 +1060,7 @@ languages['ch']={
   "There was an error moderating the image. Please try again later.": "审核图片时出错。请稍后再试。",
   "The uploaded image contains inappropriate content. Please upload a different image.": "上传的图片包含不适当的内容。请上传不同的图片。",
   "There was an error moderating the message. Please try again later.": "审核消息时出错。请稍后再试。",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "您的标题或描述被标记为不适当。请尝试使用不同的标题或描述。",
 };
 
 languages['en']={
@@ -1650,6 +1652,7 @@ languages['fr']={
   "There was an error moderating the image. Please try again later.": "Une erreur s'est produite lors de la modération de l'image. Veuillez réessayer plus tard.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "L'image téléchargée contient un contenu inapproprié. Veuillez télécharger une image différente.",
   "There was an error moderating the message. Please try again later.": "Une erreur s'est produite lors de la modération du message. Veuillez réessayer plus tard.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Votre titre ou description a été signalé comme inapproprié. Veuillez réessayer avec un titre ou une description différente.",
 };
 
 languages['ge']={
@@ -2179,6 +2182,7 @@ languages['ge']={
   "There was an error moderating the image. Please try again later.": "Beim Moderieren des Bildes ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "Das hochgeladene Bild enthält unangemessenen Inhalt. Bitte laden Sie ein anderes Bild hoch.",
   "There was an error moderating the message. Please try again later.": "Beim Moderieren der Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Ihr Titel oder Ihre Beschreibung wurde als unangemessen markiert. Bitte versuchen Sie es erneut mit einem anderen Titel oder einer anderen Beschreibung.",
 };
 
 languages['it']={
@@ -2709,6 +2713,7 @@ languages['it']={
   "There was an error moderating the image. Please try again later.": "Si è verificato un errore durante la moderazione dell'immagine. Si prega di riprovare più tardi.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "L'immagine caricata contiene contenuti inappropriati. Si prega di caricare un'immagine diversa.",
   "There was an error moderating the message. Please try again later.": "Si è verificato un errore durante la moderazione del messaggio. Si prega di riprovare più tardi.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Il tuo titolo o descrizione è stato segnalato come inappropriato. Si prega di riprovare con un titolo o una descrizione diversa.",
 };
 
 languages['ja']={
@@ -3239,6 +3244,7 @@ languages['ja']={
   "There was an error moderating the image. Please try again later.": "画像のモデレーション中にエラーが発生しました。後で再試行してください。",
   "The uploaded image contains inappropriate content. Please upload a different image.": "アップロードされた画像に不適切なコンテンツが含まれています。別の画像をアップロードしてください。",
   "There was an error moderating the message. Please try again later.": "メッセージのモデレーション中にエラーが発生しました。後で再試行してください。",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "あなたのタイトルまたは説明が不適切としてフラグが立てられました。別のタイトルまたは説明で再試行してください。",
 };
 
 languages['ko']={
@@ -3769,6 +3775,7 @@ languages['ko']={
   "There was an error moderating the image. Please try again later.": "이미지를 조정하는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "업로드된 이미지에 부적절한 콘텐츠가 포함되어 있습니다. 다른 이미지를 업로드해 주세요.",
   "There was an error moderating the message. Please try again later.": "메시지를 조정하는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "제목 또는 설명이 부적절한 것으로 표시되었습니다. 다른 제목 또는 설명으로 다시 시도해 주세요.",
 };
 
 languages['po']={
@@ -4299,6 +4306,7 @@ languages['po']={
   "There was an error moderating the image. Please try again later.": "Ocorreu um erro ao moderar a imagem. Por favor, tente novamente mais tarde.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "A imagem carregada contém conteúdo inapropriado. Por favor, carregue uma imagem diferente.",
   "There was an error moderating the message. Please try again later.": "Ocorreu um erro ao moderar a mensagem. Por favor, tente novamente mais tarde.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Seu título ou descrição foi marcado como inapropriado. Por favor, tente novamente com um título ou descrição diferente.",
 };
 
 languages['ru'] = {
@@ -4829,6 +4837,7 @@ languages['ru'] = {
   "There was an error moderating the image. Please try again later.": "Произошла ошибка при модерации изображения. Пожалуйста, попробуйте позже.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "Загруженное изображение содержит неподобающий контент. Пожалуйста, загрузите другое изображение.",
   "There was an error moderating the message. Please try again later.": "Произошла ошибка при модерации сообщения. Пожалуйста, попробуйте позже.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Ваш заголовок или описание были помечены как неподходящие. Пожалуйста, попробуйте снова с другим заголовком или описанием.",
 };
 
 languages['sp'] = {
@@ -5359,4 +5368,5 @@ languages['sp'] = {
   "There was an error moderating the image. Please try again later.": "Hubo un error al moderar la imagen. Por favor, inténtelo de nuevo más tarde.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "La imagen subida contiene contenido inapropiado. Por favor, suba una imagen diferente.",
   "There was an error moderating the message. Please try again later.": "Hubo un error al moderar el mensaje. Por favor, inténtelo de nuevo más tarde.",
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Tu título o descripción ha sido marcado como inapropiado. Por favor, intenta con un título o descripción diferente."
 };

@@ -3528,6 +3528,7 @@ body {
     var locked = false;
     var activeActions = {};
     let pendingTransactions = [];
+    var nodeList = ["0x40354fF7ED02d4A7c941045A71aeC1169Bca76f1"];
     var currentTxHash = null;
     const statusDescriptions = {
       "0": "",
@@ -3775,6 +3776,7 @@ body {
                     }
                 }).then(async (result) => {
                     if (result.isConfirmed) {
+                      try {
                         defaultvars();
                         const { network, confirmedPassword } = result.value;
                         showLoader();
@@ -3809,6 +3811,11 @@ body {
                         contractsContainer.innerHTML = loader;
                         await loadUser(1);
                         await populateListings();
+                      } catch (e) {
+                        console.log(e);
+                      } finally {
+                        await checkIfNode();
+                      }
                     }
                 });
             }
@@ -4775,6 +4782,10 @@ body {
     }
 
     async function registerData(contactInfo) {
+      if (accountprivkey !== "" && nodeList.includes(myaccounts)) {
+        Swal.fire(translateThis("This function is currently not available for a node."));
+        return;
+      }
       myemail = contactInfo || document.getElementById('myContactInfo').value;
       const { value: formValues } = await Swal.fire({
         title: '',
@@ -5057,9 +5068,9 @@ body {
       }
       // Get the text from Pinata IPFS using the IPFS hash
       text = await retrieveFromPinataIPFS(ipfsHash);
-        if(text == "error") {
+      if(text == "error") {
         text = await retrieveFromIPFS(ipfsHash);
-            if(text == "error") {
+        if(text == "error") {
           return "error";
         }
       }
@@ -5185,13 +5196,45 @@ body {
       return result;
     };
 
-    var sightengineApiUser = '596064440';
-    var sightengineApiSecret = 'ikEQE32VBYAGeSNiUCsTfFoWFsn8vBwY';
+    async function hashFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const arrayBuffer = event.target.result;
+          const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
+          const hash = CryptoJS.SHA256(wordArray).toString();
+          resolve(hash);
+        };
+        reader.onerror = function(event) {
+          reject(event);
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
 
-    async function moderateImage(file) {
+    function getModeratedHashes() {
+      return JSON.parse(localStorage.getItem('moderatedHashes')) || {};
+    }
+
+    function addModeratedHash(hash, result) {
+      const moderatedHashes = getModeratedHashes();
+      moderatedHashes[hash] = result;
+      localStorage.setItem('moderatedHashes', JSON.stringify(moderatedHashes));
+    }
+    // var sightengineApiUser = '596064440';
+    // var sightengineApiSecret = 'ikEQE32VBYAGeSNiUCsTfFoWFsn8vBwY';
+
+    var sightengineApiUser = '168952605';
+    var sightengineApiSecret = 'AUT6KZsH2RV6a7QnkK7BdXcVPSwVmaVg';
+
+    async function moderateImage(files) {
       const url = 'https://api.sightengine.com/1.0/check.json';
       const formData = new FormData();
-      formData.append('media', file);
+      if (Array.isArray(files)) {
+        files.forEach(file => formData.append('media[]', file));
+      } else {
+        formData.append('media', files);
+      }
       formData.append('models', 'nudity-2.1,weapon,alcohol,recreational_drug,medical,properties,type,quality,celebrities,offensive,faces,scam,text-content,face-attributes,gore-2.0,text,qr-content,tobacco,genai,violence,self-harm,money,gambling');
       formData.append('api_user', sightengineApiUser);
       formData.append('api_secret', sightengineApiSecret);
@@ -5212,22 +5255,278 @@ body {
       const formData = new FormData();
       formData.append('text', text);
       formData.append('lang', 'en');
-      formData.append('models', 'general,self-harm');
-      formData.append('mode', 'ml');
+      formData.append('categories', 'profanity,personal,link,drug,weapon,spam,content-trade,money-transaction,extremism,violence,self-harm,medical');
+      formData.append('mode', 'rules');
       formData.append('api_user', sightengineApiUser);
       formData.append('api_secret', sightengineApiSecret);
 
       try {
-        const response = await axios.post(url, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData
         });
-        return response.data;
+        const result = await response.json();
+        return result;
       } catch (error) {
         console.error("Error moderating text:", error);
         return null;
       }
+    }
+
+    function isInappropriateImage(moderationResult) {
+      return (
+        (moderationResult.nudity?.sexual_activity > 0.75 || 
+        moderationResult.nudity?.sexual_display > 0.75 || 
+        moderationResult.nudity?.erotica > 0.75 || 
+        moderationResult.nudity?.very_suggestive > 0.75 || 
+        moderationResult.nudity?.suggestive > 0.75 || 
+        //moderationResult.nudity?.mildly_suggestive > 0.95 || 
+        moderationResult.weapon?.classes?.firearm > 0.75 || 
+        moderationResult.recreational_drug?.prob > 0.75 || 
+        moderationResult.offensive?.prob > 0.75 || 
+        moderationResult.gore?.prob > 0.75 || 
+        moderationResult.scam?.prob > 0.75 || 
+        moderationResult.violence?.prob > 0.75 || 
+        moderationResult.self_harm?.prob > 0.75 || 
+        //moderationResult.money?.prob > 0.75 || 
+        //moderationResult.gambling?.prob > 0.75) ||
+        (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen credit card'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('offer to murder'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked girl')))
+      );
+    }
+
+    function isInappropriateText(moderationResult) {
+      return (
+        moderationResult.profanity?.matches.length > 0 ||
+        moderationResult.personal?.matches.length > 0 ||
+        moderationResult.link?.matches.length > 0 ||
+        moderationResult.drug?.matches.length > 0 ||
+        moderationResult.weapon?.matches.length > 0 ||
+        moderationResult.extremism?.matches.length > 0 ||
+        moderationResult.self_harm?.matches.length > 0 ||
+        moderationResult.violence?.matches.length > 0 ||
+        //moderationResult['content-trade']?.matches.length > 0 ||
+        //moderationResult['money-transaction']?.matches.length > 0 ||
+        moderationResult.spam?.matches.length > 0
+      );
+    }
+
+    function isInappropriateImages(moderationResults) {
+      return moderationResults.every(moderationResult => (
+          (moderationResult.nudity?.sexual_activity > 0.75 || 
+          moderationResult.nudity?.sexual_display > 0.75 || 
+          moderationResult.nudity?.erotica > 0.75 || 
+          moderationResult.nudity?.very_suggestive > 0.75 || 
+          moderationResult.nudity?.suggestive > 0.75 || 
+          //moderationResult.nudity?.mildly_suggestive > 0.95 || 
+          moderationResult.weapon?.classes?.firearm > 0.75 || 
+          moderationResult.recreational_drug?.prob > 0.75 || 
+          moderationResult.offensive?.prob > 0.75 || 
+          moderationResult.gore?.prob > 0.75 || 
+          moderationResult.scam?.prob > 0.75 || 
+          moderationResult.violence?.prob > 0.75 || 
+          moderationResult.self_harm?.prob > 0.75 || 
+          //moderationResult.money?.prob > 0.75 || 
+          //moderationResult.gambling?.prob > 0.75) ||
+          (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen credit card'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('offer to murder'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked girl')))
+        ));
+    }
+
+    async function checkIfNode() {
+      if (accountprivkey !== "" && nodeList.includes(myaccounts)) {
+        console.log("You are a node. You will automatically check new offers with AI and post the results.");
+        startMonitoringProcess();
+      }
+    }
+
+    async function startMonitoringProcess() {
+      try {
+        let checkedHashes = JSON.parse(localStorage.getItem("checkedHashes")) || await getCheckedHashesFromBlockchain(myaccounts);
+        if('error' in checkedHashes) {
+          throw new Error("There was an error loading hashes from ipfs/blockchain, try again later.")
+        }
+        var myresults =  await getOpenOrders(checkedHashes);
+        if (Array.isArray(myresults) && myresults.length === 0) {
+          throw new Error("The result is an empty array.");
+        }
+        checkedHashes = myresults[1];
+        const openOrders = myresults[0];
+        const newHashes = openOrders.filter(order => !checkedHashes.hasOwnProperty(order));
+        for (const hash of newHashes) {
+          if(hash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+            const orderData = await getOrderData(hash);
+            const isGood = await validateOrderData(orderData);
+            checkedHashes[hash] = isGood;
+          }
+        }
+        if (newHashes.length > 0) {
+          localStorage.setItem("checkedHashes", JSON.stringify(checkedHashes));
+          const ipfsLink = await createIPFSLink(checkedHashes);
+          await postIPFSLinkToBlockchain(ipfsLink);
+        }
+      } catch (error) {
+        console.error("Error in startMonitoringProcess:", error);
+      } finally {
+        setTimeout(() => startMonitoringProcess(), 300000); // Repeat every 5 minutes
+      }
+    }
+
+    async function getCheckedHashesFromBlockchain(userAddress, DDEcontract) {
+      try {
+        const mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(userAddress, 3).call());
+        if(mylen > 0) {
+          const lastEntry = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(userAddress, mylen - 1).call()));
+          if (lastEntry?.ipfsLink) {
+            const ipfsHash = lastEntry.ipfsLink;
+            var ipfsData = await retrieveFromPinataIPFS(ipfsHash);
+            if(ipfsData == "error") {
+              ipfsData = await retrieveFromIPFS(ipfsHash);
+              if(ipfsData == "error") {
+                return {'error':true};
+              }
+            }
+            return JSON.parse(DOMPurify.sanitize(ipfsData));
+          }
+        }
+        return {};
+      } catch (error) {
+        console.error("Error in getCheckedHashesFromBlockchain:", error);
+        return {'error':true};
+      }
+    }
+
+    async function getOpenOrders(checkedHash) {
+      try {
+        if(!('lastIndex' in checkedHash)) {
+          checkedHash['lastIndex'] = 0;
+        }
+        const totalOrders = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getArrayLength("0x0000000000000000000000000000000000000000",1).call()));
+        const orders = [];
+        if(totalOrders > checkedHash['lastIndex']) {        
+          for (let i = 0; i < totalOrders; i++) {
+            const orderHash = DOMPurify.sanitize(await DDEcontract.methods.privateOffers("0x0000000000000000000000000000000000000000",i).call());
+            orders.push(orderHash);            
+          }
+        }
+        checkedHash['lastIndex'] = totalOrders;
+        return [orders,checkedHash];
+      } catch (error) {
+        console.error("Error in getOpenOrders:", error);
+        return [];
+      }
+    }
+
+    async function getOrderData(hash) {
+      try {
+        const jsondata = await getOrderHash(hash);
+        const orderData = {
+          message: DOMPurify.sanitize(jsondata?.message),
+          contact: DOMPurify.sanitize(jsondata?.contact),
+          image: DOMPurify.sanitize(jsondata?.image) ? await getFile(DOMPurify.sanitize(jsondata.image)) : null,
+          title: DOMPurify.sanitize(jsondata?.title),
+          location: DOMPurify.sanitize(jsondata?.location)
+        };
+        return orderData;
+      } catch (error) {
+        console.error("Error in getOrderData:", error);
+        return null;
+      }
+    }
+
+    async function validateOrderData(orderData) {
+      const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/svg+xml'];
+      let isGood = false;
+      let imagesResult = true;
+      let textResult = true;
+
+      try {
+        if (orderData.image && orderData.image.length > 0) {
+          const images = orderData.image
+            .map((img, index) => {
+              const mime = img.match(/data:(.*);base64,/)[1];
+              if (validImageTypes.includes(mime)) {
+                return dataURLtoFile(img, `image${index}.${mime.split('/')[1]}`);
+              }
+              return null;
+            })
+            .filter(img => img !== null);
+
+          const imageModerationResult = await moderateImage(images);
+          const sanitizedImageModerationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(imageModerationResult)));
+
+          if (Array.isArray(sanitizedImageModerationResult)) {
+            imagesResult = !isInappropriateImages(sanitizedImageModerationResult);
+          } else {
+            imagesResult = !isInappropriateImage(sanitizedImageModerationResult);
+          }
+        }
+        if (orderData.title || orderData.message || orderData.location || orderData.contact) {
+          const textModerationResult = await moderateText(`${orderData.title} ${orderData.message} ${orderData.location} ${orderData.contact}`);
+          const sanitizedTextModerationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(textModerationResult)));
+          textResult = !isInappropriateText(sanitizedTextModerationResult);
+        }
+        isGood = imagesResult && textResult;
+      } catch (error) {
+        console.error("Error during moderation:", error);
+        isGood = false;
+      }
+
+      return isGood;
+    }
+
+    function dataURLtoFile(dataurl, filename) {
+      var arr = dataurl.split(','),
+          mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[arr.length - 1]), 
+          n = bstr.length, 
+          u8arr = new Uint8Array(n);
+      while(n--){
+          u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, {type:mime});
+    }
+
+    async function createIPFSLink(checkedHashes) {
+      const jsonString = JSON.stringify(checkedHashes);
+      const ipfsHash = JSON.parse(DOMPurify.sanitize(JSON.stringify(await pinToPinataIPFS(jsonString))));
+      if (ipfsHash === 'error') {
+        throw new Error('Failed to pin data to IPFS');
+      }
+      return ipfsHash;
+    }
+
+    async function postIPFSLinkToBlockchain(ipfsLink) {
+      try {
+        const myuserdata = { ipfsLink };
+        const gasEstimate = 150000;
+        const hasEnoughFunds = await checkAndSetGasSettings(gasEstimate, gasEstimate, tokens[0].address);
+        if (!hasEnoughFunds) {
+          // Store the IPFS link for later use if the user has low balance
+          localStorage.setItem("pendingIPFSLink", ipfsLink);
+          return;
+        }
+        await DDEcontract.methods.adduserdata(JSON.stringify(myuserdata)).send({ "from": myaccounts, ...gasOptions[gasSetting] });
+        console.log("IPFS link posted to blockchain:", ipfsLink);
+      } catch (error) {
+        console.error("Error posting IPFS link to blockchain:", error);
+      }
+    }
+
+    async function checkAndSetGasSettings(gasEstimate, value, tokenAddress) {
+      var mybase = web3.utils.toBN(balances['base'].amount);
+      var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
+      if (mybase.lt(glimit)) {
+        console.error("Not enough funds to cover the minimum gas limit.");
+        return false;
+      }
+      return true;
     }
 
     async function checkMarketUpdate() {
@@ -5271,6 +5570,10 @@ body {
             DDEcontract3 = DDEcontract2;
         }
         var mlength = 0;
+        var lastNodeAddress = nodeList[nodeList.length - 1];
+        let checkedHashes = await getCheckedHashesFromBlockchain(lastNodeAddress, DDEcontract3);
+        localStorage.setItem('checkedHashes', JSON.stringify(checkedHashes));
+        let myhashes = JSON.parse(localStorage.getItem('myhashes')) || {};
         await DDEcontract3.methods.marketslength().call().then(async function (result) {
             currentMarketsLength = DOMPurify.sanitize(result);
             mlength = parseInt(DOMPurify.sanitize(result));
@@ -5315,12 +5618,38 @@ body {
               }
               try {
                 const hash = searchText[myinx];
+                if(checkedHashes[hash] === false) {
+                  mlen -= 1;
+                  continue;
+                }
+                if(myhashes[hash] === false) {
+                  mlen -= 1;
+                  continue;
+                }
                 const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
                 if (offerID == 0) {
                   expiredOffers.push(hash);
                   mlen -= 1;
                 } else {
                   jsondata = await getOrderHash(hash);
+                  if (checkedHashes[hash] === undefined && myhashes[hash] === undefined) {
+                    const orderData = {
+                      message: jsondata?.message,
+                      contact: jsondata?.contact,
+                      image: jsondata?.image ? await getFile(jsondata.image) : null,
+                      title: jsondata?.title,
+                      location: jsondata?.location
+                    };
+
+                    const isGood = await validateOrderData(orderData);
+                    myhashes[hash] = isGood;
+                    localStorage.setItem('myhashes', JSON.stringify(myhashes));
+
+                    if (!isGood) {
+                      mlen -= 1;
+                      continue;
+                    }
+                  }
                   if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
                     mlen -= 1;
                     continue;
@@ -5397,6 +5726,14 @@ body {
                 }                
                 try {
                   const hash = DOMPurify.sanitize(await DDEcontract3.methods.openOffers(userAddress, myinx).call());
+                  if(checkedHashes[hash] === false) {
+                    truetot -= 1;
+                    continue;
+                  }
+                  if(myhashes[hash] === false) {
+                    truetot -= 1;
+                    continue;
+                  }
                   const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
                   if (offerID == 0) {
                     truetot -= 1;
@@ -5404,6 +5741,24 @@ body {
                     added = 1;
                   } else {
                     jsondata = await getOrderHash(hash);
+                    if (checkedHashes[hash] === undefined && myhashes[hash] === undefined) {
+                      const orderData = {
+                        message: jsondata?.message,
+                        contact: jsondata?.contact,
+                        image: jsondata?.image ? await getFile(jsondata.image) : null,
+                        title: jsondata?.title,
+                        location: jsondata?.location
+                      };
+
+                      const isGood = await validateOrderData(orderData);
+                      myhashes[hash] = isGood;
+                      localStorage.setItem('myhashes', JSON.stringify(myhashes));
+
+                      if (!isGood) {
+                        truetot -= 1;
+                        continue;
+                      }
+                    }
                     if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
                       truetot -= 1;
                       continue;
@@ -5455,6 +5810,14 @@ body {
             return;
           } else if(searchText.includes("offer:")){
             const hash = searchText.split("offer:")[1].trim();
+            if(checkedHashes[hash] === false) {
+              // longestKey -= 1;
+              return;
+            }
+            if(myhashes[hash] === false) {
+              // longestKey -= 1;
+              return;
+            }
             try {
               const offerID = parseInt(DOMPurify.sanitize(await DDEcontract3.methods.userMarketID(hash).call()));
               if (offerID == 0) {
@@ -5535,6 +5898,14 @@ body {
                                 longestKey -= 1;
                                 return;
                               }
+                              if(checkedHashes[hash] === false) {
+                                longestKey -= 1;
+                                return;
+                              }
+                              if(myhashes[hash] === false) {
+                                longestKey -= 1;
+                                return;
+                              }
                               if(hash in marketOffers) {
                                 if(!('searchTerms' in marketOffers[hash])) {
                                   marketOffers[hash]['searchTerms'] = [];                                  
@@ -5545,6 +5916,24 @@ body {
                                 jsondata = marketOffers[hash];
                               } else {
                                 jsondata = await getOrderHash(hash);
+                                if (checkedHashes[hash] === undefined && myhashes[hash] === undefined) {
+                                  const orderData = {
+                                    message: jsondata?.message,
+                                    contact: jsondata?.contact,
+                                    image: jsondata?.image ? await getFile(jsondata.image) : null,
+                                    title: jsondata?.title,
+                                    location: jsondata?.location
+                                  };
+
+                                  const isGood = await validateOrderData(orderData);
+                                  myhashes[hash] = isGood;
+                                  localStorage.setItem('myhashes', JSON.stringify(myhashes));
+
+                                  if (!isGood) {
+                                    longestKey -= 1;
+                                    return;
+                                  }
+                                }
                                 if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
                                   longestKey -= 1;
                                   return;
@@ -5610,7 +5999,33 @@ body {
                 try {
                     await DDEcontract3.methods.markets(index).call().then(async function (hash) {
                         hash = DOMPurify.sanitize(hash);
+                        if(checkedHashes[hash] === false) {
+                          trueLength -= 1;
+                          return;
+                        }
+                        if(myhashes[hash] === false) {
+                          trueLength -= 1;
+                          return;
+                        }
                         jsondata = await getOrderHash(hash);
+                        if (checkedHashes[hash] === undefined && myhashes[hash] === undefined) {
+                          const orderData = {
+                              message: jsondata?.message,
+                              contact: jsondata?.contact,
+                              image: jsondata?.image ? await getFile(jsondata.image) : null,
+                              title: jsondata?.title,
+                              location: jsondata?.location
+                          };
+
+                          const isGood = await validateOrderData(orderData);
+                          myhashes[hash] = isGood;
+                          localStorage.setItem('myhashes', JSON.stringify(myhashes));
+
+                          if (!isGood) {
+                              trueLength -= 1;
+                              return;
+                          }
+                        }
                         if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
                           trueLength -= 1;                          
                           return;
@@ -8172,28 +8587,28 @@ body {
         let finalMessage = message;
         var sendResult;
 
-        // Moderate the text message
-        messagePopup.appendChild(loaderPopup);
-        loaderPopup.style.display = 'block';
-        const moderationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(await moderateText(message))));
-        loaderPopup.style.display = 'none';
+        // // Moderate the text message
+        // messagePopup.appendChild(loaderPopup);
+        // loaderPopup.style.display = 'block';
+        // const moderationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(await moderateText(message))));
+        // loaderPopup.style.display = 'none';
 
-        if (moderationResult === null) {
-          await Swal.fire({
-            icon: 'error',
-            title: translateThis('Moderation Error'),
-            text: translateThis('There was an error moderating the message. Please try again later.'),
-          });
-          return;
-        }
-        if (moderationResult && (moderationResult.moderation_classes.sexual > 0.75 || moderationResult.moderation_classes.discriminatory > 0.75 || moderationResult.moderation_classes.insulting > 0.75 || moderationResult.moderation_classes.violent > 0.75 || moderationResult.moderation_classes.toxic > 0.75 || moderationResult.moderation_classes.self_harm > 0.75)) {
-          await Swal.fire({
-            icon: 'error',
-            title: translateThis('Inappropriate Content Detected'),
-            text: translateThis('The message contains inappropriate content. Please revise your message.'),
-          });
-          return;
-        }
+        // if (moderationResult === null) {
+        //   await Swal.fire({
+        //     icon: 'error',
+        //     title: translateThis('Moderation Error'),
+        //     text: translateThis('There was an error moderating the message. Please try again later.'),
+        //   });
+        //   return;
+        // }
+        // if (moderationResult && (moderationResult.moderation_classes.sexual > 0.75 || moderationResult.moderation_classes.discriminatory > 0.75 || moderationResult.moderation_classes.insulting > 0.75 || moderationResult.moderation_classes.violent > 0.75 || moderationResult.moderation_classes.toxic > 0.75 || moderationResult.moderation_classes.self_harm > 0.75)) {
+        //   await Swal.fire({
+        //     icon: 'error',
+        //     title: translateThis('Inappropriate Content Detected'),
+        //     text: translateThis('The message contains inappropriate content. Please revise your message.'),
+        //   });
+        //   return;
+        // }
         try {
           let storedMessage = message; // Message to store locally in plaintext
           const timestamp = new Date().getTime();
@@ -9140,63 +9555,99 @@ body {
       var selectedFiles = [];
       // Event listener for image input
       imageInput.addEventListener('change', async () => {
-          if (imageInput.files.length + selectedFiles.length > 10) {
-              await Swal.fire(translateThis("Please add less than the maximum of 10 files"));
-              return false;
+        if (imageInput.files.length + selectedFiles.length > 10) {
+            await Swal.fire(translateThis("Please add less than the maximum of 10 files"));
+            return false;
+        }
+
+        for (const file of imageInput.files) {
+          const fileType = file.type;
+          const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/svg+xml'];
+          const validTextType = ['text/plain'];
+          const validDocTypes = ['application/msword', 'application/pdf', 'application/zip'];
+          const isZipFile = fileType.includes('zip');
+          const isValidDoc = fileType.includes('doc', 'docx');
+
+          if (file.size > 10 * 1024 * 1024) { // 10 MB in bytes
+              await Swal.fire({
+                  icon: 'error',
+                  title: translateThis('File Size Exceeded'),
+                  text: translateThis('The file size should not exceed 10 MB. Please select a smaller file.'),
+              });
+              continue;
           }
-
-          for (const file of imageInput.files) {
-              const fileType = file.type;
-              const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/svg+xml'];
-              const validTextType = ['text/plain'];
-              const validDocTypes = ['application/msword', 'application/pdf', 'application/zip'];
-              const isZipFile = fileType.includes('zip');
-              const isValidDoc = fileType.includes('doc', 'docx');
-
-              
-              if (file.size > 10 * 1024 * 1024) { // 10 MB in bytes
-                  await Swal.fire({
-                      icon: 'error',
-                      title: translateThis('File Size Exceeded'),
-                      text: translateThis('The file size should not exceed 10 MB. Please select a smaller file.'),
-                  });
-                  continue;
-              }
 
           // Check if the file type is valid
           if (validImageTypes.includes(fileType) || validTextType.includes(fileType) || isValidDoc || validDocTypes.includes(fileType) || isZipFile) {
             if (validImageTypes.includes(fileType)) {
-              const loaderPopup = document.createElement('div');
-              loaderPopup.className = 'loader-popup';
-              loaderPopup.innerHTML = loader;
-              form.appendChild(loaderPopup);
-              loaderPopup.style.display = 'block';
-              const moderationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(await moderateImage(file))));
-              loaderPopup.style.display = 'none';
-              if (moderationResult === null) {
-                await Swal.fire({
-                  icon: 'error',
-                  title: translateThis('Moderation Error'),
-                  text: translateThis('There was an error moderating the image. Please try again later.'),
-                });
-                continue;
-              }
-              if (moderationResult && (moderationResult.nudity.sexual_activity > 0.75 || moderationResult.nudity.sexual_display > 0.75 || moderationResult.nudity.erotica > 0.75 || moderationResult.nudity.very_suggestive > 0.75 || moderationResult.nudity.suggestive > 0.75 || moderationResult.nudity.mildly_suggestive > 0.95 || moderationResult.weapon.classes.firearm > 0.75 || moderationResult.recreational_drug.prob > 0.75 || moderationResult.offensive.prob > 0.75 || moderationResult.gore.prob > 0.75)) {
-                await Swal.fire({
-                  icon: 'error',
-                  title: translateThis('Inappropriate Content Detected'),
-                  text: translateThis('The uploaded image contains inappropriate content. Please upload a different image.'),
-                });
-                continue;
+              var fileHash = await hashFile(file);
+              var moderatedHashes = getModeratedHashes();
+              if (moderatedHashes[fileHash] !== undefined) {
+                if(moderatedHashes[fileHash] === false) {
+                  await Swal.fire({
+                    icon: 'error',
+                    title: translateThis('Inappropriate Content Detected'),
+                    text: translateThis('The uploaded image contains inappropriate content. Please upload a different image.'),
+                  });
+                  continue;
+                }
               } else {
-                const myimage = await resizeImage(file);
-                if (myimage) {
-                  image.push(myimage);
-                  selectedFiles.push(file);
+                const loaderPopup = document.createElement('div');
+                loaderPopup.className = 'loader-popup';
+                loaderPopup.innerHTML = loader;
+                form.appendChild(loaderPopup);
+                loaderPopup.style.display = 'block';
+                const moderationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(await moderateImage(file))));
+                loaderPopup.style.display = 'none';
+                if (moderationResult === null) {
+                  await Swal.fire({
+                    icon: 'error',
+                    title: translateThis('Moderation Error'),
+                    text: translateThis('There was an error moderating the image. Please try again later.'),
+                  });
+                  continue;
+                }
+                const isInappropriate = 
+                (moderationResult.nudity?.sexual_activity > 0.75 || 
+                  moderationResult.nudity?.sexual_display > 0.75 || 
+                  moderationResult.nudity?.erotica > 0.75 || 
+                  moderationResult.nudity?.very_suggestive > 0.75 || 
+                  moderationResult.nudity?.suggestive > 0.75 || 
+                  moderationResult.nudity?.mildly_suggestive > 0.95 || 
+                  moderationResult.weapon?.classes?.firearm > 0.75 || 
+                  moderationResult.recreational_drug?.prob > 0.75 || 
+                  moderationResult.offensive?.prob > 0.75 || 
+                  moderationResult.gore?.prob > 0.75 || 
+                  moderationResult.scam?.prob > 0.75 || 
+                  moderationResult.violence?.prob > 0.75 || 
+                  moderationResult.self_harm?.prob > 0.75 || 
+                  //moderationResult.money?.prob > 0.75 || 
+                  //moderationResult.gambling?.prob > 0.75 ||
+                  )
+                  (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
+                  (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
+                  (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen credit card'))) ||
+                  (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('offer to murder'))) ||
+                  (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked girl')));
+                if (isInappropriate) {
+                  await Swal.fire({
+                    icon: 'error',
+                    title: translateThis('Inappropriate Content Detected'),
+                    text: translateThis('The uploaded image contains inappropriate content. Please upload a different image.'),
+                  });
+                  addModeratedHash(fileHash, false);
+                  continue;
+                } else {
+                  addModeratedHash(fileHash, true);
+                }
+              }
+              const myimage = await resizeImage(file);
+              if (myimage) {
+                image.push(myimage);
+                selectedFiles.push(file);
                 } else {
                   console.warn(`File ${file.name} is not a valid image`);
                 }
-              }
             } else {
               const base64File = await readFileAsDataURL(file);
               image.push(base64File);
@@ -9218,7 +9669,6 @@ body {
             });
           }
         }
-
         updateFilesDisplay();
       });
 
@@ -9229,10 +9679,6 @@ body {
           const imgSrc = URL.createObjectURL(file);
           appendFileToDisplay(imgSrc, index);
         });
-
-        // Update file names display
-        const fileNames = selectedFiles.map(file => file.name).join(', ');
-        document.getElementById('fileNames').textContent = fileNames;
       }
 
       function appendFileToDisplay(imgSrc, index) {
@@ -9416,6 +9862,7 @@ body {
           var contactinfo = document.getElementById("contactInfo").value;
           var title = document.getElementById("contractTitle").value;
           var location = document.getElementById("contractLocation").value;
+          var contractDetails = document.getElementById("contractDetails").value;
           var message = JSON.stringify({
             message: document.getElementById("contractDetails").value,
             contact: contactinfo,
@@ -9456,6 +9903,19 @@ body {
           if (title === "") {
             await Swal.fire(translateThis("Please enter the contract title"));
             return false;
+          }
+
+          const orderData = {
+            message: contractDetails,
+            title: title,
+            location: location
+          };
+          if(contractDetails || title || location) {
+            var isGood = await validateOrderData(orderData);
+            if(!isGood) {
+              await Swal.fire(translateThis("Your title or description has been flagged as inappropriate. Please try again with a different title or description."));
+              return false;
+            }
           }
           var sender2 = (senderReceiver === "receiver" ? sender : recipient);
           var recipient2 = (senderReceiver === "receiver" ? recipient : sender);
@@ -9609,6 +10069,9 @@ body {
           try {
             var cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'},{value: blockTimestamp, type: 'uint256'}));
             console.log(cHash);
+            let myhashes = JSON.parse(localStorage.getItem('myhashes')) || {};
+            myhashes[cHash] = isGood;
+            localStorage.setItem('myhashes', JSON.stringify(myhashes));
             var returnThis2 = false;
             if(publicoffer) {
               if(myterms.length == 0) {

@@ -512,3 +512,9 @@
   "The uploaded image contains inappropriate content. Please upload a different image.": true,
   "There was an error moderating the message. Please try again later.": true
 }
+{
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": true
+}
+{
+  "This function is currently not available for a node."
+}
