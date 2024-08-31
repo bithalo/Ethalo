@@ -3997,7 +3997,7 @@ body {
       //  }
       //}
       const gasSetting2 = localStorage.getItem(myaccounts + DDEaddy + ":gasOption");
-        if(gasSetting2 && gasSetting2 == "1") {
+      if(gasSetting2 && gasSetting2 == "1") {
         gasSetting = 1;
       }
       const currentBlockNumber = await web3.eth.getBlockNumber();
@@ -5274,12 +5274,13 @@ body {
     }
 
     function isInappropriateImage(moderationResult) {
+      console.log(JSON.stringify(moderationResult))
       return (
         (moderationResult.nudity?.sexual_activity > 0.75 || 
         moderationResult.nudity?.sexual_display > 0.75 || 
         moderationResult.nudity?.erotica > 0.75 || 
         moderationResult.nudity?.very_suggestive > 0.75 || 
-        moderationResult.nudity?.suggestive > 0.75 || 
+        //moderationResult.nudity?.suggestive > 0.75 || 
         //moderationResult.nudity?.mildly_suggestive > 0.95 || 
         moderationResult.weapon?.classes?.firearm > 0.75 || 
         moderationResult.recreational_drug?.prob > 0.75 || 
@@ -5287,14 +5288,18 @@ body {
         moderationResult.gore?.prob > 0.75 || 
         moderationResult.scam?.prob > 0.75 || 
         moderationResult.violence?.prob > 0.75 ||
-        //moderationResult.money?.prob > 0.75 || 
+        moderationResult.money?.prob > 0.75 || 
         //moderationResult.gambling?.prob > 0.75 ||
         moderationResult.self_harm?.prob > 0.75) || 
         (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
         (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
-        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen credit card'))) ||
-        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('offer to murder'))) ||
-        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked girl')))
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('murder'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hitman'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('assassin'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('counterfeit'))) ||
+        (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('porn')))
       );
     }
 
@@ -9046,6 +9051,20 @@ body {
     }
       
     async function confirmTransaction(gasEstimate, value, tokenAddress) {
+      let pendingTransactions = getPendingTransactions();
+      if(pendingTransactions.length != 0) {
+        const confirmPend = await Swal.fire({
+          icon: 'warning',
+          title:  translateThis('Transaction Pending'),
+          html:  translateThis('Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.'),
+          showCancelButton: true,
+          confirmButtonText: translateThis('Submit'),
+          cancelButtonText: translateThis('Cancel'),
+        });
+        if (!confirmPend.isConfirmed) {
+          return false;
+        }
+      }
       var mybase = web3.utils.toBN(balances['base'].amount);
       var glimit = web3.utils.toBN(gasOptions[gasSetting].gasLimit).mul(web3.utils.toBN(gasPrice));
       if(mybase.lt(glimit)) {
