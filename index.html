@@ -3528,7 +3528,7 @@ body {
     var locked = false;
     var activeActions = {};
     let pendingTransactions = [];
-    var nodeList = ["0x40354fF7ED02d4A7c941045A71aeC1169Bca76f1"];
+    var nodeList = ["0x273fbBbBf88AB572008eF2EC05B17b805789CE20"];
     var currentTxHash = null;
     const statusDescriptions = {
       "0": "",
@@ -5256,7 +5256,8 @@ body {
       formData.append('text', text);
       formData.append('lang', 'en');
       formData.append('categories', 'profanity,personal,link,drug,weapon,spam,content-trade,money-transaction,extremism,violence,self-harm,medical');
-      formData.append('mode', 'rules');
+      formData.append('models', 'general');
+      formData.append('mode', 'rules,ml');
       formData.append('api_user', sightengineApiUser);
       formData.append('api_secret', sightengineApiSecret);
 
@@ -5274,14 +5275,14 @@ body {
     }
 
     function isInappropriateImage(moderationResult) {
-      console.log(JSON.stringify(moderationResult))
+      //console.log(JSON.stringify(moderationResult))
       return (
         (moderationResult.nudity?.sexual_activity > 0.75 || 
         moderationResult.nudity?.sexual_display > 0.75 || 
         moderationResult.nudity?.erotica > 0.75 || 
         moderationResult.nudity?.very_suggestive > 0.75 || 
         //moderationResult.nudity?.suggestive > 0.75 || 
-        //moderationResult.nudity?.mildly_suggestive > 0.95 || 
+        //moderationResult.nudity?.mildly_suggestive > 0.75 || 
         moderationResult.weapon?.classes?.firearm > 0.75 || 
         moderationResult.recreational_drug?.prob > 0.75 || 
         moderationResult.offensive?.prob > 0.75 || 
@@ -5291,6 +5292,8 @@ body {
         moderationResult.money?.prob > 0.75 || 
         //moderationResult.gambling?.prob > 0.75 ||
         moderationResult.self_harm?.prob > 0.75) || 
+        (moderationResult.qr?.link?.length > 0) ||
+        (moderationResult.text?.link?.length > 0) ||
         (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
         (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
         (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen'))) ||
@@ -5304,16 +5307,22 @@ body {
     }
 
     function isInappropriateText(moderationResult) {
+      //console.log(JSON.stringify(moderationResult))
       return (
+        moderationResult.moderation_classes?.sexual > .5 ||
+        moderationResult.moderation_classes?.violent > .5 ||
+        moderationResult.moderation_classes?.toxic > .5 ||
+        moderationResult.moderation_classes?.discriminatory > .7 ||
+        moderationResult.moderation_classes?.insulting > .7 ||
         moderationResult.profanity?.matches.length > 0 ||
-        moderationResult.personal?.matches.length > 0 ||
+        //moderationResult.personal?.matches.length > 0 ||
         moderationResult.link?.matches.length > 0 ||
         moderationResult.drug?.matches.length > 0 ||
         moderationResult.weapon?.matches.length > 0 ||
         moderationResult.extremism?.matches.length > 0 ||
         moderationResult.self_harm?.matches.length > 0 ||
         moderationResult.violence?.matches.length > 0 ||
-        //moderationResult['content-trade']?.matches.length > 0 ||
+        moderationResult['content-trade']?.matches.length > 0 ||
         //moderationResult['money-transaction']?.matches.length > 0 ||
         moderationResult.spam?.matches.length > 0
       );
@@ -5325,22 +5334,28 @@ body {
           moderationResult.nudity?.sexual_display > 0.75 || 
           moderationResult.nudity?.erotica > 0.75 || 
           moderationResult.nudity?.very_suggestive > 0.75 || 
-          moderationResult.nudity?.suggestive > 0.75 || 
-          //moderationResult.nudity?.mildly_suggestive > 0.95 || 
+          //moderationResult.nudity?.suggestive > 0.75 || 
+          //moderationResult.nudity?.mildly_suggestive > 0.75 || 
           moderationResult.weapon?.classes?.firearm > 0.75 || 
           moderationResult.recreational_drug?.prob > 0.75 || 
           moderationResult.offensive?.prob > 0.75 || 
           moderationResult.gore?.prob > 0.75 || 
           moderationResult.scam?.prob > 0.75 || 
           moderationResult.violence?.prob > 0.75 ||
-          //moderationResult.money?.prob > 0.75 || 
+          moderationResult.money?.prob > 0.75 || 
           //moderationResult.gambling?.prob > 0.75 || 
-          moderationResult.self_harm?.prob > 0.75) || 
+          moderationResult.self_harm?.prob > 0.75) ||
+          (moderationResult.qr?.link?.length > 0) ||
+          (moderationResult.text?.link?.length > 0) ||
           (moderationResult.text?.drug?.some(drug => drug.match.toLowerCase().includes('shroom'))) ||
           (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hacking'))) ||
-          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen credit card'))) ||
-          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('offer to murder'))) ||
-          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked girl')))
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('stolen'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('murder'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('hitman'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('naked'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('assassin'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('counterfeit'))) ||
+          (moderationResult.text?.spam?.some(spam => spam.match.toLowerCase().includes('porn')))
         ));
     }
 
@@ -5353,7 +5368,7 @@ body {
 
     async function startMonitoringProcess() {
       try {
-        let checkedHashes = JSON.parse(localStorage.getItem("checkedHashes")) || await getCheckedHashesFromBlockchain(myaccounts);
+        let checkedHashes = JSON.parse(localStorage.getItem("checkedHashes"+DDEaddy)) || await getCheckedHashesFromBlockchain(myaccounts);
         if('error' in checkedHashes) {
           throw new Error("There was an error loading hashes from ipfs/blockchain, try again later.")
         }
@@ -5372,7 +5387,7 @@ body {
           }
         }
         if (newHashes.length > 0) {
-          localStorage.setItem("checkedHashes", JSON.stringify(checkedHashes));
+          localStorage.setItem("checkedHashes"+DDEaddy, JSON.stringify(checkedHashes));
           const ipfsLink = await createIPFSLink(checkedHashes);
           await postIPFSLinkToBlockchain(ipfsLink);
         }
@@ -5383,11 +5398,14 @@ body {
       }
     }
 
-    async function getCheckedHashesFromBlockchain(userAddress, DDEcontract) {
+    async function getCheckedHashesFromBlockchain(userAddress, DDEcontract5 = '') {
       try {
-        const mylen = DOMPurify.sanitize(await DDEcontract.methods.getArrayLength(userAddress, 3).call());
+        if(DDEcontract5 == '') {
+            DDEcontract5 = DDEcontract;
+        }
+        const mylen = DOMPurify.sanitize(await DDEcontract5.methods.getArrayLength(userAddress, 3).call());
         if(mylen > 0) {
-          const lastEntry = JSON.parse(DOMPurify.sanitize(await DDEcontract.methods.userdata(userAddress, mylen - 1).call()));
+          const lastEntry = JSON.parse(DOMPurify.sanitize(await DDEcontract5.methods.userdata(userAddress, mylen - 1).call()));
           if (lastEntry?.ipfsLink) {
             const ipfsHash = lastEntry.ipfsLink;
             var ipfsData = await retrieveFromPinataIPFS(ipfsHash);
@@ -5577,8 +5595,8 @@ body {
         var mlength = 0;
         var lastNodeAddress = nodeList[nodeList.length - 1];
         let checkedHashes = await getCheckedHashesFromBlockchain(lastNodeAddress, DDEcontract3);
-        localStorage.setItem('checkedHashes', JSON.stringify(checkedHashes));
-        let myhashes = JSON.parse(localStorage.getItem('myhashes')) || {};
+        localStorage.setItem('checkedHashes'+DDEaddy, JSON.stringify(checkedHashes));
+        let myhashes = JSON.parse(localStorage.getItem('myhashes'+DDEaddy)) || {};
         await DDEcontract3.methods.marketslength().call().then(async function (result) {
             currentMarketsLength = DOMPurify.sanitize(result);
             mlength = parseInt(DOMPurify.sanitize(result));
@@ -5648,7 +5666,7 @@ body {
 
                     const isGood = await validateOrderData(orderData);
                     myhashes[hash] = isGood;
-                    localStorage.setItem('myhashes', JSON.stringify(myhashes));
+                    localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                     if (!isGood) {
                       mlen -= 1;
@@ -5757,7 +5775,7 @@ body {
 
                       const isGood = await validateOrderData(orderData);
                       myhashes[hash] = isGood;
-                      localStorage.setItem('myhashes', JSON.stringify(myhashes));
+                      localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                       if (!isGood) {
                         truetot -= 1;
@@ -5932,7 +5950,7 @@ body {
 
                                   const isGood = await validateOrderData(orderData);
                                   myhashes[hash] = isGood;
-                                  localStorage.setItem('myhashes', JSON.stringify(myhashes));
+                                  localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                                   if (!isGood) {
                                     longestKey -= 1;
@@ -6024,7 +6042,7 @@ body {
 
                           const isGood = await validateOrderData(orderData);
                           myhashes[hash] = isGood;
-                          localStorage.setItem('myhashes', JSON.stringify(myhashes));
+                          localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                           if (!isGood) {
                               trueLength -= 1;
@@ -9926,7 +9944,8 @@ body {
           const orderData = {
             message: contractDetails,
             title: title,
-            location: location
+            location: location,
+            image: image
           };
           if(contractDetails || title || location) {
             var isGood = await validateOrderData(orderData);
@@ -10087,9 +10106,9 @@ body {
           try {
             var cHash = web3.utils.keccak256(web3.utils.encodePacked({value: data.sender, type: 'address'},{value: data.recipient, type: 'address'},{value: data.token, type: 'address'},{value: data.amount, type: 'uint256'},{value: data.depositSender, type: 'uint256'},{value: data.depositRecipient, type: 'uint256'},{value: data.timelimit.toString(), type: 'uint256'},{value: expiration.toString(), type: 'uint256'},{value: data.message, type: 'string'},{value: blockTimestamp, type: 'uint256'}));
             console.log(cHash);
-            let myhashes = JSON.parse(localStorage.getItem('myhashes')) || {};
+            let myhashes = JSON.parse(localStorage.getItem('myhashes'+DDEaddy)) || {};
             myhashes[cHash] = isGood;
-            localStorage.setItem('myhashes', JSON.stringify(myhashes));
+            localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
             var returnThis2 = false;
             if(publicoffer) {
               if(myterms.length == 0) {

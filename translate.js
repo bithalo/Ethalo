@@ -529,6 +529,8 @@ languages['ar']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "تحتوي الصورة المرفوعة على محتوى غير لائق. يرجى تحميل صورة مختلفة.",
   "There was an error moderating the message. Please try again later.": "حدث خطأ أثناء الإشراف على الرسالة. يرجى المحاولة مرة أخرى لاحقًا.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "تم الإبلاغ عن عنوانك أو وصفك على أنه غير لائق. يرجى المحاولة مرة أخرى بعنوان أو وصف مختلف.",
+  "This function is currently not available for a node.": "هذه الوظيفة غير متاحة حاليًا للعقدة.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "تحذير: لديك معاملة معلقة. إذا قمت بإرسال هذه المعاملة، فقد يؤدي ذلك إلى إبطال المعاملة الأخرى التي لم يتم تأكيدها بعد. يُوصى بالانتظار حتى تأكيد المعاملة أو تسريع المعاملة المعلقة في لوحة الحساب."
 };
 
 
@@ -1061,6 +1063,8 @@ languages['ch']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "上传的图片包含不适当的内容。请上传不同的图片。",
   "There was an error moderating the message. Please try again later.": "审核消息时出错。请稍后再试。",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "您的标题或描述被标记为不适当。请尝试使用不同的标题或描述。",
+  "This function is currently not available for a node.": "此功能目前不适用于节点。",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "警告：您有一个待处理的交易。如果您提交此交易，可能会使尚未确认的其他交易无效。建议等待交易确认或在账户面板中加速待处理的交易。"
 };
 
 languages['en']={
@@ -1653,6 +1657,8 @@ languages['fr']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "L'image téléchargée contient un contenu inapproprié. Veuillez télécharger une image différente.",
   "There was an error moderating the message. Please try again later.": "Une erreur s'est produite lors de la modération du message. Veuillez réessayer plus tard.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Votre titre ou description a été signalé comme inapproprié. Veuillez réessayer avec un titre ou une description différente.",
+  "This function is currently not available for a node.": "Cette fonction n'est actuellement pas disponible pour un nœud.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Avertissement : Vous avez une transaction en attente. Si vous soumettez cette transaction, cela pourrait invalider l'autre transaction qui n'a pas encore été confirmée. Il est recommandé d'attendre la confirmation de la transaction ou d'accélérer la transaction en attente dans le panneau de compte."
 };
 
 languages['ge']={
@@ -2183,6 +2189,8 @@ languages['ge']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "Das hochgeladene Bild enthält unangemessenen Inhalt. Bitte laden Sie ein anderes Bild hoch.",
   "There was an error moderating the message. Please try again later.": "Beim Moderieren der Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Ihr Titel oder Ihre Beschreibung wurde als unangemessen markiert. Bitte versuchen Sie es erneut mit einem anderen Titel oder einer anderen Beschreibung.",
+  "This function is currently not available for a node.": "Diese Funktion ist derzeit für einen Knoten nicht verfügbar.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Warnung: Sie haben eine ausstehende Transaktion. Wenn Sie diese Transaktion absenden, könnte dies die andere Transaktion, die noch nicht bestätigt wurde, ungültig machen. Es wird empfohlen, zu warten, bis die Transaktion bestätigt wird, oder die ausstehende Transaktion im Konto-Panel zu beschleunigen."
 };
 
 languages['it']={
@@ -2714,6 +2722,8 @@ languages['it']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "L'immagine caricata contiene contenuti inappropriati. Si prega di caricare un'immagine diversa.",
   "There was an error moderating the message. Please try again later.": "Si è verificato un errore durante la moderazione del messaggio. Si prega di riprovare più tardi.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Il tuo titolo o descrizione è stato segnalato come inappropriato. Si prega di riprovare con un titolo o una descrizione diversa.",
+  "This function is currently not available for a node.": "Questa funzione non è attualmente disponibile per un nodo.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Avviso: Hai una transazione in sospeso. Se invii questa transazione, potrebbe invalidare l'altra transazione che non è ancora stata confermata. Si consiglia di attendere la conferma della transazione o di accelerare la transazione in sospeso nel pannello dell'account."
 };
 
 languages['ja']={
@@ -3245,6 +3255,8 @@ languages['ja']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "アップロードされた画像に不適切なコンテンツが含まれています。別の画像をアップロードしてください。",
   "There was an error moderating the message. Please try again later.": "メッセージのモデレーション中にエラーが発生しました。後で再試行してください。",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "あなたのタイトルまたは説明が不適切としてフラグが立てられました。別のタイトルまたは説明で再試行してください。",
+  "This function is currently not available for a node.": "この機能は現在ノードでは利用できません。",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "警告: トランザクションが保留中です。このトランザクションを送信すると、まだ確認されていない別のトランザクションが無効になる可能性があります。トランザクションの確認を待つか、アカウントパネルで保留中のトランザクションを早めることをお勧めします。"
 };
 
 languages['ko']={
@@ -3776,6 +3788,8 @@ languages['ko']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "업로드된 이미지에 부적절한 콘텐츠가 포함되어 있습니다. 다른 이미지를 업로드해 주세요.",
   "There was an error moderating the message. Please try again later.": "메시지를 조정하는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "제목 또는 설명이 부적절한 것으로 표시되었습니다. 다른 제목 또는 설명으로 다시 시도해 주세요.",
+  "This function is currently not available for a node.": "이 기능은 현재 노드에서 사용할 수 없습니다.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "경고: 트랜잭션이 보류 중입니다. 이 트랜잭션을 제출하면 아직 확인되지 않은 다른 트랜잭션이 무효화될 수 있습니다. 트랜잭션이 확인될 때까지 기다리거나 계정 패널에서 보류 중인 트랜잭션을 가속화할 것을 권장합니다."
 };
 
 languages['po']={
@@ -4307,6 +4321,8 @@ languages['po']={
   "The uploaded image contains inappropriate content. Please upload a different image.": "A imagem carregada contém conteúdo inapropriado. Por favor, carregue uma imagem diferente.",
   "There was an error moderating the message. Please try again later.": "Ocorreu um erro ao moderar a mensagem. Por favor, tente novamente mais tarde.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Seu título ou descrição foi marcado como inapropriado. Por favor, tente novamente com um título ou descrição diferente.",
+  "This function is currently not available for a node.": "Esta função não está disponível atualmente para um nó.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Aviso: Você tem uma transação pendente. Se você enviar esta transação, pode invalidar a outra transação que ainda não foi confirmada. Recomenda-se aguardar a confirmação da transação ou acelerar a transação pendente no painel da conta."
 };
 
 languages['ru'] = {
@@ -4838,6 +4854,8 @@ languages['ru'] = {
   "The uploaded image contains inappropriate content. Please upload a different image.": "Загруженное изображение содержит неподобающий контент. Пожалуйста, загрузите другое изображение.",
   "There was an error moderating the message. Please try again later.": "Произошла ошибка при модерации сообщения. Пожалуйста, попробуйте позже.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Ваш заголовок или описание были помечены как неподходящие. Пожалуйста, попробуйте снова с другим заголовком или описанием.",
+  "This function is currently not available for a node.": "Эта функция в настоящее время недоступна для узла.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Предупреждение: У вас есть ожидающая транзакция. Если вы отправите эту транзакцию, это может аннулировать другую транзакцию, которая еще не была подтверждена. Рекомендуется дождаться подтверждения транзакции или ускорить обработку ожидающей транзакции в панели аккаунта."
 };
 
 languages['sp'] = {
@@ -5368,5 +5386,7 @@ languages['sp'] = {
   "There was an error moderating the image. Please try again later.": "Hubo un error al moderar la imagen. Por favor, inténtelo de nuevo más tarde.",
   "The uploaded image contains inappropriate content. Please upload a different image.": "La imagen subida contiene contenido inapropiado. Por favor, suba una imagen diferente.",
   "There was an error moderating the message. Please try again later.": "Hubo un error al moderar el mensaje. Por favor, inténtelo de nuevo más tarde.",
-  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Tu título o descripción ha sido marcado como inapropiado. Por favor, intenta con un título o descripción diferente."
+  "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Tu título o descripción ha sido marcado como inapropiado. Por favor, intenta con un título o descripción diferente.",
+  "This function is currently not available for a node.": "Esta función no está disponible actualmente para un nodo.",
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Advertencia: Tienes una transacción pendiente. Si envías esta transacción, podrías invalidar la otra transacción que aún no ha sido confirmada. Se recomienda esperar a que la transacción se confirme o acelerar la transacción pendiente en el panel de cuenta."
 };
