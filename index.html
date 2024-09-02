@@ -4526,7 +4526,7 @@ body {
             setActionActive(myaccounts+"removeCosigner"+result.value, true);
             if (accountprivkey !== "") {
               const gasEstimate = 130000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if (!res) {
                 return;
               }
@@ -4574,7 +4574,7 @@ body {
             setActionActive(myaccounts+"addCosigner"+result.value, true);
             if(accountprivkey != "") {
               const gasEstimate = 130000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -4600,7 +4600,7 @@ body {
             setActionActive(myaccounts+"addCosigner"+result.value, true);
             if(accountprivkey != "") {
               const gasEstimate = 50000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -4828,7 +4828,7 @@ body {
         setActionActive(myaccounts+"register"+JSON.stringify(myuserdata), true);
         if(accountprivkey != "") {
             const gasEstimate = 150000;
-            var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+            var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
             if(!res) {
               return;
             }
@@ -4936,7 +4936,7 @@ body {
               setActionActive(myaccounts+"changeAffiliate"+affiliate, true);
               if(accountprivkey != "") {
                 const gasEstimate = 50000;
-                var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                 if(!res) {
                   return;
                 }
@@ -4988,7 +4988,7 @@ body {
             setActionActive(myaccounts+"changeFee"+value, true);
             if(accountprivkey != "") {
               const gasEstimate = 50000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -5221,11 +5221,9 @@ body {
       moderatedHashes[hash] = result;
       localStorage.setItem('moderatedHashes', JSON.stringify(moderatedHashes));
     }
-    // var sightengineApiUser = '596064440';
-    // var sightengineApiSecret = 'ikEQE32VBYAGeSNiUCsTfFoWFsn8vBwY';
 
-    var sightengineApiUser = '168952605';
-    var sightengineApiSecret = 'AUT6KZsH2RV6a7QnkK7BdXcVPSwVmaVg';
+    var sightengineApiUser = '1043766005';
+    var sightengineApiSecret = 'mnwcdJCHsE7EZbz2fcNJdn9KxXYkWmem';
 
     async function moderateImage(files) {
       const url = 'https://api.sightengine.com/1.0/check.json';
@@ -5321,10 +5319,10 @@ body {
         moderationResult.weapon?.matches.length > 0 ||
         moderationResult.extremism?.matches.length > 0 ||
         moderationResult.self_harm?.matches.length > 0 ||
-        moderationResult.violence?.matches.length > 0 ||
-        moderationResult['content-trade']?.matches.length > 0 ||
+        moderationResult.violence?.matches.length > 0// ||
+        //moderationResult['content-trade']?.matches.length > 0 ||
         //moderationResult['money-transaction']?.matches.length > 0 ||
-        moderationResult.spam?.matches.length > 0
+        //moderationResult.spam?.matches.length > 0
       );
     }
 
@@ -5361,7 +5359,7 @@ body {
 
     async function checkIfNode() {
       if (accountprivkey !== "" && nodeList.includes(myaccounts)) {
-        console.log("You are a node. You will automatically check new offers with AI and post the results.");
+        Swal.fire("You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.");
         startMonitoringProcess();
       }
     }
@@ -5482,16 +5480,30 @@ body {
             .filter(img => img !== null);
 
           const imageModerationResult = await moderateImage(images);
+          if (imageModerationResult === null) {
+            throw new Error("The result is null.")
+          }
           const sanitizedImageModerationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(imageModerationResult)));
 
-          if (Array.isArray(sanitizedImageModerationResult)) {
-            imagesResult = !isInappropriateImages(sanitizedImageModerationResult);
+          if ('data' in sanitizedImageModerationResult) {
+            if (Array.isArray(sanitizedImageModerationResult.data)) {
+              imagesResult = !isInappropriateImages(sanitizedImageModerationResult.data);
+            } else {
+              imagesResult = !isInappropriateImage(sanitizedImageModerationResult.data);
+            }
           } else {
-            imagesResult = !isInappropriateImage(sanitizedImageModerationResult);
+            if (Array.isArray(sanitizedImageModerationResult)) {
+              imagesResult = !isInappropriateImages(sanitizedImageModerationResult);
+            } else {
+              imagesResult = !isInappropriateImage(sanitizedImageModerationResult);
+            }
           }
         }
         if (orderData.title || orderData.message || orderData.location || orderData.contact) {
           const textModerationResult = await moderateText(`${orderData.title} ${orderData.message} ${orderData.location} ${orderData.contact}`);
+          if (textModerationResult === null) {
+            throw new Error("The result is null.")
+          }
           const sanitizedTextModerationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(textModerationResult)));
           textResult = !isInappropriateText(sanitizedTextModerationResult);
         }
@@ -7954,7 +7966,7 @@ body {
                     setActionActive(myaccounts+"expireEscrow"+listing.hash, true);
                     if(accountprivkey != "") {
                       const gasEstimate = 100000;
-                      var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                      var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                       if(!res) {
                         return;
                       }
@@ -8007,7 +8019,7 @@ body {
                   setActionActive(myaccounts+"acceptExtend"+listing.hash, true);
                   if(accountprivkey != "") {
                     const gasEstimate = 70000;
-                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                     if(!res) {
                       return;
                     }
@@ -8045,7 +8057,7 @@ body {
                   setActionActive(myaccounts+"acceptExtend"+listing.hash, true);
                   if(accountprivkey != "") {
                     const gasEstimate = 70000;
-                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                     if(!res) {
                       return;
                     }
@@ -8113,7 +8125,7 @@ body {
                 setActionActive(myaccounts+"requestExtend"+listing.hash, true);
                 if(accountprivkey != "") {
                   const gasEstimate = 70000;
-                  var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                  var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                   if(!res) {
                     return;
                   }
@@ -8159,7 +8171,7 @@ body {
               setActionActive(myaccounts+"requestCancel"+listing.hash, true);
               if(accountprivkey != "") {
                 const gasEstimate = 70000;
-                var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                 if(!res) {
                   return;
                 }
@@ -8208,7 +8220,7 @@ body {
               setActionActive(myaccounts+"requestComplete"+listing.hash, true);
               if(accountprivkey != "") {
                     const gasEstimate = 150000;
-                    var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+                    var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
                     if(!res) {
                       return;
                     }
@@ -8649,7 +8661,7 @@ body {
 
           if(accountprivkey != "") {
             const gasEstimate = 150000;
-            var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+            var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
             if(!res) {
               return;
             }
@@ -9089,9 +9101,18 @@ body {
         await Swal.fire({title: translateThis("Not enough funds"), html: translateThis("Please deposit funds to cover the minimum gas limit. This amount is needed to process all types of transactions. However, transactions will usually cost less than this limit.") + "<br><br>" + "Gas limit:" + " " + gasOptions[gasSetting].gasLimit + "<br>" + "Gas price:" + " " + gasPrice + "<br>" + "Minimum cost:" + " " + displayDecimals(tokens[0].address,glimit.toString()) + " " + tokens[0].token});
         return false;
       }
+      var tname = tokennames[tokenAddress];
+      var dvalue = "";
+      if(value == null) {
+        value = web3.utils.toBN(gasEstimate).mul(web3.utils.toBN(gasPrice));
+        dvalue = displayDecimals(tokens[0].address, value.toString())
+        tname = tokens[0].token;
+      } else {
+        dvalue = displayDecimals(tokenAddress, value.toString());
+      }
       const confirmation = await Swal.fire({
         title:  translateThis('Confirm Transaction'),
-        html:  translateThis('Estimated gas cost:') + " " + gasEstimate + '<br>' + translateThis('Gas limit:') + " " + gasOptions[gasSetting].gasLimit + '<br>' + translateThis('Gas price:') + " " + gasPrice + '<br>' + translateThis('Estimated fee:') + " " + displayDecimals(tokens[0].address,web3.utils.toBN(gasEstimate).mul(web3.utils.toBN(gasPrice)).toString()) + " " +  tokens[0].token + '<br>' + translateThis('Maximum fee:') + " " + displayDecimals(tokens[0].address,glimit.toString()) + " " +  tokens[0].token + '<br>' + translateThis('Total(in coins):') + " " + displayDecimals(tokenAddress, value.toString()) + " " + tokennames[tokenAddress],
+        html:  translateThis('Estimated gas cost:') + " " + gasEstimate + '<br>' + translateThis('Gas limit:') + " " + gasOptions[gasSetting].gasLimit + '<br>' + translateThis('Gas price:') + " " + gasPrice + '<br>' + translateThis('Estimated fee:') + " " + displayDecimals(tokens[0].address,web3.utils.toBN(gasEstimate).mul(web3.utils.toBN(gasPrice)).toString()) + " " +  tokens[0].token + '<br>' + translateThis('Maximum fee:') + " " + displayDecimals(tokens[0].address,glimit.toString()) + " " +  tokens[0].token + '<br>' + translateThis('Total(in coins):') + " " + dvalue + " " + tname,
         showCancelButton: true,
         confirmButtonText: translateThis('Submit'),
         cancelButtonText: translateThis('Cancel'),
@@ -9669,7 +9690,7 @@ body {
                   await Swal.fire({
                     icon: 'error',
                     title: translateThis('Inappropriate Content Detected'),
-                    text: translateThis('The uploaded image contains inappropriate content. Please upload a different image.'),
+                    text: translateThis('The uploaded image contains inappropriate content. Please upload a different image.') + " " + translateThis("Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc."),
                   });
                   addModeratedHash(fileHash, false);
                   continue;
@@ -9950,7 +9971,7 @@ body {
           if(contractDetails || title || location) {
             var isGood = await validateOrderData(orderData);
             if(!isGood) {
-              await Swal.fire(translateThis("Your title or description has been flagged as inappropriate. Please try again with a different title or description."));
+              await Swal.fire(translateThis("Your title or description has been flagged as inappropriate. Please try again with a different title or description.")+" "+translateThis("Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc."));
               return false;
             }
           }
@@ -10804,7 +10825,7 @@ body {
             dialog.remove();
             if(accountprivkey != "") {
               const gasEstimate = 50000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -10840,7 +10861,7 @@ body {
           if (listing.sender == "0x0000000000000000000000000000000000000000" || listing.recipient == "0x0000000000000000000000000000000000000000") {
             if(accountprivkey != "") {
               const gasEstimate = 50000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -10864,7 +10885,7 @@ body {
           } else {
             if(accountprivkey != "") {
               const gasEstimate = 50000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -10966,7 +10987,7 @@ body {
           setActionActive(myaccounts+"changeQuantity"+listing.hash, true);
           if(accountprivkey != "") {
             const gasEstimate = 50000;
-            var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+            var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
             if(!res) {
               return;
             }
@@ -11024,7 +11045,7 @@ body {
             setActionActive(myaccounts+"changeOrderFee"+listing.hash, true);
             if(accountprivkey != "") {
               const gasEstimate = 50000;
-              var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+              var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
               if(!res) {
                 return;
               }
@@ -11067,7 +11088,7 @@ body {
         setActionActive(myaccounts+"addAPI"+text, true);
         if(accountprivkey != "") {
           const gasEstimate = 150000;
-          var res = await confirmTransaction(gasEstimate, gasEstimate, tokens[0].address);
+          var res = await confirmTransaction(gasEstimate, null, tokens[0].address);
           if(!res) {
             return;
           }
@@ -11109,6 +11130,10 @@ body {
             pinataSecretApiKey = data[1];
             pinataGateway = data[2];
             pinataToken = data[3];
+            if(data.length>4) {
+              sightengineApiUser = data[4];
+              sightengineApiSecret = data[5];
+            }
           }
         }
       });

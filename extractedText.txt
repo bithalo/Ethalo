@@ -519,3 +519,8 @@
   "This function is currently not available for a node.":true,
   "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.":true
 }
+{
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": true,
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": true,
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": true
+}
