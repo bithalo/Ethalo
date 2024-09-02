@@ -530,7 +530,10 @@ languages['ar']={
   "There was an error moderating the message. Please try again later.": "حدث خطأ أثناء الإشراف على الرسالة. يرجى المحاولة مرة أخرى لاحقًا.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "تم الإبلاغ عن عنوانك أو وصفك على أنه غير لائق. يرجى المحاولة مرة أخرى بعنوان أو وصف مختلف.",
   "This function is currently not available for a node.": "هذه الوظيفة غير متاحة حاليًا للعقدة.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "تحذير: لديك معاملة معلقة. إذا قمت بإرسال هذه المعاملة، فقد يؤدي ذلك إلى إبطال المعاملة الأخرى التي لم يتم تأكيدها بعد. يُوصى بالانتظار حتى تأكيد المعاملة أو تسريع المعاملة المعلقة في لوحة الحساب."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "تحذير: لديك معاملة معلقة. إذا قمت بإرسال هذه المعاملة، فقد يؤدي ذلك إلى إبطال المعاملة الأخرى التي لم يتم تأكيدها بعد. يُوصى بالانتظار حتى تأكيد المعاملة أو تسريع المعاملة المعلقة في لوحة الحساب.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "يجب ألا تحتوي الطلبات على روابط، أو مواد جنسية، أو عنف، أو احتيال، أو مخدرات، أو أسلحة، أو إهانات، إلخ.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "يجب ألا تحتوي الصور على روابط، أو رموز QR، أو مواد جنسية، أو عنف، أو احتيال، أو صور أو نصوص موحية، أو مخدرات، أو أسلحة، إلخ.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "أنت عبارة عن عقدة. ستقوم بفحص العروض الجديدة تلقائيًا باستخدام الذكاء الاصطناعي ونشر النتائج على سلسلة الكتل. يرجى التأكد دائمًا من أن لديك أموالاً كافية لنشر تحديثاتك في الأسواق."
 };
 
 
@@ -1064,7 +1067,10 @@ languages['ch']={
   "There was an error moderating the message. Please try again later.": "审核消息时出错。请稍后再试。",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "您的标题或描述被标记为不适当。请尝试使用不同的标题或描述。",
   "This function is currently not available for a node.": "此功能目前不适用于节点。",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "警告：您有一个待处理的交易。如果您提交此交易，可能会使尚未确认的其他交易无效。建议等待交易确认或在账户面板中加速待处理的交易。"
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "警告：您有一个待处理的交易。如果您提交此交易，可能会使尚未确认的其他交易无效。建议等待交易确认或在账户面板中加速待处理的交易。",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "订单不应包含链接、色情、暴力、欺诈、毒品、武器、侮辱等内容。",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "图片不应包含链接、二维码、色情、暴力、欺诈、暗示性图像或文字、毒品、武器等内容。",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "您是一个节点。您将使用人工智能自动检查新报价并将结果发布到区块链。请始终确保您有足够的资金来发布您的市场更新。"
 };
 
 languages['en']={
@@ -1658,7 +1664,10 @@ languages['fr']={
   "There was an error moderating the message. Please try again later.": "Une erreur s'est produite lors de la modération du message. Veuillez réessayer plus tard.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Votre titre ou description a été signalé comme inapproprié. Veuillez réessayer avec un titre ou une description différente.",
   "This function is currently not available for a node.": "Cette fonction n'est actuellement pas disponible pour un nœud.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Avertissement : Vous avez une transaction en attente. Si vous soumettez cette transaction, cela pourrait invalider l'autre transaction qui n'a pas encore été confirmée. Il est recommandé d'attendre la confirmation de la transaction ou d'accélérer la transaction en attente dans le panneau de compte."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Avertissement : Vous avez une transaction en attente. Si vous soumettez cette transaction, cela pourrait invalider l'autre transaction qui n'a pas encore été confirmée. Il est recommandé d'attendre la confirmation de la transaction ou d'accélérer la transaction en attente dans le panneau de compte.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "Les commandes ne doivent pas contenir de liens, de contenu sexuel, de violence, de fraude, de drogues, d'armes, d'insultes, etc.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "Les images ne doivent pas contenir de liens, de codes QR, de contenu sexuel, de violence, de fraude, d'images ou de texte suggestifs, de drogues, d'armes, etc.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "Vous êtes un nœud. Vous vérifierez automatiquement les nouvelles offres avec l'IA et publierez les résultats sur la blockchain. Veuillez toujours vous assurer que vous disposez de fonds suffisants pour publier vos mises à jour sur les marchés."
 };
 
 languages['ge']={
@@ -2190,7 +2199,10 @@ languages['ge']={
   "There was an error moderating the message. Please try again later.": "Beim Moderieren der Nachricht ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Ihr Titel oder Ihre Beschreibung wurde als unangemessen markiert. Bitte versuchen Sie es erneut mit einem anderen Titel oder einer anderen Beschreibung.",
   "This function is currently not available for a node.": "Diese Funktion ist derzeit für einen Knoten nicht verfügbar.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Warnung: Sie haben eine ausstehende Transaktion. Wenn Sie diese Transaktion absenden, könnte dies die andere Transaktion, die noch nicht bestätigt wurde, ungültig machen. Es wird empfohlen, zu warten, bis die Transaktion bestätigt wird, oder die ausstehende Transaktion im Konto-Panel zu beschleunigen."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Warnung: Sie haben eine ausstehende Transaktion. Wenn Sie diese Transaktion absenden, könnte dies die andere Transaktion, die noch nicht bestätigt wurde, ungültig machen. Es wird empfohlen, zu warten, bis die Transaktion bestätigt wird, oder die ausstehende Transaktion im Konto-Panel zu beschleunigen.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "Bestellungen sollten keine Links, Sex, Gewalt, Betrug, Drogen, Waffen, Beleidigungen usw. enthalten.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "Bilder sollten keine Links, QR-Codes, Sex, Gewalt, Betrug, anstößige Bilder oder Texte, Drogen, Waffen usw. enthalten.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "Sie sind ein Knotenpunkt. Sie werden neue Angebote automatisch mit KI prüfen und die Ergebnisse auf der Blockchain veröffentlichen. Bitte stellen Sie immer sicher, dass Sie über ausreichende Mittel verfügen, um Ihre Aktualisierungen auf den Märkten zu veröffentlichen."
 };
 
 languages['it']={
@@ -2723,7 +2735,10 @@ languages['it']={
   "There was an error moderating the message. Please try again later.": "Si è verificato un errore durante la moderazione del messaggio. Si prega di riprovare più tardi.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Il tuo titolo o descrizione è stato segnalato come inappropriato. Si prega di riprovare con un titolo o una descrizione diversa.",
   "This function is currently not available for a node.": "Questa funzione non è attualmente disponibile per un nodo.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Avviso: Hai una transazione in sospeso. Se invii questa transazione, potrebbe invalidare l'altra transazione che non è ancora stata confermata. Si consiglia di attendere la conferma della transazione o di accelerare la transazione in sospeso nel pannello dell'account."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Avviso: Hai una transazione in sospeso. Se invii questa transazione, potrebbe invalidare l'altra transazione che non è ancora stata confermata. Si consiglia di attendere la conferma della transazione o di accelerare la transazione in sospeso nel pannello dell'account.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "Gli ordini non devono contenere link, sesso, violenza, frode, droghe, armi, insulti, ecc.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "Le immagini non devono contenere link, codici QR, sesso, violenza, frode, immagini o testi suggestivi, droghe, armi, ecc.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "Sei un nodo. Controllerai automaticamente le nuove offerte con l'IA e pubblicherai i risultati sulla blockchain. Assicurati sempre di avere fondi sufficienti per pubblicare i tuoi aggiornamenti sui mercati."
 };
 
 languages['ja']={
@@ -3256,7 +3271,10 @@ languages['ja']={
   "There was an error moderating the message. Please try again later.": "メッセージのモデレーション中にエラーが発生しました。後で再試行してください。",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "あなたのタイトルまたは説明が不適切としてフラグが立てられました。別のタイトルまたは説明で再試行してください。",
   "This function is currently not available for a node.": "この機能は現在ノードでは利用できません。",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "警告: トランザクションが保留中です。このトランザクションを送信すると、まだ確認されていない別のトランザクションが無効になる可能性があります。トランザクションの確認を待つか、アカウントパネルで保留中のトランザクションを早めることをお勧めします。"
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "警告: トランザクションが保留中です。このトランザクションを送信すると、まだ確認されていない別のトランザクションが無効になる可能性があります。トランザクションの確認を待つか、アカウントパネルで保留中のトランザクションを早めることをお勧めします。",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "注文にはリンク、性的内容、暴力、詐欺、薬物、武器、侮辱などを含めてはいけません。",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "画像にはリンク、QRコード、性的内容、暴力、詐欺、暗示的な画像やテキスト、薬物、武器などを含めてはいけません。",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "あなたはノードです。AIを使って新しいオファーを自動的にチェックし、その結果をブロックチェーンに投稿します。マーケットに更新を投稿するための十分な資金を常に確保してください。"
 };
 
 languages['ko']={
@@ -3789,7 +3807,10 @@ languages['ko']={
   "There was an error moderating the message. Please try again later.": "메시지를 조정하는 중에 오류가 발생했습니다. 나중에 다시 시도해 주세요.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "제목 또는 설명이 부적절한 것으로 표시되었습니다. 다른 제목 또는 설명으로 다시 시도해 주세요.",
   "This function is currently not available for a node.": "이 기능은 현재 노드에서 사용할 수 없습니다.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "경고: 트랜잭션이 보류 중입니다. 이 트랜잭션을 제출하면 아직 확인되지 않은 다른 트랜잭션이 무효화될 수 있습니다. 트랜잭션이 확인될 때까지 기다리거나 계정 패널에서 보류 중인 트랜잭션을 가속화할 것을 권장합니다."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "경고: 트랜잭션이 보류 중입니다. 이 트랜잭션을 제출하면 아직 확인되지 않은 다른 트랜잭션이 무효화될 수 있습니다. 트랜잭션이 확인될 때까지 기다리거나 계정 패널에서 보류 중인 트랜잭션을 가속화할 것을 권장합니다.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "주문에는 링크, 성적인 내용, 폭력, 사기, 마약, 무기, 모욕 등의 내용이 포함되어서는 안 됩니다.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "이미지에는 링크, QR 코드, 성적인 내용, 폭력, 사기, 암시적인 이미지 또는 텍스트, 마약, 무기 등이 포함되어서는 안 됩니다.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "당신은 노드입니다. AI를 사용하여 새로운 제안을 자동으로 확인하고 결과를 블록체인에 게시합니다. 시장에 업데이트를 게시하기 위해 항상 충분한 자금을 확보하십시오."
 };
 
 languages['po']={
@@ -4322,7 +4343,10 @@ languages['po']={
   "There was an error moderating the message. Please try again later.": "Ocorreu um erro ao moderar a mensagem. Por favor, tente novamente mais tarde.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Seu título ou descrição foi marcado como inapropriado. Por favor, tente novamente com um título ou descrição diferente.",
   "This function is currently not available for a node.": "Esta função não está disponível atualmente para um nó.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Aviso: Você tem uma transação pendente. Se você enviar esta transação, pode invalidar a outra transação que ainda não foi confirmada. Recomenda-se aguardar a confirmação da transação ou acelerar a transação pendente no painel da conta."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Aviso: Você tem uma transação pendente. Se você enviar esta transação, pode invalidar a outra transação que ainda não foi confirmada. Recomenda-se aguardar a confirmação da transação ou acelerar a transação pendente no painel da conta.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "Os pedidos não devem conter links, sexo, violência, fraude, drogas, armas, insultos, etc.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "As imagens não devem conter links, códigos QR, sexo, violência, fraude, imagens ou textos sugestivos, drogas, armas, etc.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "Você é um nó. Você verificará automaticamente novas ofertas com IA e publicará os resultados na blockchain. Por favor, certifique-se de ter fundos suficientes para postar suas atualizações nos mercados."
 };
 
 languages['ru'] = {
@@ -4855,7 +4879,10 @@ languages['ru'] = {
   "There was an error moderating the message. Please try again later.": "Произошла ошибка при модерации сообщения. Пожалуйста, попробуйте позже.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Ваш заголовок или описание были помечены как неподходящие. Пожалуйста, попробуйте снова с другим заголовком или описанием.",
   "This function is currently not available for a node.": "Эта функция в настоящее время недоступна для узла.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Предупреждение: У вас есть ожидающая транзакция. Если вы отправите эту транзакцию, это может аннулировать другую транзакцию, которая еще не была подтверждена. Рекомендуется дождаться подтверждения транзакции или ускорить обработку ожидающей транзакции в панели аккаунта."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Предупреждение: У вас есть ожидающая транзакция. Если вы отправите эту транзакцию, это может аннулировать другую транзакцию, которая еще не была подтверждена. Рекомендуется дождаться подтверждения транзакции или ускорить обработку ожидающей транзакции в панели аккаунта.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "Заказы не должны содержать ссылки, сексуальный контент, насилие, мошенничество, наркотики, оружие, оскорбления и т.д.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "Изображения не должны содержать ссылки, QR-коды, сексуальный контент, насилие, мошенничество, намекающие изображения или текст, наркотики, оружие и т.д.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "Вы — узел. Вы будете автоматически проверять новые предложения с помощью ИИ и размещать результаты в блокчейне. Пожалуйста, всегда следите за тем, чтобы у вас было достаточно средств для размещения обновлений на рынках."
 };
 
 languages['sp'] = {
@@ -5388,5 +5415,8 @@ languages['sp'] = {
   "There was an error moderating the message. Please try again later.": "Hubo un error al moderar el mensaje. Por favor, inténtelo de nuevo más tarde.",
   "Your title or description has been flagged as inappropriate. Please try again with a different title or description.": "Tu título o descripción ha sido marcado como inapropiado. Por favor, intenta con un título o descripción diferente.",
   "This function is currently not available for a node.": "Esta función no está disponible actualmente para un nodo.",
-  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Advertencia: Tienes una transacción pendiente. Si envías esta transacción, podrías invalidar la otra transacción que aún no ha sido confirmada. Se recomienda esperar a que la transacción se confirme o acelerar la transacción pendiente en el panel de cuenta."
+  "Warning: You have a transaction pending. If you submit this transaction it might invalidate the other transaction that has not yet confirmed. It is recommended to wait for the transaction to confirm or to speed up the pending transaction in the account panel.": "Advertencia: Tienes una transacción pendiente. Si envías esta transacción, podrías invalidar la otra transacción que aún no ha sido confirmada. Se recomienda esperar a que la transacción se confirme o acelerar la transacción pendiente en el panel de cuenta.",
+  "Orders should not contain links, sex, violence, fraud, drugs, weapons, insults, etc.": "Los pedidos no deben contener enlaces, contenido sexual, violencia, fraude, drogas, armas, insultos, etc.",
+  "Images should not contain links, QR codes, sex, violence, fraud, suggestive images or text, drugs, weapons, etc.": "Las imágenes no deben contener enlaces, códigos QR, contenido sexual, violencia, fraude, imágenes o textos sugestivos, drogas, armas, etc.",
+  "You are a node. You will automatically check new offers with AI and post the results to the blockchain. Please always ensure you have sufficient funds to post your updates to the markets.": "Eres un nodo. Verificarás automáticamente las nuevas ofertas con IA y publicarás los resultados en la cadena de bloques. Por favor, asegúrate de tener fondos suficientes para publicar tus actualizaciones en los mercados."
 };

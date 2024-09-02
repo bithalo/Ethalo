@@ -6345,6 +6345,10 @@ body {
             <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData.message.slice(0, 20)}...</div><br>
           `;
           myhash = web3.utils.keccak256(li.innerHTML);
+          const existingNotes = localStorage.getItem(myaccounts + DDEaddy +'notes_' + offerHash) || '';
+          if(existingNotes != '') {
+            li.innerHTML += '<div><bdo>' + translateThis('Notes:') + '</bdo> '+existingNotes+'...</div><br>';
+          }
           if(offerHash in notifications) {
             if(notifications[offerHash] != myhash) {
               updateNotifications(notifications[offerHash], myhash, offerHash, offerData, 1);
@@ -6456,6 +6460,10 @@ body {
             <div><bdo>` + translateThis('Message:') + `</bdo> ${offerData2.message.slice(0, 20)}...</div><br>
           `;
           myhash = web3.utils.keccak256(li2.innerHTML);
+          const existingNotes2 = localStorage.getItem(myaccounts + DDEaddy +'notes_' + offerHash2) || '';
+          if(existingNotes2 != '') {
+            li2.innerHTML += '<div><bdo>' + translateThis('Notes:') + '</bdo> '+existingNotes2+'...</div><br>';
+          }
           offerData2.index = i;
           let mode;
           if(myaccounts == offerData2.sender && offerData2.status[0] == 1) {
@@ -6707,6 +6715,10 @@ body {
           const lineToExcludeRegex = new RegExp("<div>" + translateThis("Time Until Funds Expire:") + ".*" + translateThis("days") + "</div>");
           const inputString = li3.innerHTML.replace(lineToExcludeRegex, '');
           myhash = web3.utils.keccak256(inputString);
+          const existingNotes3 = localStorage.getItem(myaccounts + DDEaddy +'notes_' + offerHash3) || '';
+          if(existingNotes3 != '') {
+            li3.innerHTML += '<div><bdo>' + translateThis('Notes:') + '</bdo> '+existingNotes3+'...</div><br>';
+          }
           offerData3.index = i;
           if(offerHash3 in notifications) {
             var mslen2 = parseInt(DOMPurify.sanitize(await DDEcontract.methods.getMessageLength(offerHash3, counterpartyAddress3).call()));
@@ -11245,6 +11257,7 @@ body {
 
     //Notes:
     //It's an interesting idea to let users post an API key for GPT so that new offers can be curated
+    //Multiple AI APIs and ability to switch mode where users and nodes verify or nodes only
     //Having users who iterate all contracts and collect all the tags to share with other users on front end
     //A page that looks like "craigs list/classified ads" to browse all the key words and tags
     //Instructions on how to set up an IPFS node and letting the system synchronize with multiple nodes
