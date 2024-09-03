@@ -3070,13 +3070,18 @@ body {
       indicator.style.display = 'block';
     }
 
-    function updatePendingTransactionsUI() {
+    async function updatePendingTransactionsUI() {
       const dropdown = document.getElementById('pending-transactions-dropdown');
       const indicator = document.getElementById('pending-transactions-indicator');
       dropdown.innerHTML = '';
       const pendingTransactions = getPendingTransactions();
 
       if (pendingTransactions.length > 0) {
+        var webAddress = "https://polygonscan.com/tx/";
+        const currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
+        if(currentChainId == "11155111") {
+          webAddress = "https://sepolia.etherscan.io/tx/"
+        }
         indicator.style.display = 'block';
         pendingTransactions.forEach(txHash => {
           const truncatedHash = truncateHash(txHash);
@@ -3085,7 +3090,7 @@ body {
           transactionDiv.innerHTML = `
             <div class="notification-box-content-info">
               <h6>${translateThis("Transaction Pending")}</h6>
-              <p>${translateThis("Hash:")} ${truncatedHash} <a href="https://sepolia.etherscan.io/tx/${txHash}" target="_blank">&#128279;</a></p>
+              <p>${translateThis("Hash:")} ${truncatedHash} <a href="${webAddress}${txHash}" target="_blank">&#128279;</a></p>
               <button class="confirm-btn" onclick="increaseGas('${txHash}')">${translateThis("Increase Gas")}</button>
               <button class="cancel-btn" onclick="cancelTransaction('${txHash}')">${translateThis("Cancel Transaction")}</button>
             </div>
@@ -3477,7 +3482,8 @@ body {
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
-    var DDEaddy = "0xc1620929B151ecB45beB7093AfFb1F9A359656d9"; //Sepolia testnet is default market view
+    //var DDEaddy = "0xc1620929B151ecB45beB7093AfFb1F9A359656d9"; //Sepolia testnet is default market view
+    var DDEaddy = "0x5669Ac4951cCDE4e2bEdE1fc96681F15E3F015D1" //Polygon is default market view
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
@@ -3493,22 +3499,38 @@ body {
     var currentMarketsLength = 0;
     var gasPrice = "";
     var CurrentTimeStamp = new Date().getTime();
+    //var tokens = [
+    //  {
+    //    address: "0xA66857Da8d75BE2363968a3B01BfE1f417B28202",
+    //    token: "ETH",
+    //    image: "eth.png",
+    //    decimals: "18"
+    //  },
+    //  {
+    //    address: "0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11",
+    //    token: "WALRUS",
+    //    image: "walrus.png",
+    //    decimals: "8"
+    //  }
+    //];
     var tokens = [
       {
-        address: "0xA66857Da8d75BE2363968a3B01BfE1f417B28202",
-        token: "ETH",
-        image: "eth.png",
+        address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+        token: "MATIC",
+        image: "matic.png",
         decimals: "18"
       },
       {
-        address: "0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11",
-        token: "WALRUS",
-        image: "walrus.png",
-        decimals: "8"
+        address: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+        token: "DAI",
+        image: "dai.png",
+        decimals: "18"
       }
     ];
-    var tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
-    web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
+    //var tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
+    var tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"MATIC","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
+    //web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
+    web3 = new Web3("https://rpc.ankr.com/polygon");
     var referral = "0x0000000000000000000000000000000000000000";
     var baseFee = 0;
     var myFavorites = [];
@@ -3528,7 +3550,7 @@ body {
     var locked = false;
     var activeActions = {};
     let pendingTransactions = [];
-    var nodeList = ["0x273fbBbBf88AB572008eF2EC05B17b805789CE20"];
+    var nodeList = ["0xB967532AF84A0116CD78B2f82Cc960e9EcF415f9"];
     var currentTxHash = null;
     const statusDescriptions = {
       "0": "",
@@ -3609,7 +3631,7 @@ body {
     function defaultvars() {
       DDEcontract = "";
       myaccounts = "";
-      DDEaddy = "0xc1620929B151ecB45beB7093AfFb1F9A359656d9";
+      DDEaddy = "0x5669Ac4951cCDE4e2bEdE1fc96681F15E3F015D1";
       balances = {};
       baseBalance = 0;
       gasPrice = "";
@@ -3644,7 +3666,7 @@ body {
                 title: translateThis('Login using unique password'),
                 html:
                     '<select id="network" class="swal2-select">' +
-                    '<option value="0">Ethereum</option>' +
+                    '<option value="0">Polygon</option>' +
                     '<option value="1" selected>Sepolia Testnet</option>' +
                     '</select>' +
                     '<input type="password" id="password" class="swal2-input" placeholder="' + translateThis('Enter Password') + '">' +
@@ -3674,6 +3696,7 @@ body {
                 }
             }).then(async (result) => {
                 if (result.isConfirmed) {
+                  try {
                     const { network, confirmedPassword } = result.value;
                     showLoader();
                     var hashedPassword = Crypto.SHA256(confirmedPassword);
@@ -3686,7 +3709,7 @@ body {
                     document.getElementById("myPasswordInput").value = Crypto.SHA256("default");
                     document.getElementById("myPasswordInput").disabled = true;
                     if (parseInt(network) === 0) {
-                        web3 = new Web3("https://rpc.ankr.com/eth");
+                        web3 = new Web3("https://rpc.ankr.com/polygon");
                     } else {
                         web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
                     }
@@ -3695,6 +3718,9 @@ body {
                     wallet.add(account);
                     hideLoader();
                     isConnected = true;
+                    if (clear == 1) {
+                        marketOffers = {'indices': [], 'results': []};
+                    }                    
                     document.getElementById("connectionstatus").innerHTML = translateThis("Connected.");
                     document.getElementById("account").innerHTML = loader;
                     document.getElementById("loginButton").style.display = 'none'; // Hide login button
@@ -3704,6 +3730,11 @@ body {
                     contractsContainer.innerHTML = loader;
                     await loadUser(1);
                     await populateListings();
+                  } catch (e) {                  
+                    console.log(e);
+                  } finally {
+                    await checkIfNode();
+                  }
                 }
             });
             return;
@@ -3713,6 +3744,7 @@ body {
         await Swal.fire({
             title: translateThis('Login/connect'),
             text: translateThis('Please choose which way you want to log into this website.'),
+            allowOutsideClick: false,
             showCancelButton: true,
             confirmButtonText: isMetaMaskInstalled ? translateThis('Connect Using Metamask') : translateThis('Install MetaMask'),
             cancelButtonText: translateThis('Create/access account using password'),
@@ -3746,7 +3778,7 @@ body {
                     title: translateThis('Login using unique password'),
                     html:
                         '<select id="network" class="swal2-select">' +
-                        '<option value="0">Ethereum</option>' +
+                        '<option value="0">Polygon</option>' +
                         '<option value="1" selected>Sepolia Testnet</option>' +
                         '</select>' +
                         '<input type="password" id="password" class="swal2-input" placeholder="'+translateThis('Enter Password')+'">' +
@@ -3790,7 +3822,7 @@ body {
                         document.getElementById("myPasswordInput").value = Crypto.SHA256("default");
                         document.getElementById("myPasswordInput").disabled = true;
                         if(parseInt(network) == 0) {
-                            web3 = new Web3("https://rpc.ankr.com/eth");
+                            web3 = new Web3("https://rpc.ankr.com/polygon");
                         } else {
                             web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
                         }
@@ -3859,16 +3891,56 @@ body {
         document.getElementById("connectionstatus").innerHTML = isMobile ? '' : translateThis("Please unlock Metamask so it can connect.");
         return;
       }
-      currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
+      var currentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
       var netname = "unknown";
       var netname2 = "ETH";
+      if (currentChainId == "137") {
+        await web3.eth.getGasPrice().then(function (theGasPrice) {
+          gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
+          //console.log(gasPrice)
+          if(parseInt(gasPrice) > 2500000000000) {
+            gasPrice = "2500000000000";
+          }
+          if(parseInt(gasPrice) < 2500000000) {
+            gasPrice = "2500000000";
+          }
+        });
+        netname = "Polygon";
+        netname2 = "MATIC";
+        DDEaddy = "0x5669Ac4951cCDE4e2bEdE1fc96681F15E3F015D1";
+        gasOptions[0] = {
+          gasLimit: 1500000,
+          gasPrice: null,
+          maxPriorityFeePerGas: window.web3.utils.toWei('1.5', 'gwei'), // Max priority fee of 1.5 Gwei
+          maxFeePerGas: window.web3.utils.toWei('1.6', 'gwei'), // Max base fee of 1.5 Gwei
+        };
+        gasOptions[1] = {
+          gasLimit: 1500000,
+          gasPrice: gasPrice
+        };
+        tokens = [
+          {
+            address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+            token: "MATIC",
+            image: "matic.png",
+            decimals: "18"
+          },
+          {
+            address: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+            token: "DAI",
+            image: "dai.png",
+            decimals: "18"
+          }
+        ];
+        tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"MATIC","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
+      }
       if (currentChainId == "11155111") {
         await web3.eth.getGasPrice().then(function (theGasPrice) {
           gasPrice = window.web3.utils.toWei(parseInt(parseInt(DOMPurify.sanitize(theGasPrice)) * 1.5).toString(), 'wei');
-                if(parseInt(gasPrice) > 900000000000) {
-                    gasPrice = "900000000000";
-              }
-                if(parseInt(gasPrice) < 2500000000) {
+          if(parseInt(gasPrice) > 2500000000000) {
+            gasPrice = "2500000000000";
+          }
+          if(parseInt(gasPrice) < 2500000000) {
             gasPrice = "2500000000";
           }
         });
@@ -11124,6 +11196,7 @@ body {
     }
     async function getAPI(index) {
       await DDEcontract.methods.publicdata(index).call().then(function (data) {
+        //console.log(DOMPurify.sanitize(data));
         data=JSON.parse(DOMPurify.sanitize(CryptoJS.AES.decrypt(DOMPurify.sanitize(data), AESkey).toString(CryptoJS.enc.Utf8)));
         if (data.length === 2) { //using public gateway
           pinataApiKey = data[0];
@@ -11263,6 +11336,7 @@ body {
     //Instructions on how to set up an IPFS node and letting the system synchronize with multiple nodes
     //Having it so users can set up blockchain nodes and let other users access/poll multiple nodes at once through API(like electrum)
     //Making it so users can exchange market data using something like gundb or webrtc/torrent protocols
+    //Make templates for different types of contracts
   </script>
 </body>
 </html>
