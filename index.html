@@ -3516,7 +3516,7 @@ body {
     var tokens = [
       {
         address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-        token: "MATIC",
+        token: "POL",
         image: "matic.png",
         decimals: "18"
       },
@@ -3528,7 +3528,7 @@ body {
       }
     ];
     //var tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
-    var tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"MATIC","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
+    var tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"POL","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
     //web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
     web3 = new Web3("https://rpc.ankr.com/polygon");
     var referral = "0x0000000000000000000000000000000000000000";
@@ -3906,7 +3906,7 @@ body {
           }
         });
         netname = "Polygon";
-        netname2 = "MATIC";
+        netname2 = "POL";
         DDEaddy = "0x5669Ac4951cCDE4e2bEdE1fc96681F15E3F015D1";
         gasOptions[0] = {
           gasLimit: 1500000,
@@ -3921,7 +3921,7 @@ body {
         tokens = [
           {
             address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-            token: "MATIC",
+            token: "POL",
             image: "matic.png",
             decimals: "18"
           },
@@ -3932,7 +3932,7 @@ body {
             decimals: "18"
           }
         ];
-        tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"MATIC","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
+        tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"POL","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
       }
       if (currentChainId == "11155111") {
         await web3.eth.getGasPrice().then(function (theGasPrice) {
