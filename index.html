@@ -2822,6 +2822,31 @@ body {
     </div>
   </div>
   <script>
+    if (typeof navigator.serviceWorker !== 'undefined') {
+      navigator.serviceWorker.register('sw.js')
+    }
+    var lastTouchY = 0;
+    var preventPullToRefresh = false;
+    window.document.body.addEventListener("touchstart", function(e){
+        if (e.touches.length != 1) { return; }
+        lastTouchY = e.touches[0].clientY;
+        preventPullToRefresh = window.pageYOffset == 0;
+    }, false);
+
+    window.document.body.addEventListener("touchmove", function(e){
+        var touchY = e.touches[0].clientY;
+        var touchYDelta = touchY - lastTouchY;
+        lastTouchY = touchY;
+        if (preventPullToRefresh) {
+            // To suppress pull-to-refresh it is sufficient to preventDefault the first overscrolling touchmove.
+            preventPullToRefresh = false;
+            if (touchYDelta > 0) {
+                e.preventDefault();
+                return;
+            }
+        }
+    }, false);
+
     function setActionActive(actionCode, isActive) {
       activeActions[Crypto.SHA256(actionCode)] = isActive;
     }
@@ -3436,6 +3461,32 @@ body {
       });
     }
 
+    async function deleteFile(hash) {
+      return new Promise(function (resolve, reject) {
+        if (hash === '') {
+          resolve(false); // Invalid hash, nothing to delete
+        }
+
+        // Check if the file hash is in loadedFiles
+        if (hash in loadedFiles) {
+          delete loadedFiles[hash]; // Remove the file from the loadedFiles cache
+        }
+
+        // Open a transaction to delete the file from IndexedDB
+        var transaction = db.transaction(['files'], 'readwrite');
+        var objectStore = transaction.objectStore('files');
+
+        var request = objectStore.delete(hash);
+
+        request.onsuccess = function (event) {
+          resolve(true); // Resolve the promise indicating the file was successfully deleted
+        };
+
+        request.onerror = function (event) {
+          resolve(false); // Resolve the promise with false indicating an error occurred
+        };
+      });
+    }
 
     // Function to store image/file in IndexedDB
     async function storeFile(hash, data) {
@@ -5753,6 +5804,7 @@ body {
                     localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                     if (!isGood) {
+                      myres = await deleteFile(jsondata.image);
                       mlen -= 1;
                       continue;
                     }
@@ -5862,6 +5914,7 @@ body {
                       localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                       if (!isGood) {
+                        myres = await deleteFile(jsondata.image);
                         truetot -= 1;
                         continue;
                       }
@@ -6037,6 +6090,7 @@ body {
                                   localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                                   if (!isGood) {
+                                    myres = await deleteFile(jsondata.image);
                                     longestKey -= 1;
                                     return;
                                   }
@@ -6129,8 +6183,9 @@ body {
                           localStorage.setItem('myhashes'+DDEaddy, JSON.stringify(myhashes));
 
                           if (!isGood) {
-                              trueLength -= 1;
-                              return;
+                            myres = await deleteFile(jsondata.image);
+                            trueLength -= 1;
+                            return;
                           }
                         }
                         if(udata.hasOwnProperty(jsondata.sender) || udata.hasOwnProperty(jsondata.recipient)) {
