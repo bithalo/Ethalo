@@ -2822,9 +2822,6 @@ body {
     </div>
   </div>
   <script>
-    if (typeof navigator.serviceWorker !== 'undefined') {
-      navigator.serviceWorker.register('sw.js')
-    }
     var lastTouchY = 0;
     var preventPullToRefresh = false;
     window.document.body.addEventListener("touchstart", function(e){
@@ -11392,6 +11389,11 @@ body {
     //Having it so users can set up blockchain nodes and let other users access/poll multiple nodes at once through API(like electrum)
     //Making it so users can exchange market data using something like gundb or webrtc/torrent protocols
     //Make templates for different types of contracts
+  </script>
+  <script>
+    if (typeof navigator.serviceWorker !== 'undefined') {
+      navigator.serviceWorker.register('sw.js')
+    }
   </script>
 </body>
 </html>
