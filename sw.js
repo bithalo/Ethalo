@@ -7,25 +7,25 @@
 var cacheAll = true;
 var CACHE_NAME = 'webapk-cache';
 var urlsToCache = [
-    './index.html',
-    './all.min.css',
-    './axios.min.js',
-    './bignumber.min.js',
-    './cryptico.min.js',
-    './crypto-js.js',
-    './crypto-sha256.js',
-    './DDEABI.js',
-    './ERC20.js',
-    './faq.js',
-    './jdenticon.min.js',
-    './lottie-player.js',
-    './open-sans.css',
-    './purify.js',
-    './simple-scrollbar.css',
-    './simple-scrollbar.min.js',
-    './sweetalert211.js',
-    './translate.js',
-    './web3.min.js'
+    //'./index.html',
+    //'./all.min.css',
+    //'./axios.min.js',
+    //'./bignumber.min.js',
+    //'./cryptico.min.js',
+    //'./crypto-js.js',
+    //'./crypto-sha256.js',
+    //'./DDEABI.js',
+    //'./ERC20.js',
+    //'./faq.js',
+    //'./jdenticon.min.js',
+    //'./lottie-player.js',
+    //'./open-sans.css',
+    //'./purify.js',
+    //'./simple-scrollbar.css',
+    //'./simple-scrollbar.min.js',
+    //'./sweetalert211.js',
+    //'./translate.js',
+    //'./web3.min.js'
 ];
 
 var urlsNotToCache = [
