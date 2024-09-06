@@ -3587,7 +3587,7 @@ body {
     var marketOffers = {'indices':[], 'results':[]};
     var currentViewContext = '';
     var contextIndex = 0;
-    var maxContextLoad = [2,2,2,2];
+    var maxContextLoad = [10,10,10,10];
     //web3[0] = new Web3("https://cloudflare-eth.com");
     //web3[1] = new Web3("https://bsc-dataseed.binance.org");
     //web3[2] = new Web3("https://api-goerli.etherscan.io/");
@@ -6958,7 +6958,7 @@ body {
     //**************MARKETS TAB//**************
     // global variables for pagination
     var currentPage = 1;
-    var listingsPerPage = 2;
+    var listingsPerPage = 10;
 
     async function populateListings(searchText = "", sortHits = 0) {
       if(sortHits == 1) {
