@@ -3935,7 +3935,11 @@ body {
       if (!isConnected) {
         return;
       }
-      var myaccounts2 = await web3.eth.getAccounts();
+      var myaccounts2 = [];
+      try {
+        myaccounts2 = await web3.eth.getAccounts();
+      } catch {
+      }
       if (myaccounts2.length == 0 && accountprivkey == "") {
         document.getElementById("connectionstatus").innerHTML = isMobile ? '' : translateThis("Please unlock Metamask so it can connect.");
         return;
