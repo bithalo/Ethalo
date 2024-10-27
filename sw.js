@@ -23,8 +23,8 @@ self.addEventListener('activate', function(event) {
 
 // Fetch Event
 self.addEventListener('fetch', function(event) {
-    console.log("[SW] Fetch event: ", event.request.url);
+    //console.log("[SW] Fetch event: ", event.request.url);
     // Just pass through the request without caching
-    event.respondWith(fetch(event.request));
+    //event.respondWith(fetch(event.request));
 });
 
