@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 import os
+import sys
 import json
 import threading
 import hashlib
@@ -11,14 +12,21 @@ import traceback
 from waitress import serve
 from flask_cors import CORS  # Import flask-cors
 
+if getattr(sys, 'frozen', False):
+    # If the app is running as a frozen executable
+    os.chdir(os.path.dirname(sys.executable))
+print("Current working directory:", os.getcwd())
+
 global totalThreads
 global driver
 global nonce
 global nonce_lock
+global reqdb
 
 driver = []
 nonce = 0
 nonce_lock = threading.Lock()
+reqdb = {}
 
 app = Flask(__name__)
 CORS(app)
@@ -41,14 +49,15 @@ def manage_local_storage():
     # Read the current value from the file
     with open(local_storage_file, 'r') as f:
         data = json.load(f)
-        return data['password'], data['items']
+        return data['password'], data['items'], data['reqdb']
 
 # Get the session key and items from the local storage file
-session_key, local_storage_items = manage_local_storage()
+session_key, local_storage_items, reqdb = manage_local_storage()
 
 file_lock = threading.Lock()
 # Function to handle GET and SET requests
 def handle_local_storage(action, item, value=None, key=None):
+    global reqdb
     with file_lock:
         # Load existing data
         with open(local_storage_file, 'r') as f:
@@ -57,6 +66,8 @@ def handle_local_storage(action, item, value=None, key=None):
         if action == 'get':
             # Validate key and retrieve item
             if key == data['password']:  # Check if key matches the stored password
+                if(item == 'reqdb'):
+                    return json.dumps(data['reqdb'])
                 return data['items'].get(item, None)  # Return the value or None if not found
             else:
                 return None  # Invalid key
@@ -66,6 +77,7 @@ def handle_local_storage(action, item, value=None, key=None):
             if key == data['password']:  # Check if key matches the stored password
                 if("reqdb:" in item):
                     data['reqdb'][item.split("reqdb:")[1]] = value
+                    reqdb[item.split("reqdb:")[1]] = value
                 else:
                     data['items'][item] = value
                 # Save updated data back to the file
@@ -82,6 +94,7 @@ def serve_index():
 @app.route('/api', methods=['POST'])
 def handle_post():
     global nonce;
+    global reqdb;
     data = request.get_json()
     action = data.get('action')
     item = data.get('item')
@@ -97,6 +110,8 @@ def handle_post():
         try:
             print("Incoming request")
             json_data = json.dumps(value)
+            if 'hash' in value and value['hash'] in reqdb:
+                return jsonify({"result": json.loads(reqdb[value['hash']])});
             hex_data = '"'+binascii.hexlify(json_data.encode('utf-8')).decode('utf-8')+'"'
             with nonce_lock:
                 current_nonce = nonce
@@ -144,9 +159,9 @@ def execute_js_from_file(filepath, index):
 inx = 0
 while(inx < totalThreads):
     driver.append(webdriver.Firefox(options=Options()))
-    driver[inx].get('http://localhost:9000')    
+    driver[inx].get('http://localhost:9000')
     execute_js_from_file("config.js", inx)
     driver[inx].execute_script(f"window.globalSessionKey = '{session_key}';")
-    inx += 1    
+    inx += 1
 print(driver[0].title)
 print(totalThreads)
