@@ -1112,7 +1112,7 @@ languages['en']={
   "36":{"#en":"One month"},
   "37":{"#en":"Backup cached site/user data"},
   "38":{"#en":"Load site/user data from file"},
-  "39":{"#en":"Use default IPFS Pinata Gateway"},
+  "39":{"#en":"Detect nodes automatically"},
   "40":{"#en":"About"},
   "41":{"#en":"Welcome to the world of unbreakable contracts. These are two party escrow(double deposit) contracts that cannot be broken and require no 3rd party arbiters. Both users place a customizable deposit along with a payment into a joint account. If the deal goes well they both sign off on it. If one party tries to defraud the other the deal will eventually expire and blow up making it so that nobody wins and theft is profitless. This forces the users to be honest and follow through with their agreements since they either win together or they lose together."},
   "42":{"#en":"The markets themselves run on top of Solidity chains such as Ethereum and Polygon. Offers can range from goods, services, barter and p2p trading. Since this webpage is fully open source and runs on the client side, the user can also download this code from github and run it locally for even greater security. This protocol which was pioneered by BitHalo back in 2014 predated Ethereum and was the worlds first smart contracts. This is a web based interface for fully decentralized markets."},
@@ -1131,7 +1131,8 @@ languages['en']={
   "55":{"#en": "Waiting for confirmation..."},
   "56":{"#en": "Transaction in progress..."},
   "57":{"#en": "Pending Transactions"},
-  "58":{"#en": "Minimize"}
+  "58":{"#en": "Minimize"},
+  "59":{"#en": "Network/API options"}
 };
 
 languages['fr']={

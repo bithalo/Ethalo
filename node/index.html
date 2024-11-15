@@ -229,7 +229,7 @@
     }
     async function verifyRequest(request = '') {
         if (typeof window.globalSessionKey == 'undefined' || window.globalSessionKey == null) {
-          return "Server not ready";
+          return {'error':'Server not ready'};
         }
         const requestToVerify = document.getElementById("verifyRequest").value;
         if(request=='') {
@@ -402,32 +402,37 @@
         } catch (e) {
           return {'false':'Invalid JSON'};
         }
-        var ipfshash = '';
         if('ipfs' in request) {
           if(userData.IPFSRequests > window.maximumIPFSRequests) {
             return {'false':'Too many IPFS post requests, try again later'};
           }
-          userData.IPFSRequests += 1;
-          setItem(request.address + ':userdata',JSON.stringify(userData));
-          ipfshash = await pinToPinataIPFS(message);
-          console.log(ipfshash)
-          if(ipfshash == "error") {
-            return {'false': "error posting to ipfs"};
-          }
-        } else {
-          setItem(request.address + ':userdata',JSON.stringify(userData));
         }
+        setItem(request.address + ':userdata',JSON.stringify(userData));
         var isGood = false;
-        if(window.sightengineApiUser != '') {          
+        if(window.sightengineApiUser != '') {
           isGood = await validateOrderData(orderData);
-        }        
-        if(!isGood) {
-          const results = {'false': 'Order failed AI test'};
+        } else {
+          isGood = 'error';
+          console.log("Need to supply API key");
+        }
+        if(isGood.toString().toLowerCase().includes("error")) {
+          const results = {'false': 'Error checking AI'};
+          return results;
+        }
+        if(isGood.toString() != 'true') {
+          const results = {'false': 'Order failed AI test', 'result': isGood};
           reqdb[request.hash] = results;
           setItem('reqdb:'+request.hash,JSON.stringify(results));
           return results;
         } else {
-          if(ipfshash != '') {
+          if('ipfs' in request) {
+            userData.IPFSRequests += 1;
+            var ipfshash = await pinToPinataIPFS(message);
+            console.log(ipfshash)
+            if(ipfshash == "error") {
+              return {'false': "error posting to ipfs"};
+            }
+            setItem(request.address + ':userdata',JSON.stringify(userData));
             const results = {'true': 'Order passed AI test','ipfs':ipfshash};
             reqdb[request.hash] = results
             setItem('reqdb:'+request.hash,JSON.stringify(results));
@@ -443,7 +448,6 @@
 
     async function validateOrderData(orderData) {
       const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/svg+xml'];
-      let isGood = false;
       let imagesResult = true;
       let textResult = true;
 
@@ -487,13 +491,15 @@
           const sanitizedTextModerationResult = JSON.parse(DOMPurify.sanitize(JSON.stringify(textModerationResult)));
           textResult = !isInappropriateText(sanitizedTextModerationResult);
         }
-        isGood = imagesResult && textResult;
+        if(imagesResult && textResult) {
+          return true;
+        } else {
+          return [imagesResult, textResult];
+        }
       } catch (error) {
         console.error("Error during moderation:", error);
-        isGood = false;
+        return 'error checking AI';
       }
-
-      return isGood;
     }
 
     function dataURLtoFile(dataurl, filename) {

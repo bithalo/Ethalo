@@ -162,6 +162,7 @@ while(inx < totalThreads):
     driver[inx].get('http://localhost:9000')
     execute_js_from_file("config.js", inx)
     driver[inx].execute_script(f"window.globalSessionKey = '{session_key}';")
+    print("Session key(DO NOT SHARE):" + session_key)
     inx += 1
 print(driver[0].title)
 print(totalThreads)
