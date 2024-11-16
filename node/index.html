@@ -231,6 +231,9 @@
         if (typeof window.globalSessionKey == 'undefined' || window.globalSessionKey == null) {
           return {'error':'Server not ready'};
         }
+        if (request.publicKey == '') {
+          return {'error':'No public key set or the order requested has not been checked yet'};
+        }
         const requestToVerify = document.getElementById("verifyRequest").value;
         if(request=='') {
           request = JSON.parse(requestToVerify);          

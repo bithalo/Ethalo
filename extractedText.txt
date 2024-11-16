@@ -543,6 +543,6 @@
   "Fortunately, every user has a public key for encryption which can be used to verify their requests like an API key. Nodes will have different rate limits based on the amount of funds deposited and requests allowed per week. This prevents spam because it validates every genuine user.": true,
   "In order to interact with nodes and users it is requested that you register a separate encryption key so requests can be validated and secured. Also at this time it is highly recommended to register contact information such as an email address so users may contact you when involved in a contract. Would you like to do that now?": true,
   "How would you like to connect to validate orders using AI?": true,
-  "Enter your 'Session Key' which is shown when you load your local server.": true,
-  "Session Key cannot be blank": true
+  "Enter your 'Gateway public key' which is shown in your browser when you load your local server.": true,
+  "Key cannot be blank": true
 }

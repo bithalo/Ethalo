@@ -9,6 +9,7 @@ import hashlib
 import random
 import binascii
 import traceback
+import time
 from waitress import serve
 from flask_cors import CORS  # Import flask-cors
 
@@ -108,10 +109,13 @@ def handle_post():
         response = {"action": "set", "item": item, "success": success}
     elif action == 'verify':
         try:
-            print("Incoming request")
+            print("Incoming request: " + str(time.time()))
             json_data = json.dumps(value)
-            if 'hash' in value and value['hash'] in reqdb:
+            json_data2 = json.loads(json_data)
+            if 'hash' in json_data2 and json_data2['hash'] in reqdb:
                 return jsonify({"result": json.loads(reqdb[value['hash']])});
+            if 'publicKey' in json_data2 and json_data2['publicKey'] == '':
+                return jsonify({"error": "No public key set or the order requested has not been checked yet"}), 500
             hex_data = '"'+binascii.hexlify(json_data.encode('utf-8')).decode('utf-8')+'"'
             with nonce_lock:
                 current_nonce = nonce

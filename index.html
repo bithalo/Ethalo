@@ -3989,8 +3989,13 @@ body {
     showMain('markets');
     var web3 = [];
     var DDEcontract = "";
-    //var DDEaddy = "0xc1620929B151ecB45beB7093AfFb1F9A359656d9"; //Sepolia testnet is default market view
-    var DDEaddy = "0x213DB7D60F33f3D1Ca9e13F298Ac6578d5Fc20fc" //Polygon is default market view
+    var testNetView = false;
+    var DDEaddy;
+    if(testNetView) {
+      DDEaddy = "0xc1620929B151ecB45beB7093AfFb1F9A359656d9"; //Sepolia testnet is default market view
+    } else {
+      DDEaddy = "0x213DB7D60F33f3D1Ca9e13F298Ac6578d5Fc20fc" //Polygon is default market view
+    }
     var myaccounts = "";
     var userpubkey = "";
     var userprivkey = "";
@@ -4006,38 +4011,50 @@ body {
     var currentMarketsLength = 0;
     var gasPrice = "";
     var CurrentTimeStamp = new Date().getTime();
-    //var tokens = [
-    //  {
-    //    address: "0xA66857Da8d75BE2363968a3B01BfE1f417B28202",
-    //    token: "ETH",
-    //    image: "eth.png",
-    //    decimals: "18"
-    //  },
-    //  {
-    //    address: "0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11",
-    //    token: "WALRUS",
-    //    image: "walrus.png",
-    //    decimals: "8"
-    //  }
-    //];
-    var tokens = [
-      {
-        address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
-        token: "POL",
-        image: "matic.png",
-        decimals: "18"
-      },
-      {
-        address: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
-        token: "DAI",
-        image: "dai.png",
-        decimals: "18"
-      }
-    ];
-    //var tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
-    var tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"POL","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
-    //web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
-    web3 = new Web3("https://rpc.ankr.com/polygon");
+    var tokens;
+    if(testNetView) {
+      tokens = [
+        {
+          address: "0xA66857Da8d75BE2363968a3B01BfE1f417B28202",
+          token: "ETH",
+          image: "eth.png",
+          decimals: "18"
+        },
+        {
+          address: "0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11",
+          token: "WALRUS",
+          image: "walrus.png",
+          decimals: "8"
+        }
+      ];
+    } else {
+      tokens = [
+        {
+          address: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+          token: "POL",
+          image: "matic.png",
+          decimals: "18"
+        },
+        {
+          address: "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+          token: "DAI",
+          image: "dai.png",
+          decimals: "18"
+        }
+      ];
+    }
+    var tokennames;
+    if(testNetView) {
+      tokennames = {"0xA66857Da8d75BE2363968a3B01BfE1f417B28202":"ETH","0xD7567f0841Aae04833C8c004e8685cBF9F1a6b11":"WALRUS"}
+    } else {
+      tokennames = {"0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270":"POL","0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063":"DAI"}
+    }
+    var web3;
+    if(testNetView) {
+      web3 = new Web3("https://rpc.ankr.com/eth_sepolia");
+    } else {
+      web3 = new Web3("https://rpc.ankr.com/polygon");
+    }
     var referral = "0x0000000000000000000000000000000000000000";
     var baseFee = 0;
     var myFavorites = [];
@@ -4870,7 +4887,10 @@ body {
 
     async function saveAPI(setAPI = '') {
       const myCurrentChainId = DOMPurify.sanitize(await web3.eth.net.getId());
-      var mySelectedAPI = setAPI;
+      var mySelectedAPI = '';
+      if(setAPI == 'a' || setAPI == 'b') {
+        mySelectedAPI = setAPI;
+      }
       if(mySelectedAPI == '') {
         mySelectedAPI = document.getElementById('connectMethod').value;
       }
@@ -4879,7 +4899,7 @@ body {
         var APIKEYS = localStorage.getItem(myaccounts + DDEaddy + myCurrentChainId + ":apiKeys") || "none";
         var newkeys = true;
         if(APIKEYS != "none") {
-          if(setAPI != '') {
+          if(setAPI == 'a' || setAPI == 'b') {
             newkeys = false;
           } else {
             await Swal.fire({
@@ -5910,16 +5930,22 @@ body {
       request.chain = DOMPurify.sanitize(await web3.eth.net.getId());
       if(hash == '') {
         request.hash = hashObject(JSON.stringify(orderData));
+      } else {
+        request.hash = hash;
       }
       request.publicKey = userpubkey;
       const timestamp = new Date().getTime();
       const padding = Crypto.SHA256(timestamp).substring(0, 16); //Pad to avoid chosen cipher attack
-      var finalMessage = cryptico.encrypt(JSON.stringify(orderData) + "#*#*#" + timestamp + padding, gatewayList[currentGateway]['pub'], userprivkey).cipher;
+      var gatewayPub = gatewayList[currentGateway]['pub'];
+      if(window.globalPublicKey) {
+        gatewayPub = window.globalPublicKey;
+      }
+      var finalMessage = cryptico.encrypt(JSON.stringify(orderData) + "#*#*#" + timestamp + padding, gatewayPub, userprivkey).cipher;
       request.message = finalMessage;
       if(ipfs != '') {
         request.ipfs = true;
       }
-      if(window.globalSessionKey) {
+      if(window.globalPublicKey) {
         return localVerify(request);
       }
       const requestData = {
@@ -5936,7 +5962,7 @@ body {
       var errorMessage = "Error parsing response";
       for(var x=0; x<maxtries; x++) {
         try {
-          if(x.toString() in checkThis) {
+          if(x.toString() in checkedThis) {
             continue;
           }
           checkedThis[x.toString()] = 1;
@@ -6135,23 +6161,24 @@ body {
           icon: 'question',
         }).then(async (result) => {
           if (result.isConfirmed) {
-            Swal.fire({
+            await Swal.fire({
               title: translateThis("Login/connect"),
-              text: translateThis("Enter your 'Session Key' which is shown when you load your local server."),
-              input: 'text',
-              inputPlaceholder: 'Session Key',
+              html:
+                '<p>' + translateThis("Enter your 'Gateway public key' which is shown in your browser when you load your local server.") + '</p>' +
+                '<input id="gateway-key" class="swal2-input" placeholder="Gateway Public Key">',
               showCancelButton: true,
               confirmButtonText: 'Submit',
-              preConfirm: (value) => {
-                if (!value) {
-                  Swal.showValidationMessage('Session Key cannot be blank');
+              preConfirm: () => {
+                const gatewayKey = document.getElementById('gateway-key').value;
+                if (!gatewayKey) {
+                  Swal.showValidationMessage('Key cannot be blank');
                   return false;
                 }
-                return value;
+                return { gatewayKey };
               }
             }).then((result) => {
               if (result.isConfirmed) {
-                window.globalSessionKey = sessionKey;
+                window.globalPublicKey = result.value.gatewayKey;
               }
             });
           } else {
@@ -6176,7 +6203,7 @@ body {
           headers: {
               'Content-Type': 'application/json',
           },
-          body: JSON.stringify({action: 'verify', item: '', value, key: window.globalSessionKey}),
+          body: JSON.stringify({action: 'verify', item: '', value, key: ''}),
       })
       .then(response => {
         if (response.data.result) {
@@ -7054,7 +7081,6 @@ body {
                 searchThis = [];
                 try {
                     await DDEcontract3.methods.markets(index).call().then(async function (hash) {
-                        console.log(index)
                         hash = DOMPurify.sanitize(hash);
                         if(checkedHashes[hash] === false) {
                           trueLength -= 1;
@@ -7191,7 +7217,6 @@ body {
               } else {
                 if(DOMPurify.sanitize(data.sender) == myaccounts) {
                   var message = cryptico.decrypt(testdata['sender'].cipher, userprivkey).plaintext;
-                  console.log(message)
                   var padding = message.split("#*#*#")[1];
                   if(padding.length > 30) {
                     text = message.split("#*#*#")[0];
