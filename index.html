@@ -4075,8 +4075,8 @@ body {
     var locked = false;
     var activeActions = {};
     let pendingTransactions = [];
-    var nodeList = ["0xAcC26A4470399A27CC515C24EabEa0FF65E43409","0x273fbBbBf88AB572008eF2EC05B17b805789CE20"];
-    var gatewayList = [{"pub":"ZnE78c08JAxmfHBag9dARazkTlMQmMeSLk1cyeFF1MRwj6mUK0y/2jzb1bj4JeLXL8kFWaPGpkBxfakk1gPrFk3+DCmVPz9cXsgQgqWbcpBLALcyKDHpc5XSbBnRXnwQgyvvhQrB8Zj2fM4eIeOltWFK0HS0d2VIKjGANiG3ync=","address":"0xcB905a189b216B7E21d29CAdE9A6423E9C8Df81d","isAffiliate":true,"url":"https://crack-popular-jay.ngrok-free.app/api"}]
+    var nodeList = ["0xAcC26A4470399A27CC515C24EabEa0FF65E43409", "0xB967532AF84A0116CD78B2f82Cc960e9EcF415f9"];
+    var gatewayList = [{"pub":"zoukWEeLvakRN9DoJmlNFnhSXkBlkLjPXBzX/GbgzbreIdqqxc2AaBDt4aPfxvsM3/DaucrVQmX38bhCtxIQkBBoAfchmoU++DJfprCwDhr50qZVq2H/S/9VCcmsTC2/vBwN9JzWQeuMjkgbEK5BZKIB+wCrMvDqtOElNhRUpKk=","address":"0xAcC26A4470399A27CC515C24EabEa0FF65E43409","isAffiliate":true,"url":"https://popular-asp-native.ngrok-free.app/api"},{"pub":"5Nux9SZrTXrgSBbs+RkDBUmddhzbXOFtCt3+PgkmfX/iOs0aXDmaBb+EBhLaRpngMczRg569EoyS+2xpkoYbQ7hJoEW8u0djkcPnq0HLzxz9hUAAJP9uDriez6kn7lFb6cRDpVO9R9sxKZoC4YjD+9AikowXwJJLujOMvB11MYc=","address":"0xB967532AF84A0116CD78B2f82Cc960e9EcF415f9","isAffiliate":false,"url":"https://crack-popular-jay.ngrok-free.app/api"}]
     var currentTxHash = null;
     var showMod = false;
     const statusDescriptions = {
@@ -11152,6 +11152,18 @@ body {
           data2.message = "IPFS link: " + data2.message;
           data2.timelimit = [data2.timelimit];
           data2.rfee = baseFee;
+          if(referral == "0x0000000000000000000000000000000000000000") {
+            var rlist = [];
+            for(var xr = 0; xr < gatewayList.length(); xr ++) {
+              if(gatewayList[xr]['isAffiliate']) {
+                rlist.push(gatewayList[xr]['address'])
+              }
+            }
+            if (rlist.length > 0) {
+              var randomIndex = Math.floor(Math.random() * rlist.length);
+              referral = rlist[randomIndex];
+            }
+          }
           data2.referred = referral;
           if(Object.keys(counterdata).length !== 0) {
             data2.referred = counterdata.referred;
@@ -11616,6 +11628,18 @@ body {
               if(result == false) {
                 return;
               }
+              if(referral == "0x0000000000000000000000000000000000000000") {
+                var rlist = [];
+                for(var xr = 0; xr < gatewayList.length(); xr ++) {
+                  if(gatewayList[xr]['isAffiliate']) {
+                    rlist.push(gatewayList[xr]['address'])
+                  }
+                }
+                if (rlist.length > 0) {
+                  var randomIndex = Math.floor(Math.random() * rlist.length);
+                  referral = rlist[randomIndex];
+                }
+              }
               if (!web3.utils.isAddress(referral)) {
                 referral = "0x0000000000000000000000000000000000000000";
               }
@@ -11761,6 +11785,18 @@ body {
           var result = await showListing(mylisting, 3)
           if(result == false) {
             return;
+          }
+          if(referral == "0x0000000000000000000000000000000000000000") {
+            var rlist = [];
+            for(var xr = 0; xr < gatewayList.length(); xr ++) {
+              if(gatewayList[xr]['isAffiliate']) {
+                rlist.push(gatewayList[xr]['address'])
+              }
+            }
+            if (rlist.length > 0) {
+              var randomIndex = Math.floor(Math.random() * rlist.length);
+              referral = rlist[randomIndex];
+            }
           }
           if (!web3.utils.isAddress(referral)) {
             referral = "0x0000000000000000000000000000000000000000";

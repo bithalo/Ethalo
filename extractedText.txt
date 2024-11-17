@@ -526,9 +526,12 @@
 }
 {
   "59":{"#en": "Network/API options"},
-  "39":{"#en": "Detect nodes automatically"},
+  "39":{"#en": "Detect nodes automatically"}
+}
+{
   "All of the code is open source under the 'Coinleft Public License for BitBay' which is a license that allows users free use of the software without granting them commercial rights to create a competing project by copying the code. If such an act was to be taken it must be negotiated with the BitBay community which would result in an airdrop or profit share to its users. This helps BitBay maintain it's competitive advantage in the industry while letting users fully validate the code itself. The code has also been audited multiple times and those reports are published on Github. Users and companies should continue to audit it proving it's safety.": true,
   "Detect nodes automatically": true,
+  "Supply my own API keys": true,
   "Register API Keys": true,
   "You already have API keys saved would you like to remove them and make new ones? If not you will stay with the current keys.": true,
   "Success": true,
